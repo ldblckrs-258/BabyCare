@@ -1,26 +1,20 @@
 {
   "expo": {
-    "name": "my-expo-app",
-    "slug": "my-expo-app",
+    "name": "BabyCare",
+    "slug": "babycare",
     "version": "1.0.0",
-
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/babycare_logo.png"
     },
-
     "experiments": {
       "tsconfigPaths": true
     },
-
-    "plugins": [],
-
+    "plugins": ["expo-router"],
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
-
+    "icon": "./assets/babycare_logo_rb.png",
     "userInterfaceStyle": "light",
-
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/babycare_logo_rb.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -30,8 +24,15 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/babycare_logo_rb.png",
         "backgroundColor": "#ffffff"
+      },
+      "newArchEnable": true,
+      "package": "com.babycare.pbl5app"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "68033c70-f1d9-4cab-a6d8-7b428a21ff94"
       }
     }
   }
