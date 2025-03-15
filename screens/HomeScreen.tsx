@@ -28,11 +28,11 @@ export default function HomeScreen() {
           <View className="items-center">
             <View className="h-24 w-24 overflow-hidden rounded-full bg-gray-200">
               <Image
-                source={{
-                  uri: user?.photoURL || 'https://ui-avatars.com/api/?name=' + user?.email,
-                }}
+                // source={{
+                //   uri: user?.photoURL || 'https://ui-avatars.com/api/?name=' + user?.email,
+                // }}
+                source={require('../assets/default-avatar.png')}
                 className="h-full w-full"
-                contentFit="cover"
               />
             </View>
             <Text className="mt-4 text-xl font-semibold text-gray-800">

@@ -6,7 +6,6 @@ import { LoginScreen } from './screens/LoginScreen';
 import MainTabs from './screens/MainTabs';
 import { RegisterScreen } from './screens/RegisterScreen';
 import { WelcomeScreen } from './screens/WelcomeScreen';
-
 import type { RootStackParamList } from './types/navigation';
 
 import './global.css';

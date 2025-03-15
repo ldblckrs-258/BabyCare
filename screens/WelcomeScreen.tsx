@@ -42,7 +42,7 @@ export function WelcomeScreen() {
 
   const Footer = () => {
     return (
-      <View className="absolute bottom-2 aspect-square w-full p-3">
+      <View className="absolute bottom-0 aspect-square w-full p-3">
         <View className="flex-1 flex-col items-center justify-center rounded-3xl bg-white px-5 py-6">
           {/* Indicator container */}
           <View className="flex-row justify-center gap-1">
@@ -50,7 +50,7 @@ export function WelcomeScreen() {
               <View
                 key={index}
                 className={`h-2.5 rounded-full ${
-                  currentSlideIndex === index ? 'bg-primary-500 w-6' : 'bg-primary-200 w-2.5'
+                  currentSlideIndex === index ? 'w-6 bg-primary-500' : 'w-2.5 bg-primary-200'
                 }`}
               />
             ))}
@@ -60,7 +60,7 @@ export function WelcomeScreen() {
             <Text className="text-4xl font-bold text-black">
               {slides[currentSlideIndex].title[0]}
             </Text>
-            <Text className="text-primary-500 text-4xl font-bold">
+            <Text className="text-4xl font-bold text-primary-500">
               {slides[currentSlideIndex].title[1]}
             </Text>
             <Text className="pt-4 text-center text-xl text-gray-600">
@@ -74,7 +74,7 @@ export function WelcomeScreen() {
               <View className="flex flex-col items-center gap-4">
                 <TouchableOpacity
                   onPress={() => navigation.navigate('Register')}
-                  className="bg-tertiary-600 w-[180px] rounded-full py-3">
+                  className="w-[180px] rounded-full bg-tertiary-600 py-3">
                   <Text className="w-[180px] text-center text-xl font-semibold text-white">
                     Sign up
                   </Text>
@@ -89,7 +89,7 @@ export function WelcomeScreen() {
               <View className="flex flex-col items-center gap-4">
                 <TouchableOpacity
                   onPress={goNextSlide}
-                  className="bg-primary-500 w-[180px] rounded-full py-3">
+                  className="w-[180px] rounded-full bg-primary-500 py-3">
                   <Text className="text-center text-xl font-semibold text-white">Continue</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => navigation.navigate('Login')}>
@@ -133,12 +133,12 @@ export function WelcomeScreen() {
         showsHorizontalScrollIndicator={false}
         onMomentumScrollEnd={updateCurrentSlideIndex}
         renderItem={({ item }) => (
-          <View style={{ width }} className="flex-1">
-            <View className="flex-1 items-center justify-center px-4">
+          <View style={{ width }} className="w-full flex-1">
+            <View className="w-full flex-1 items-center justify-center">
               <Image
                 source={item.image}
-                className="absolute h-screen w-screen"
-                resizeMode="contain"
+                className="h-full w-full" // Changed from absolute h-screen w-screen to h-full w-full
+                resizeMode="cover" // Changed from contain to cover
               />
             </View>
           </View>

@@ -9,7 +9,9 @@
     "experiments": {
       "tsconfigPaths": true
     },
-    "plugins": ["expo-router"],
+    "plugins": [
+      "expo-router"
+    ],
     "orientation": "portrait",
     "icon": "./assets/babycare_logo_rb.png",
     "userInterfaceStyle": "light",
@@ -18,7 +20,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true
     },
@@ -31,9 +35,13 @@
       "package": "com.babycare.pbl5app"
     },
     "extra": {
+      "router": {
+        "origin": false
+      },
       "eas": {
-        "projectId": "68033c70-f1d9-4cab-a6d8-7b428a21ff94"
+        "projectId": "283dabec-0362-46ae-9d1a-2d3c0b10fd22"
       }
-    }
+    },
+    "owner": "ldblckrs"
   }
 }
