@@ -6,39 +6,39 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { RootStackParamList } from '../types/navigation';
 
-const { width } = Dimensions.get('window');
+import { useTranslation } from '@/lib/hooks/useTranslation';
 
-const slides = [
-  {
-    id: '1',
-    image: require('../assets/welcome/1.png'),
-    title: ['Welcome to', 'BabyCare'],
-    subtitle:
-      "Caring for your little one has never been easier or more reassuring. BabyCare is your ultimate companion in monitoring and protecting your child comprehensively, even when you're not right beside them.",
-    color: '#F3FAF7',
-  },
-  {
-    id: '2',
-    image: require('../assets/welcome/2.png'),
-    title: ['Safe Sleep Position', 'Monitoring'],
-    subtitle:
-      "Worry no more about your baby's sleeping position. Our AI system continuously monitors and immediately alerts you to potentially dangerous sleeping postures and keep your child safe.",
-    color: '#F9E7E8',
-  },
-  {
-    id: '3',
-    image: require('../assets/welcome/3.png'),
-    title: ['Intelligent', 'Cry Detection'],
-    subtitle:
-      "Our advanced AI technology analyzes your baby's cries, helping you quickly understand their needs and condition. Receive instant notifications whenever your child requires attention, no matter where you are.",
-    color: '#E6EDF8',
-  },
-];
+const { width } = Dimensions.get('window');
 
 export function WelcomeScreen() {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const flatListRef = useRef<FlatList>(null);
+  const { t } = useTranslation();
+
+  const slides = [
+    {
+      id: '1',
+      image: require('../assets/welcome/1.png'),
+      title: t('welcome.slides.first.title', { returnObjects: true }),
+      subtitle: t('welcome.slides.first.subtitle'),
+      color: '#F3FAF7',
+    },
+    {
+      id: '2',
+      image: require('../assets/welcome/2.png'),
+      title: t('welcome.slides.second.title', { returnObjects: true }),
+      subtitle: t('welcome.slides.second.subtitle'),
+      color: '#F9E7E8',
+    },
+    {
+      id: '3',
+      image: require('../assets/welcome/3.png'),
+      title: t('welcome.slides.third.title', { returnObjects: true }),
+      subtitle: t('welcome.slides.third.subtitle'),
+      color: '#E6EDF8',
+    },
+  ];
 
   const Footer = () => {
     return (
@@ -76,12 +76,12 @@ export function WelcomeScreen() {
                   onPress={() => navigation.navigate('Register')}
                   className="w-[180px] rounded-full bg-tertiary-600 py-3">
                   <Text className="w-[180px] text-center text-xl font-semibold text-white">
-                    Sign up
+                    {t('common.signUp')}
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => navigation.navigate('Login')}>
                   <Text className="w-[180px] text-center text-xl font-medium text-gray-400">
-                    Login now
+                    {t('common.loginNow')}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -90,11 +90,13 @@ export function WelcomeScreen() {
                 <TouchableOpacity
                   onPress={goNextSlide}
                   className="w-[180px] rounded-full bg-primary-500 py-3">
-                  <Text className="text-center text-xl font-semibold text-white">Continue</Text>
+                  <Text className="text-center text-xl font-semibold text-white">
+                    {t('common.continue')}
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => navigation.navigate('Login')}>
                   <Text className="w-[180px] text-center text-xl font-medium text-gray-400">
-                    Skip
+                    {t('common.skip')}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -135,11 +137,7 @@ export function WelcomeScreen() {
         renderItem={({ item }) => (
           <View style={{ width }} className="w-full flex-1">
             <View className="w-full flex-1 items-center justify-center">
-              <Image
-                source={item.image}
-                className="h-full w-full" // Changed from absolute h-screen w-screen to h-full w-full
-                resizeMode="cover" // Changed from contain to cover
-              />
+              <Image source={item.image} className="h-full w-full" resizeMode="cover" />
             </View>
           </View>
         )}

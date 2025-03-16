@@ -10,13 +10,21 @@ import { DeviceConnectionModal } from '../components/modals/DeviceConnectionModa
 import { LanguageModal } from '../components/modals/LanguageModal';
 import { NotificationModal } from '../components/modals/NotificationModal';
 import { PrivacyTermsModal } from '../components/modals/PrivacyTermsModal';
+import { useTranslation } from '@/lib/hooks/useTranslation';
 import { useAuthStore } from '../stores/authStore';
+import { useSettingsStore } from '../stores/settingsStore';
 import type { RootStackParamList } from '../types/navigation';
+
+const languages = {
+  en: 'English',
+  vi: 'Tiếng Việt',
+};
 
 export default function SettingsScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { t } = useTranslation();
   const { user } = useAuthStore();
-  const [isDeviceConnected, setIsDeviceConnected] = useState(false);
+  const { isDeviceConnected, deviceId, language, setDeviceConnection } = useSettingsStore();
 
   // Modal visibility states
   const [deviceModalVisible, setDeviceModalVisible] = useState(false);
@@ -27,6 +35,12 @@ export default function SettingsScreen() {
   // Combined state to check if any modal is visible
   const isAnyModalVisible =
     deviceModalVisible || notificationModalVisible || languageModalVisible || privacyModalVisible;
+
+  const handleQRCodeScanned = (code: string) => {
+    // Here you would typically validate the QR code format
+    setDeviceConnection(true, code);
+    console.log('Scanned QR code:', code);
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-100">
@@ -62,17 +76,21 @@ export default function SettingsScreen() {
         <View className="rounded-lg bg-white">
           {/* Device Connection */}
           <TouchableOpacity
-            className="flex-row items-center justify-between  p-4"
+            className="flex-row items-center justify-between p-4"
             onPress={() => setDeviceModalVisible(true)}>
             <View className="flex-row items-center">
               <View className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-blue-100">
                 <MaterialIcons name="bluetooth" size={20} color="#3b82f6" />
               </View>
-              <Text className="text-base font-semibold text-gray-800">Device Connection</Text>
+              <Text className="text-base font-semibold text-gray-800">
+                {t('settings.deviceConnection.title')}
+              </Text>
             </View>
             <View className="flex-row items-center">
               <Text className="mr-2 text-sm text-gray-400">
-                {isDeviceConnected ? 'Connected' : 'Not Connected'}
+                {isDeviceConnected
+                  ? `${t('settings.deviceConnection.connected')} ${deviceId}`
+                  : t('settings.deviceConnection.notConnected')}
               </Text>
               <MaterialIcons name="chevron-right" size={24} color="#ccc" />
             </View>
@@ -80,42 +98,50 @@ export default function SettingsScreen() {
 
           {/* Notification */}
           <TouchableOpacity
-            className="flex-row items-center justify-between  p-4"
+            className="flex-row items-center justify-between p-4"
             onPress={() => setNotificationModalVisible(true)}>
             <View className="flex-row items-center">
               <View className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-green-100">
                 <MaterialIcons name="notifications" size={20} color="#10b981" />
               </View>
-              <Text className="text-base font-semibold text-gray-800">Notification</Text>
+              <Text className="text-base font-semibold text-gray-800">
+                {t('settings.notifications.title')}
+              </Text>
             </View>
             <MaterialIcons name="chevron-right" size={24} color="#ccc" />
           </TouchableOpacity>
 
           {/* Language */}
           <TouchableOpacity
-            className="flex-row items-center justify-between  p-4"
+            className="flex-row items-center justify-between p-4"
             onPress={() => setLanguageModalVisible(true)}>
             <View className="flex-row items-center">
               <View className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-purple-100">
                 <MaterialIcons name="language" size={20} color="#8b5cf6" />
               </View>
-              <Text className="text-base font-semibold text-gray-800">Language</Text>
+              <Text className="text-base font-semibold text-gray-800">
+                {t('settings.language.title')}
+              </Text>
             </View>
             <View className="flex-row items-center">
-              <Text className="mr-2 text-sm text-gray-400">English</Text>
+              <Text className="mr-2 text-sm text-gray-400">
+                {languages[language as keyof typeof languages]}
+              </Text>
               <MaterialIcons name="chevron-right" size={24} color="#ccc" />
             </View>
           </TouchableOpacity>
 
           {/* Privacy & Terms */}
           <TouchableOpacity
-            className="flex-row items-center justify-between  p-4"
+            className="flex-row items-center justify-between p-4"
             onPress={() => setPrivacyModalVisible(true)}>
             <View className="flex-row items-center">
               <View className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-yellow-100">
                 <MaterialIcons name="security" size={20} color="#f59e0b" />
               </View>
-              <Text className="text-base font-semibold text-gray-800">Privacy & Terms</Text>
+              <Text className="text-base font-semibold text-gray-800">
+                {t('settings.privacyAndTerms.title')}
+              </Text>
             </View>
             <MaterialIcons name="chevron-right" size={24} color="#ccc" />
           </TouchableOpacity>
@@ -126,7 +152,7 @@ export default function SettingsScreen() {
               <View className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-gray-100">
                 <MaterialIcons name="info" size={20} color="#6b7280" />
               </View>
-              <Text className="text-base font-semibold text-gray-800">Version</Text>
+              <Text className="text-base font-semibold text-gray-800">{t('settings.version')}</Text>
             </View>
             <Text className="text-sm text-gray-400">0.0.1 beta</Text>
           </View>
@@ -137,8 +163,7 @@ export default function SettingsScreen() {
       <DeviceConnectionModal
         visible={deviceModalVisible}
         onClose={() => setDeviceModalVisible(false)}
-        isDeviceConnected={isDeviceConnected}
-        setIsDeviceConnected={setIsDeviceConnected}
+        onCodeScanned={handleQRCodeScanned}
       />
 
       <NotificationModal

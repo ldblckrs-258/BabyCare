@@ -1,11 +1,11 @@
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { useEffect, useState } from 'react';
 import { Modal, Text, TouchableOpacity, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import SelectDropdown from 'react-native-select-dropdown';
 
 import { Switch } from '@/components/ui/switch';
-import SelectDropdown from 'react-native-select-dropdown';
+import { useTranslation } from '@/lib/hooks/useTranslation';
+import { useSettingsStore } from '@/stores/settingsStore';
 
 type NotificationModalProps = {
   visible: boolean;
@@ -25,23 +25,13 @@ const BadPositionThresholds = [
 ];
 
 export function NotificationModal({ visible, onClose }: NotificationModalProps) {
-  const [notificationSettings, setNotificationSettings] = useState({
-    cryDetection: 5,
-    sleepPosition: 5,
-    deviceDisconnected: true,
-    dailyReport: false,
-  });
+  const { notifications, updateNotificationSettings } = useSettingsStore();
+  const { t } = useTranslation();
 
-  const toggleSetting = (setting: keyof typeof notificationSettings) => {
-    setNotificationSettings({
-      ...notificationSettings,
-      [setting]: !notificationSettings[setting],
-    });
+  const handleSave = () => {
+    // Settings are already saved in the store
+    onClose();
   };
-
-  useEffect(() => {
-    console.log('NotificationModal', notificationSettings);
-  }, [notificationSettings]);
 
   return (
     <Modal animationType="slide" transparent visible={visible} onRequestClose={onClose}>
@@ -49,7 +39,9 @@ export function NotificationModal({ visible, onClose }: NotificationModalProps) 
         <View className="h-3/4 rounded-t-3xl bg-white p-6 shadow-lg">
           {/* Header with close button */}
           <View className="mb-6 flex-row items-center justify-between">
-            <Text className="text-2xl font-bold text-gray-800">Notification Settings</Text>
+            <Text className="text-2xl font-bold text-gray-800">
+              {t('settings.notifications.title')}
+            </Text>
             <TouchableOpacity
               onPress={onClose}
               className="h-10 w-10 items-center justify-center rounded-full bg-gray-100">
@@ -65,48 +57,41 @@ export function NotificationModal({ visible, onClose }: NotificationModalProps) 
                 <View className="flex-row items-center">
                   <View>
                     <Text className="text-base font-semibold text-gray-800">
-                      Cry Detection Threshold
+                      {t('settings.notifications.cryDetection.title')}
                     </Text>
                     <Text className="text-sm text-gray-500">
-                      Alert when baby is crying continously
+                      {t('settings.notifications.cryDetection.description')}
                     </Text>
                   </View>
                 </View>
                 <SelectDropdown
                   data={CryThresholds}
-                  onSelect={(selectedItem, index) => {
-                    setNotificationSettings({
-                      ...notificationSettings,
-                      cryDetection: selectedItem.value,
-                    });
+                  onSelect={(selectedItem) => {
+                    updateNotificationSettings({ cryDetection: selectedItem.value });
                   }}
                   defaultValue={CryThresholds.find(
-                    (item) => item.value === notificationSettings.cryDetection
+                    (item) => item.value === notifications.cryDetection
                   )}
-                  renderButton={(selectedItem, isOpened) => {
-                    return (
-                      <View className="flex w-[120px] flex-row items-center justify-between gap-2 rounded-md border border-gray-300 px-2 py-2 ">
-                        <Text className="text-sm text-gray-800">
-                          {selectedItem?.label || '-- Select --'}
-                        </Text>
-                        <FontAwesome6
-                          name={isOpened ? 'chevron-up' : 'chevron-down'}
-                          size={16}
-                          color="#ccc"
-                        />
-                      </View>
-                    );
-                  }}
-                  renderItem={(item, index, isSelected) => {
-                    return (
-                      <View
-                        className={`flex-row items-center justify-between border-t border-gray-100 px-2 py-2 ${
-                          isSelected ? 'bg-primary-200' : 'bg-transparent'
-                        }`}>
-                        <Text className=" text-sm text-gray-800">{item.label}</Text>
-                      </View>
-                    );
-                  }}
+                  renderButton={(selectedItem, isOpened) => (
+                    <View className="flex w-[120px] flex-row items-center justify-between gap-2 rounded-md border border-gray-300 px-2 py-2 ">
+                      <Text className="text-sm text-gray-800">
+                        {selectedItem?.label || '-- Select --'}
+                      </Text>
+                      <FontAwesome6
+                        name={isOpened ? 'chevron-up' : 'chevron-down'}
+                        size={16}
+                        color="#ccc"
+                      />
+                    </View>
+                  )}
+                  renderItem={(item, index, isSelected) => (
+                    <View
+                      className={`flex-row items-center justify-between border-t border-gray-100 px-2 py-2 ${
+                        isSelected ? 'bg-primary-200' : 'bg-transparent'
+                      }`}>
+                      <Text className=" text-sm text-gray-800">{item.label}</Text>
+                    </View>
+                  )}
                   showsVerticalScrollIndicator={false}
                   dropdownStyle={{
                     backgroundColor: '#fff',
@@ -122,47 +107,42 @@ export function NotificationModal({ visible, onClose }: NotificationModalProps) 
               <View className="flex-row items-center justify-between">
                 <View className="flex-row items-center">
                   <View>
-                    <Text className="text-base font-semibold text-gray-800">Sleep Position</Text>
+                    <Text className="text-base font-semibold text-gray-800">
+                      {t('settings.notifications.sleepPosition.title')}
+                    </Text>
                     <Text className="text-sm text-gray-500">
-                      Alert for unsafe sleeping positions
+                      {t('settings.notifications.sleepPosition.description')}
                     </Text>
                   </View>
                 </View>
                 <SelectDropdown
                   data={BadPositionThresholds}
-                  onSelect={(selectedItem, index) => {
-                    setNotificationSettings({
-                      ...notificationSettings,
-                      sleepPosition: selectedItem.value,
-                    });
+                  onSelect={(selectedItem) => {
+                    updateNotificationSettings({ sleepPosition: selectedItem.value });
                   }}
                   defaultValue={BadPositionThresholds.find(
-                    (item) => item.value === notificationSettings.sleepPosition
+                    (item) => item.value === notifications.sleepPosition
                   )}
-                  renderButton={(selectedItem, isOpened) => {
-                    return (
-                      <View className="flex w-[120px] flex-row items-center justify-between gap-2 rounded-md border border-gray-300 px-2 py-2 ">
-                        <Text className="text-sm text-gray-800">
-                          {selectedItem?.label || '-- Select --'}
-                        </Text>
-                        <FontAwesome6
-                          name={isOpened ? 'chevron-up' : 'chevron-down'}
-                          size={16}
-                          color="#ccc"
-                        />
-                      </View>
-                    );
-                  }}
-                  renderItem={(item, index, isSelected) => {
-                    return (
-                      <View
-                        className={`flex-row items-center justify-between border-t border-gray-100 px-2 py-2 ${
-                          isSelected ? 'bg-primary-200' : 'bg-transparent'
-                        }`}>
-                        <Text className=" text-sm text-gray-800">{item.label}</Text>
-                      </View>
-                    );
-                  }}
+                  renderButton={(selectedItem, isOpened) => (
+                    <View className="flex w-[120px] flex-row items-center justify-between gap-2 rounded-md border border-gray-300 px-2 py-2 ">
+                      <Text className="text-sm text-gray-800">
+                        {selectedItem?.label || '-- Select --'}
+                      </Text>
+                      <FontAwesome6
+                        name={isOpened ? 'chevron-up' : 'chevron-down'}
+                        size={16}
+                        color="#ccc"
+                      />
+                    </View>
+                  )}
+                  renderItem={(item, index, isSelected) => (
+                    <View
+                      className={`flex-row items-center justify-between border-t border-gray-100 px-2 py-2 ${
+                        isSelected ? 'bg-primary-200' : 'bg-transparent'
+                      }`}>
+                      <Text className=" text-sm text-gray-800">{item.label}</Text>
+                    </View>
+                  )}
                   showsVerticalScrollIndicator={false}
                   dropdownStyle={{
                     backgroundColor: '#fff',
@@ -179,14 +159,20 @@ export function NotificationModal({ visible, onClose }: NotificationModalProps) 
                 <View className="flex-row items-center">
                   <View>
                     <Text className="text-base font-semibold text-gray-800">
-                      Device Disconnected
+                      {t('settings.notifications.deviceDisconnected.title')}
                     </Text>
-                    <Text className="text-sm text-gray-500">Alert when device disconnects</Text>
+                    <Text className="text-sm text-gray-500">
+                      {t('settings.notifications.deviceDisconnected.description')}
+                    </Text>
                   </View>
                 </View>
                 <Switch
-                  onCheckedChange={() => toggleSetting('deviceDisconnected')}
-                  checked={notificationSettings.deviceDisconnected}
+                  onCheckedChange={() =>
+                    updateNotificationSettings({
+                      deviceDisconnected: !notifications.deviceDisconnected,
+                    })
+                  }
+                  checked={notifications.deviceDisconnected}
                   nativeID="deviceDisconnected"
                 />
               </View>
@@ -197,13 +183,21 @@ export function NotificationModal({ visible, onClose }: NotificationModalProps) 
               <View className="flex-row items-center justify-between">
                 <View className="flex-row items-center">
                   <View>
-                    <Text className="text-base font-semibold text-gray-800">Daily Report</Text>
-                    <Text className="text-sm text-gray-500">Receive daily summary reports</Text>
+                    <Text className="text-base font-semibold text-gray-800">
+                      {t('settings.notifications.dailyReport.title')}
+                    </Text>
+                    <Text className="text-sm text-gray-500">
+                      {t('settings.notifications.dailyReport.description')}
+                    </Text>
                   </View>
                 </View>
                 <Switch
-                  onCheckedChange={() => toggleSetting('dailyReport')}
-                  checked={notificationSettings.dailyReport}
+                  onCheckedChange={() =>
+                    updateNotificationSettings({
+                      dailyReport: !notifications.dailyReport,
+                    })
+                  }
+                  checked={notifications.dailyReport}
                   nativeID="dailyReport"
                 />
               </View>
@@ -211,8 +205,10 @@ export function NotificationModal({ visible, onClose }: NotificationModalProps) 
           </View>
 
           {/* Save Button */}
-          <TouchableOpacity onPress={onClose} className="mt-4 rounded-lg bg-primary-500 p-4">
-            <Text className="text-center text-base font-semibold text-white">Save Settings</Text>
+          <TouchableOpacity onPress={handleSave} className="mt-4 rounded-lg bg-primary-500 p-4">
+            <Text className="text-center text-base font-semibold text-white">
+              {t('common.save')}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>

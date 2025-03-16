@@ -1,5 +1,8 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { useTranslation } from '@/lib/hooks/useTranslation';
 
 type PrivacyTermsModalProps = {
   visible: boolean;
@@ -7,13 +10,20 @@ type PrivacyTermsModalProps = {
 };
 
 export function PrivacyTermsModal({ visible, onClose }: PrivacyTermsModalProps) {
+  const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
+
   return (
     <Modal animationType="slide" transparent visible={visible} onRequestClose={onClose}>
       <View className="flex-1 justify-end">
-        <View className="flex h-4/5 flex-col rounded-t-3xl bg-white p-6 pr-1 shadow-lg">
+        <View
+          className="relative flex h-3/4 flex-col rounded-t-3xl bg-white shadow-lg"
+          style={{ paddingBottom: Math.max(insets.bottom, 16) }}>
           {/* Header with close button */}
-          <View className="mb-6 mr-4 flex-row items-center justify-between">
-            <Text className="text-2xl font-bold text-gray-800">Privacy & Terms</Text>
+          <View className="mb-4 flex-row items-center justify-between px-6 pt-6">
+            <Text className="text-2xl font-bold text-gray-800">
+              {t('settings.privacyAndTerms.title')}
+            </Text>
             <TouchableOpacity
               onPress={onClose}
               className="h-10 w-10 items-center justify-center rounded-full bg-gray-100">
@@ -22,7 +32,7 @@ export function PrivacyTermsModal({ visible, onClose }: PrivacyTermsModalProps) 
           </View>
 
           {/* Privacy & Terms Content */}
-          <ScrollView className="flex-1 pr-4">
+          <ScrollView className="flex-1 px-6" showsVerticalScrollIndicator>
             {/* Privacy Policy Section */}
             <View className="mb-6">
               <View className="mb-3 flex-row items-center">
@@ -32,25 +42,25 @@ export function PrivacyTermsModal({ visible, onClose }: PrivacyTermsModalProps) 
                 <Text className="text-xl font-bold text-gray-800">Privacy Policy</Text>
               </View>
 
-              <Text className="mb-2 text-base font-semibold text-gray-700">Data Collection</Text>
+              <Text className="mb-2 text-base font-semibold text-gray-700">
+                {t('settings.privacyAndTerms.dataCollection.title')}
+              </Text>
               <Text className="mb-4 text-gray-600">
-                BabyCare collects data related to your baby's sleep patterns, crying episodes, and
-                device usage. This data is used to provide you with insights and alerts about your
-                baby's well-being.
+                {t('settings.privacyAndTerms.dataCollection.content')}
               </Text>
 
-              <Text className="mb-2 text-base font-semibold text-gray-700">Data Storage</Text>
+              <Text className="mb-2 text-base font-semibold text-gray-700">
+                {t('settings.privacyAndTerms.dataStorage.title')}
+              </Text>
               <Text className="mb-4 text-gray-600">
-                All data is securely stored and encrypted. We use industry-standard security
-                measures to protect your information. Your data is stored on secure servers and is
-                only accessible to you through your authenticated account.
+                {t('settings.privacyAndTerms.dataStorage.content')}
               </Text>
 
-              <Text className="mb-2 text-base font-semibold text-gray-700">Data Sharing</Text>
+              <Text className="mb-2 text-base font-semibold text-gray-700">
+                {t('settings.privacyAndTerms.dataSharing.title')}
+              </Text>
               <Text className="mb-4 text-gray-600">
-                We do not sell or share your personal data with third parties. Your baby's
-                information remains private and is only used to provide the services you've
-                requested.
+                {t('settings.privacyAndTerms.dataSharing.content')}
               </Text>
             </View>
 
@@ -63,23 +73,25 @@ export function PrivacyTermsModal({ visible, onClose }: PrivacyTermsModalProps) 
                 <Text className="text-xl font-bold text-gray-800">Terms of Service</Text>
               </View>
 
-              <Text className="mb-2 text-base font-semibold text-gray-700">License</Text>
+              <Text className="mb-2 text-base font-semibold text-gray-700">
+                {t('settings.privacyAndTerms.license.title')}
+              </Text>
               <Text className="mb-4 text-gray-600">
-                BabyCare grants you a limited, non-exclusive, non-transferable license to use the
-                application for personal, non-commercial purposes.
+                {t('settings.privacyAndTerms.license.content')}
               </Text>
 
-              <Text className="mb-2 text-base font-semibold text-gray-700">Restrictions</Text>
+              <Text className="mb-2 text-base font-semibold text-gray-700">
+                {t('settings.privacyAndTerms.restrictions.title')}
+              </Text>
               <Text className="mb-4 text-gray-600">
-                You may not modify, distribute, or create derivative works based on our application.
-                The app and its content remain the property of BabyCare.
+                {t('settings.privacyAndTerms.restrictions.content')}
               </Text>
 
-              <Text className="mb-2 text-base font-semibold text-gray-700">Disclaimer</Text>
+              <Text className="mb-2 text-base font-semibold text-gray-700">
+                {t('settings.privacyAndTerms.disclaimer.title')}
+              </Text>
               <Text className="mb-4 text-gray-600">
-                BabyCare is designed as a supplementary tool for baby monitoring and should not
-                replace proper adult supervision. We are not responsible for any incidents that may
-                occur while using our application.
+                {t('settings.privacyAndTerms.disclaimer.content')}
               </Text>
             </View>
 
@@ -89,21 +101,22 @@ export function PrivacyTermsModal({ visible, onClose }: PrivacyTermsModalProps) 
                 <View className="mr-2 w-8 items-center justify-center rounded-full">
                   <MaterialIcons name="contact-support" size={20} color="#5d97d3" />
                 </View>
-                <Text className="text-xl font-bold text-gray-800">Contact Us</Text>
+                <Text className="text-xl font-bold text-gray-800">
+                  {t('settings.privacyAndTerms.contactUs.title')}
+                </Text>
               </View>
 
               <Text className="text-gray-600">
-                If you have any questions about our Privacy Policy or Terms of Service, please
-                contact us at:
+                {t('settings.privacyAndTerms.contactUs.content')}
               </Text>
               <Text className="mt-2 text-blue-600">ldb258204@gmail.com</Text>
             </View>
           </ScrollView>
-
-          {/* Accept Button */}
-          <View className="mt-4 w-full pr-4">
+          <View className="bg-white px-6 pt-4">
             <TouchableOpacity onPress={onClose} className="w-full rounded-lg bg-primary-500 p-4">
-              <Text className="text-center text-base font-semibold text-white">I Understand</Text>
+              <Text className="text-center text-base font-semibold text-white">
+                {t('common.close')}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

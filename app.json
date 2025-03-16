@@ -10,7 +10,14 @@
       "tsconfigPaths": true
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "react-native-vision-camera",
+        {
+          "cameraPermissionText": "$(PRODUCT_NAME) needs access to your camera to scan QR codes",
+          "enableMicrophonePermission": false
+        }
+      ]
     ],
     "orientation": "portrait",
     "icon": "./assets/babycare_logo_rb.png",
@@ -32,7 +39,10 @@
         "backgroundColor": "#ffffff"
       },
       "newArchEnable": true,
-      "package": "com.babycare.pbl5app"
+      "package": "com.babycare.pbl5app",
+      "permissions": [
+        "android.permission.CAMERA"
+      ]
     },
     "extra": {
       "router": {

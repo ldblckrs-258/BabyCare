@@ -2,6 +2,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text, TouchableOpacity, View } from 'react-native';
 
+import { useTranslation } from '@/lib/hooks/useTranslation';
 import HistoryScreen from './HistoryScreen';
 import HomeScreen from './HomeScreen';
 import SettingsScreen from './SettingsScreen';
@@ -14,7 +15,6 @@ const TABS = [
   {
     name: 'Streaming',
     component: StreamingScreen,
-    label: 'Streaming',
     icon: (color: string, size: number) => (
       <MaterialIcons name="live-tv" size={size} color={color} />
     ),
@@ -22,7 +22,6 @@ const TABS = [
   {
     name: 'History',
     component: HistoryScreen,
-    label: 'History',
     icon: (color: string, size: number) => (
       <MaterialIcons name="view-list" size={size} color={color} />
     ),
@@ -30,7 +29,6 @@ const TABS = [
   {
     name: 'Home',
     component: HomeScreen,
-    label: 'Home',
     icon: (color: string, size: number) => (
       <MaterialIcons name="home-filled" size={size} color={color} />
     ),
@@ -38,7 +36,6 @@ const TABS = [
   {
     name: 'Statistics',
     component: StatisticsScreen,
-    label: 'Statistics',
     icon: (color: string, size: number) => (
       <MaterialIcons name="insert-chart" size={size} color={color} />
     ),
@@ -46,12 +43,12 @@ const TABS = [
   {
     name: 'Settings',
     component: SettingsScreen,
-    label: 'Settings',
     icon: (color: string, size: number) => (
       <MaterialIcons name="settings" size={size} color={color} />
     ),
   },
 ];
+
 export default function MainTabs() {
   return (
     <Tab.Navigator
@@ -76,6 +73,8 @@ function CustomTabBar({
   descriptors: any;
   navigation: any;
 }) {
+  const { t } = useTranslation();
+
   return (
     <View className="relative w-full bg-neutral-100 px-3 pb-3">
       <View className="flex-row rounded-xl bg-white p-2 shadow-xl">
@@ -126,10 +125,10 @@ function CustomTabBar({
                 accessibilityLabel={options.tabBarAccessibilityLabel}
                 testID={options.tabBarTestID}
                 onPress={onPress}
-                className={`flex-1 items-center p-2 `}>
+                className={`flex-1 items-center p-2`}>
                 {TABS[index].icon(isFocused ? '#3d8d7a' : 'gray', 26)}
                 <Text className={`text-sm ${isFocused ? 'text-primary-500' : 'text-gray-500'}`}>
-                  {route.name}
+                  {t(`tabs.${route.name.toLowerCase()}`)}
                 </Text>
               </TouchableOpacity>
             );

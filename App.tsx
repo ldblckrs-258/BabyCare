@@ -2,6 +2,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
 
+import './lib/i18n'; // Import i18n configuration
 import { LoginScreen } from './screens/LoginScreen';
 import MainTabs from './screens/MainTabs';
 import { RegisterScreen } from './screens/RegisterScreen';
