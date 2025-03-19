@@ -2,7 +2,7 @@
   "expo": {
     "name": "BabyCare",
     "slug": "babycare",
-    "version": "1.0.0",
+    "version": "0.0.3-dev",
     "web": {
       "favicon": "./assets/babycare_logo.png"
     },
@@ -27,9 +27,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
     },
@@ -40,9 +38,7 @@
       },
       "newArchEnable": true,
       "package": "com.babycare.pbl5app",
-      "permissions": [
-        "android.permission.CAMERA"
-      ]
+      "permissions": ["android.permission.CAMERA"]
     },
     "extra": {
       "router": {

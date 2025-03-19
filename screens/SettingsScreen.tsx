@@ -1,16 +1,18 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Image } from 'expo-image';
+// import { Image } from 'expo-image';
 import { useState } from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Image, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { useTranslation } from '@/lib/hooks/useTranslation';
 
 import { DeviceConnectionModal } from '../components/modals/DeviceConnectionModal';
 import { LanguageModal } from '../components/modals/LanguageModal';
 import { NotificationModal } from '../components/modals/NotificationModal';
 import { PrivacyTermsModal } from '../components/modals/PrivacyTermsModal';
-import { useTranslation } from '@/lib/hooks/useTranslation';
+import { ProfileModal } from '../components/modals/ProfileModal';
 import { useAuthStore } from '../stores/authStore';
 import { useSettingsStore } from '../stores/settingsStore';
 import type { RootStackParamList } from '../types/navigation';
@@ -24,6 +26,7 @@ export default function SettingsScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { t } = useTranslation();
   const { user } = useAuthStore();
+
   const { isDeviceConnected, deviceId, language, setDeviceConnection } = useSettingsStore();
 
   // Modal visibility states
@@ -31,10 +34,15 @@ export default function SettingsScreen() {
   const [notificationModalVisible, setNotificationModalVisible] = useState(false);
   const [languageModalVisible, setLanguageModalVisible] = useState(false);
   const [privacyModalVisible, setPrivacyModalVisible] = useState(false);
+  const [profileModalVisible, setProfileModalVisible] = useState(false);
 
   // Combined state to check if any modal is visible
   const isAnyModalVisible =
-    deviceModalVisible || notificationModalVisible || languageModalVisible || privacyModalVisible;
+    deviceModalVisible ||
+    notificationModalVisible ||
+    languageModalVisible ||
+    privacyModalVisible ||
+    profileModalVisible;
 
   const handleQRCodeScanned = (code: string) => {
     // Here you would typically validate the QR code format
@@ -55,12 +63,13 @@ export default function SettingsScreen() {
         {/* User Profile Section */}
         <TouchableOpacity
           className="mb-4 flex-row items-center rounded-lg bg-white p-4"
-          onPress={() => console.log('Navigate to profile')}>
+          onPress={() => setProfileModalVisible(true)}>
           <View className="mr-3 h-12 w-12 overflow-hidden rounded-full bg-gray-200">
             <Image
-              source={require('../assets/default-avatar.png')}
-              className="h-full w-full"
-              contentFit="cover"
+              source={
+                user?.photoURL ? { uri: user.photoURL } : require('../assets/default-avatar.png')
+              }
+              className="size-12"
             />
           </View>
           <View className="flex-1">
@@ -89,7 +98,7 @@ export default function SettingsScreen() {
             <View className="flex-row items-center">
               <Text className="mr-2 text-sm text-gray-400">
                 {isDeviceConnected
-                  ? `${t('settings.deviceConnection.connected')} ${deviceId}`
+                  ? t('settings.deviceConnection.connected')
                   : t('settings.deviceConnection.notConnected')}
               </Text>
               <MaterialIcons name="chevron-right" size={24} color="#ccc" />
@@ -154,7 +163,7 @@ export default function SettingsScreen() {
               </View>
               <Text className="text-base font-semibold text-gray-800">{t('settings.version')}</Text>
             </View>
-            <Text className="text-sm text-gray-400">0.0.1 beta</Text>
+            <Text className="text-sm text-gray-400">0.0.3-dev</Text>
           </View>
         </View>
       </View>
@@ -164,6 +173,9 @@ export default function SettingsScreen() {
         visible={deviceModalVisible}
         onClose={() => setDeviceModalVisible(false)}
         onCodeScanned={handleQRCodeScanned}
+        isConnected={isDeviceConnected}
+        deviceId={deviceId}
+        onDisconnect={() => setDeviceConnection(false)}
       />
 
       <NotificationModal
@@ -180,6 +192,8 @@ export default function SettingsScreen() {
         visible={privacyModalVisible}
         onClose={() => setPrivacyModalVisible(false)}
       />
+
+      <ProfileModal visible={profileModalVisible} onClose={() => setProfileModalVisible(false)} />
     </SafeAreaView>
   );
 }

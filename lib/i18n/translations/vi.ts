@@ -10,6 +10,42 @@ export const vi = {
     close: 'Đóng',
     back: 'Quay lại',
   },
+  home: {
+    title: {
+      greeting: 'Xin chào',
+      dashboard: 'Bảng điều khiển của bạn',
+    },
+    device: {
+      connected: {
+        title: 'Đã kết nối',
+        description: 'Đang theo dõi',
+      },
+      notConnected: {
+        title: 'Chưa kết nối',
+        description: 'Không có thiết bị nào',
+      },
+    },
+    badPosition: {
+      true: {
+        title: 'Tư thế không tốt',
+        description: 'Liên tục trong',
+      },
+      false: {
+        title: 'Tư thế tốt',
+        description: 'Mọi thứ đều ổn',
+      },
+    },
+    cry: {
+      true: {
+        title: 'Đang khóc',
+        description: 'Liên tục trong',
+      },
+      false: {
+        title: 'Không khóc',
+        description: 'Mọi thứ đều ổn',
+      },
+    },
+  },
   welcome: {
     slides: {
       first: {
@@ -52,30 +88,37 @@ export const vi = {
   },
   settings: {
     title: 'Cài đặt',
+    profile: {
+      title: 'Hồ sơ',
+      email: 'Email',
+      displayName: 'Tên hiển thị',
+      displayNamePlaceholder: 'Nhập tên hiển thị của bạn',
+      changePassword: 'Đổi mật khẩu',
+      currentPassword: 'Mật khẩu hiện tại',
+      newPassword: 'Mật khẩu mới',
+      confirmPassword: 'Xác nhận mật khẩu mới',
+      changePasswordButton: 'Đổi mật khẩu',
+      signOut: 'Đăng xuất',
+    },
     deviceConnection: {
       title: 'Kết nối thiết bị',
       status: 'Trạng thái',
       notConnected: 'Chưa kết nối',
-      connected: 'Đã kết nối với',
-      bluetooth: 'Bluetooth',
-      enableBluetooth: 'Bật Bluetooth để kết nối với thiết bị BabyCare',
-      availableDevices: 'Thiết bị khả dụng',
-      scanning: 'Đang quét...',
-      scan: 'Quét',
-      noDevices: 'Không tìm thấy thiết bị. Nhấn Quét để tìm kiếm thiết bị.',
-      searching: 'Đang tìm kiếm thiết bị...',
+      connected: 'Đã kết nối',
+      scanQRCode: 'Quét mã QR',
+      scanQRCodeDescription: 'Quét mã QR trên thiết bị của bạn để kết nối',
       helpText:
         'Đảm bảo thiết bị BabyCare của bạn đã được bật và trong phạm vi kết nối. Nếu bạn gặp khó khăn trong việc kết nối, hãy thử khởi động lại thiết bị.',
     },
     notifications: {
       title: 'Cài đặt thông báo',
       cryDetection: {
-        title: 'Ngưỡng phát hiện khóc',
+        title: 'Ngưỡng cảnh báo khóc',
         description: 'Thông báo khi bé khóc liên tục',
       },
       sleepPosition: {
-        title: 'Tư thế ngủ',
-        description: 'Thông báo khi tư thế ngủ không an toàn',
+        title: 'Ngưỡng cảnh báo tư thế',
+        description: 'Thông báo tư thế ngủ không an toàn',
       },
       deviceDisconnected: {
         title: 'Thiết bị ngắt kết nối',

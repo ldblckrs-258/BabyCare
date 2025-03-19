@@ -25,3 +25,4 @@ android
 .vscode/
 .cursor/
 .env
+.cursorignore

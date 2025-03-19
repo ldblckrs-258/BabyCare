@@ -79,6 +79,10 @@ module.exports = {
           foreground: 'hsl(var(--card-foreground))',
         },
       },
+      boxShadow: {
+        'bottom-1': '0px 6px 10px 4px hsl(var(--shadow))',
+        'top-1': '0px -6px 10px 4px hsl(var(--shadow))',
+      },
       keyframes: {
         'accordion-down': {
           from: { height: '0' },
