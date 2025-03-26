@@ -2,7 +2,7 @@
   "expo": {
     "name": "BabyCare",
     "slug": "babycare",
-    "version": "0.0.3-dev",
+    "version": "0.0.4",
     "web": {
       "favicon": "./assets/babycare_logo.png"
     },
@@ -27,9 +27,16 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.babycare.pbl5app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "$(PRODUCT_NAME) needs access to your camera to scan QR codes",
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -38,7 +45,9 @@
       },
       "newArchEnable": true,
       "package": "com.babycare.pbl5app",
-      "permissions": ["android.permission.CAMERA"]
+      "permissions": [
+        "android.permission.CAMERA"
+      ]
     },
     "extra": {
       "router": {

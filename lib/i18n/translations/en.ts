@@ -182,4 +182,21 @@ export const en = {
     statistics: 'Statistics',
     settings: 'Settings',
   },
+  history: {
+    allEvents: 'All Events',
+    today: 'Today',
+    yesterday: 'Yesterday',
+    loading: 'Loading notifications...',
+    loadingMore: 'Loading more...',
+    noNotifications: 'No notifications yet',
+    notificationsWillAppearHere: 'When you receive notifications, they will appear here',
+    markAllAsRead: 'Mark all as read',
+    deleteAll: 'Delete all',
+    notificationTypes: {
+      cryAlert: 'Cry Alert',
+      positionAlert: 'Sleep Position Alert',
+      dailyReport: 'Daily Report',
+      system: 'System Notification'
+    }
+  },
 };

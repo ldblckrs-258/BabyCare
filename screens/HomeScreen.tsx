@@ -1,14 +1,14 @@
+import AntDesign from '@expo/vector-icons/AntDesign';
+import Entypo from '@expo/vector-icons/Entypo';
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useEffect, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { LineChart } from 'react-native-chart-kit';
+import { LineChart } from 'react-native-gifted-charts';
 
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
-
-import AntDesign from '@expo/vector-icons/AntDesign';
-import Entypo from '@expo/vector-icons/Entypo';
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
-import { useEffect, useState } from 'react';
 
 export default function HomeScreen() {
   const { isDeviceConnected } = useSettingsStore();
@@ -20,23 +20,30 @@ export default function HomeScreen() {
     time: '2m18s',
   };
 
+  const [chartData, setChartData] = useState(
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].map((value) => ({ value }))
+  );
+
   const cryData = {
     isCrying: true,
-    dataSets: [
-      {
-        data: [2, 4, 0, 2, 1, 6, 3, 5, 8, 4, 1],
-      },
-    ],
+    dataSets: chartData,
     time: '1m30s',
   };
 
-  const lastName = user?.displayName?.split(' ').slice(-1)[0];
-  const [chartParentWidth, setChartParentWidth] = useState(0);
+  // Simulate real-time data updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setChartData((prevData) => {
+        const newValue = Math.floor(Math.random() * 10); // Random value between 0-9
+        const newData = [...prevData, { value: newValue }];
+        return newData;
+      });
+    }, 3000); // Update every 3 seconds
 
-  const handleLayout = (event: any) => {
-    const { width } = event.nativeEvent.layout;
-    setChartParentWidth(width);
-  };
+    return () => clearInterval(interval);
+  }, []);
+
+  const lastName = user?.displayName?.split(' ').slice(-1)[0];
 
   const [currentTime, setCurrentTime] = useState(
     new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
@@ -75,11 +82,7 @@ export default function HomeScreen() {
               {isDeviceConnected ? (
                 <AntDesign name="checkcircle" size={24} color="#3d8d7a" />
               ) : (
-                <View
-                  className="flex size-7 items-center justify-center rounded-full bg-amber-500"
-                  style={{ borderRadius: 9999 }}>
-                  <AntDesign name="disconnect" size={14} color="#fff" />
-                </View>
+                <AntDesign name="disconnect" size={18} color="#f59e0b" />
               )}
               <Entypo
                 name="dots-three-horizontal"
@@ -127,13 +130,9 @@ export default function HomeScreen() {
         <View className="flex-1">
           {/* Crying */}
           <View
-            className={`mb-4 h-[252px] flex-col items-center justify-between rounded-[20px] pt-4 ${cryData.isCrying ? 'bg-tertiary-500' : 'bg-primary-400'}`}>
+            className={`mb-4 h-[252px] flex-col items-center justify-between overflow-hidden rounded-[20px] pt-4 ${cryData.isCrying ? 'bg-tertiary-500' : 'bg-primary-400'}`}>
             <View className="flex w-full flex-row items-center justify-between pl-5 pr-4">
-              <FontAwesome6
-                name={cryData.isCrying ? 'sad-cry' : 'smile-beam'}
-                size={20}
-                color="white"
-              />
+              <FontAwesome6 name="baby" size={20} color="white" />
               <Entypo name="chevron-right" size={24} color="white" />
             </View>
             <View className="flex w-full px-4">
@@ -146,48 +145,36 @@ export default function HomeScreen() {
                   : t('home.cry.false.description')}
               </Text>
             </View>
-            <View
-              className="-mt-4 w-full overflow-hidden"
-              onLayout={handleLayout}
-              style={{ width: '100%' }}>
+            <View className="flex w-full">
               <View
+                className="overflow-hidden"
                 style={{
-                  transform: [{ translateX: -65 }],
+                  transform: [{ translateX: -40 }],
+                  width: '135%',
                 }}>
                 <LineChart
-                  data={{
-                    datasets: cryData.dataSets,
-                    labels: Array(cryData.dataSets[0].data.length).fill(''),
-                  }}
-                  width={chartParentWidth * 1.5}
+                  areaChart
+                  data={cryData.dataSets}
                   height={100}
-                  chartConfig={{
-                    backgroundColor: '#5d97d300',
-                    backgroundGradientFrom: '#5d97d300',
-                    backgroundGradientTo: '#5d97d300',
-                    color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-                    labelColor: () => `rgba(255, 255, 255, 0)`,
-                    style: {
-                      borderRadius: 16,
-                    },
-                    propsForDots: {
-                      r: '0',
-                    },
-                    propsForBackgroundLines: {
-                      strokeWidth: 0,
-                    },
-                  }}
-                  bezier
-                  style={{
-                    marginVertical: 8,
-                    borderRadius: 16,
-                  }}
+                  hideDataPoints
+                  hideDataPoints1={false}
+                  hideAxesAndRules
+                  color="white"
+                  startFillColor="rgba(255, 255, 255, 0.6)"
+                  endFillColor="rgba(255, 255, 255, 0.1)"
+                  startOpacity={0.6}
+                  endOpacity={0.1}
+                  spacing={20}
+                  thickness={2}
+                  adjustToWidth
+                  curved
+                  curveType={1}
+                  scrollToEnd
+                  disableScroll
                 />
-                <View
-                  className="mt-[-17px] h-14 w-[200%]"
-                  style={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  }}
+                <LinearGradient
+                  colors={['rgba(255, 255, 255, 0.13)', 'transparent']}
+                  className="relative mt-[-25px] h-8 w-full"
                 />
               </View>
             </View>
