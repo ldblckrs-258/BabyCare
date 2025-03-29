@@ -45,6 +45,9 @@ export const en = {
         description: 'Everything is fine',
       },
     },
+    latestEvents: 'Latest Events',
+    viewAll: 'View all',
+    noRecentEvents: 'No recent events',
   },
   welcome: {
     slides: {
@@ -199,4 +202,29 @@ export const en = {
       system: 'System Notification'
     }
   },
+  streaming: {
+    live: 'Live',
+    streamInfo: 'Stream Information',
+    connectingToStream: 'Connecting to stream...',
+    retry: 'Retry',
+    status: {
+      title: 'Status',
+      connecting: 'Connecting...',
+      error: 'Error',
+      active: 'Active',
+      disconnected: 'Disconnected',
+    },
+    quality: {
+      title: 'Quality',
+      hd: 'HD (720p)',
+    },
+    connection: {
+      title: 'Connection',
+      wifi: 'WiFi',
+      mobileData: 'Mobile Data',
+    },
+    errorMessage: {
+      connectionFailed: 'Could not connect to the stream',
+    }
+  }
 };

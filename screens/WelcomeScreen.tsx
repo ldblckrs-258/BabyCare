@@ -1,3 +1,4 @@
+import { useTranslation } from '@/lib/hooks/useTranslation';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useRef, useState } from 'react';
@@ -5,8 +6,6 @@ import { Dimensions, FlatList, Image, StatusBar, Text, TouchableOpacity, View } 
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { RootStackParamList } from '../types/navigation';
-
-import { useTranslation } from '@/lib/hooks/useTranslation';
 
 const { width } = Dimensions.get('window');
 
@@ -126,7 +125,7 @@ export function WelcomeScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <StatusBar backgroundColor={slides[currentSlideIndex].color} />
+      <StatusBar translucent backgroundColor="transparent" />
       <FlatList
         ref={flatListRef}
         data={slides}

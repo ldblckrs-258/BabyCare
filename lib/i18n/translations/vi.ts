@@ -45,6 +45,9 @@ export const vi = {
         description: 'Mọi thứ đều ổn',
       },
     },
+    latestEvents: 'Sự kiện gần đây',
+    viewAll: 'Xem tất cả',
+    noRecentEvents: 'Không có sự kiện gần đây',
   },
   welcome: {
     slides: {
@@ -180,4 +183,29 @@ export const vi = {
     statistics: 'Thống kê',
     settings: 'Cài đặt',
   },
+  streaming: {
+    live: 'Trực tiếp',
+    streamInfo: 'Thông tin stream',
+    connectingToStream: 'Đang kết nối stream...',
+    retry: 'Thử lại',
+    status: {
+      title: 'Trạng thái',
+      connecting: 'Đang kết nối...',
+      error: 'Lỗi',
+      active: 'Hoạt động',
+      disconnected: 'Mất kết nối',
+    },
+    quality: {
+      title: 'Chất lượng',
+      hd: 'HD (720p)',
+    },
+    connection: {
+      title: 'Kết nối',
+      wifi: 'WiFi',
+      mobileData: 'Dữ liệu di động',
+    },
+    errorMessage: {
+      connectionFailed: 'Không thể kết nối đến stream',
+    }
+  }
 };

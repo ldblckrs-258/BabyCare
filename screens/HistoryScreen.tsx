@@ -1,19 +1,19 @@
-import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { NotificationModal } from '@/components/modals/NotificationModal';
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import {
   Notification,
   NotificationType,
-  staticNotifications,
+  formatTime,
   generateMoreNotifications,
   groupNotificationsByDate,
-  formatTime,
+  staticNotifications,
 } from '@/lib/notifications';
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { format, isToday, isYesterday } from 'date-fns';
+import { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 // Get icon for notification type
 const getNotificationIcon = (type: NotificationType) => {

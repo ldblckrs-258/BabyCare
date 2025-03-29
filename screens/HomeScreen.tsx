@@ -1,36 +1,74 @@
+import { useTranslation } from '@/lib/hooks/useTranslation';
+import {
+  Notification,
+  NotificationType,
+  formatTime,
+  staticNotifications,
+} from '@/lib/notifications';
+import { useAuthStore } from '@/stores/authStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useEffect, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
 
-import { useTranslation } from '@/lib/hooks/useTranslation';
-import { useAuthStore } from '@/stores/authStore';
-import { useSettingsStore } from '@/stores/settingsStore';
+// Get icon for notification type
+const getNotificationIcon = (type: NotificationType) => {
+  switch (type) {
+    case 'cry_alert':
+      return <FontAwesome6 name="baby" size={20} color="#5d97d3" />;
+    case 'position_alert':
+      return <FontAwesome6 name="bed" size={16} color="#d26165" />;
+    case 'daily_report':
+      return <MaterialIcons name="assessment" size={22} color="#a855f7" />;
+    case 'system':
+      return <MaterialIcons name="notifications" size={22} color="#3d8d7a" />;
+    default:
+      return <MaterialIcons name="notifications" size={22} color="#3d8d7a" />;
+  }
+};
 
 export default function HomeScreen() {
   const { isDeviceConnected } = useSettingsStore();
   const { user } = useAuthStore();
   const { t } = useTranslation();
+  const navigation = useNavigation();
 
-  const badPositionData = {
-    isBad: true,
-    time: '2m18s',
-  };
-
+  // State hooks - keep all useState together in the same order
+  const [latestNotifications, setLatestNotifications] = useState<Notification[]>([]);
   const [chartData, setChartData] = useState(
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].map((value) => ({ value }))
   );
+  const [currentTime, setCurrentTime] = useState(
+    new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+  );
 
-  const cryData = {
-    isCrying: true,
-    dataSets: chartData,
-    time: '1m30s',
-  };
+  // Memoized values - these won't cause hook order issues
+  const badPositionData = useMemo(
+    () => ({
+      isBad: true,
+      time: '2m18s',
+    }),
+    []
+  );
 
-  // Simulate real-time data updates
+  const cryData = useMemo(
+    () => ({
+      isCrying: true,
+      dataSets: chartData,
+      time: '1m30s',
+    }),
+    [chartData]
+  );
+
+  const lastName = useMemo(() => user?.displayName?.split(' ').slice(-1)[0], [user?.displayName]);
+
+  // Effect hooks - keep all useEffect together in the same order
   useEffect(() => {
     const interval = setInterval(() => {
       setChartData((prevData) => {
@@ -43,13 +81,19 @@ export default function HomeScreen() {
     return () => clearInterval(interval);
   }, []);
 
-  const lastName = user?.displayName?.split(' ').slice(-1)[0];
+  // Load latest notifications
+  useEffect(() => {
+    // Simulate API call to get notifications
+    setTimeout(() => {
+      // Get the 3 most recent notifications
+      const latest = [...staticNotifications]
+        .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+        .slice(0, 3);
+      setLatestNotifications(latest);
+    }, 500);
+  }, []);
 
-  const [currentTime, setCurrentTime] = useState(
-    new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-  );
-
-  // Use useEffect to avoid memory leaks with setInterval
+  // Update time
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(
@@ -59,6 +103,11 @@ export default function HomeScreen() {
 
     return () => clearInterval(timer);
   }, []);
+
+  // Navigation handler - defined as a constant to maintain hook order
+  const handleViewAll = () => {
+    navigation.navigate('History' as never);
+  };
 
   return (
     <ScrollView className="flex-1 bg-neutral-100 px-2 pt-6">
@@ -190,6 +239,55 @@ export default function HomeScreen() {
             <Text className="text-3xl font-bold text-primary-500">{currentTime}</Text>
           </View>
         </View>
+      </View>
+
+      {/* Latest Notifications Section */}
+      <View className="flex-1 px-2 mt-8">
+        <View className="flex-row items-center justify-between pb-2">
+          <Text className="text-xl font-semibold text-primary-600">{t('home.latestEvents')}</Text>
+          <TouchableOpacity onPress={handleViewAll} className="flex-row items-center">
+            <Text className="mr-1 text-primary-500">{t('home.viewAll')}</Text>
+            <AntDesign name="right" size={14} color="#3d8d7a" />
+          </TouchableOpacity>
+        </View>
+
+        {latestNotifications.length > 0 ? (
+          <View className="rounded-xl bg-white py-3 px-2 shadow flex flex-col gap-1">
+            {latestNotifications.map((notification) => (
+              <TouchableOpacity
+                key={notification.id}
+                className={`relative mb-2 rounded-xl p-2 pb-1`}>
+                <View className="flex-row items-center">
+                  <View
+                    className={`mr-3 h-10 w-10 items-center justify-center rounded-full ${
+                      notification.read ? 'bg-gray-100' : 'bg-white'
+                    }`}>
+                    {getNotificationIcon(notification.type)}
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-base font-semibold text-gray-800">
+                      {notification.title}
+                    </Text>
+                    <Text className="text-sm text-gray-600">
+                      {notification.message}{' '}
+                      <Text className="mt-1 inline-block text-xs text-gray-400">
+                        {formatTime(notification.timestamp)}
+                      </Text>
+                    </Text>
+                  </View>
+                  {!notification.read && (
+                    <View className="absolute right-3 top-3 h-3 w-3 rounded-full bg-primary-500" />
+                  )}
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        ) : (
+          <View className="items-center rounded-xl bg-white p-6 shadow-sm">
+            <MaterialIcons name="notifications-none" size={40} color="#ccc" />
+            <Text className="mt-2 text-gray-500">{t('home.noRecentEvents')}</Text>
+          </View>
+        )}
       </View>
     </ScrollView>
   );
