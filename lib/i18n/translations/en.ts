@@ -88,6 +88,8 @@ export const en = {
     termsAndConditions: 'Terms & Conditions',
     and: 'and',
     privacyPolicy: 'Privacy Policy',
+    login: 'Login',
+    register: 'Register',
   },
   settings: {
     title: 'Settings',
@@ -226,5 +228,37 @@ export const en = {
     errorMessage: {
       connectionFailed: 'Could not connect to the stream',
     }
+  },
+  statistics: {
+    title: 'Statistics',
+    todayOverview: 'Today Overview',
+    badPosition: 'Bad Position',
+    crying: 'Crying',
+    totalTime: 'Total time',
+    totalTimes: 'Total times',
+    totalMinutes: 'Total minutes',
+    longestPeriod: 'Longest period',
+    longestDuration: 'Longest duration',
+    correlate: 'Correlate',
+    min: 'min'
+  },
+  register: {
+    title: 'Register',
+    signUpWithGoogle: 'Sign up with Google',
+    orSignUpWith: 'or sign up with',
+    fullName: 'Full Name',
+    fullNamePlaceholder: 'John Doe',
+    email: 'Email Address',
+    emailPlaceholder: 'johndoe@gmail.com',
+    password: 'Password',
+    passwordPlaceholder: '••••••••',
+    confirmPassword: 'Confirm Password',
+    createAccount: 'Create Account',
+    alreadyHaveAccount: 'Already have an account?',
+    loginHere: 'Login here',
+    fillAllFields: 'Please fill in all fields',
+    passwordsMismatch: 'Passwords do not match',
+    agreeToTerms: 'Please agree to Terms & Conditions',
+    error: 'An error occurred during registration'
   }
-};
+}

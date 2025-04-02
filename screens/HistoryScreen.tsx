@@ -11,6 +11,7 @@ import {
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { format, isToday, isYesterday } from 'date-fns';
+import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -129,6 +130,7 @@ export default function HistoryScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-100">
+      <StatusBar style="dark" />
       {showNotificationSettings && (
         <View
           className="absolute inset-0 z-10 bg-black/50"
@@ -136,7 +138,7 @@ export default function HistoryScreen() {
         />
       )}
       {/* Header */}
-      <View className="flex-row items-center justify-between bg-white px-5 py-4">
+      <View className="flex-row items-center justify-between px-5 py-4">
         <Text className="text-2xl font-bold text-primary-600">{t('history.allEvents')}</Text>
         <TouchableOpacity
           onPress={() => setShowNotificationSettings(true)}

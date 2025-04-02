@@ -88,6 +88,8 @@ export const vi = {
     termsAndConditions: 'Điều khoản & Điều kiện',
     and: 'và',
     privacyPolicy: 'Chính sách bảo mật',
+    login: 'Đăng nhập',
+    register: 'Đăng ký',
   },
   settings: {
     title: 'Cài đặt',
@@ -183,6 +185,23 @@ export const vi = {
     statistics: 'Thống kê',
     settings: 'Cài đặt',
   },
+  history: {
+    allEvents: 'Tất cả sự kiện',
+    today: 'Hôm nay',
+    yesterday: 'Hôm qua',
+    loading: 'Đang tải thông báo...',
+    loadingMore: 'Đang tải thêm...',
+    noNotifications: 'Chưa có thông báo',
+    notificationsWillAppearHere: 'Khi bạn nhận được thông báo, chúng sẽ xuất hiện ở đây',
+    markAllAsRead: 'Đánh dấu tất cả là đã đọc',
+    deleteAll: 'Xóa tất cả',
+    notificationTypes: {
+      cryAlert: 'Cảnh báo khóc',
+      positionAlert: 'Cảnh báo tư thế ngủ',
+      dailyReport: 'Báo cáo hàng ngày',
+      system: 'Thông báo hệ thống'
+    }
+  },
   streaming: {
     live: 'Trực tiếp',
     streamInfo: 'Thông tin stream',
@@ -207,5 +226,37 @@ export const vi = {
     errorMessage: {
       connectionFailed: 'Không thể kết nối đến stream',
     }
+  },
+  statistics: {
+    title: 'Thống kê',
+    todayOverview: 'Tổng quan hôm nay',
+    badPosition: 'Tư thế không tốt',
+    crying: 'Khóc',
+    totalTime: 'Tổng thời gian',
+    totalTimes: 'Tổng số lần',
+    totalMinutes: 'Tổng số phút',
+    longestPeriod: 'Giai đoạn dài nhất',
+    longestDuration: 'Thời lượng dài nhất',
+    correlate: 'Tương quan',
+    min: 'phút'
+  },
+  register: {
+    title: 'Đăng ký',
+    signUpWithGoogle: 'Đăng ký với Google',
+    orSignUpWith: 'hoặc đăng ký với',
+    fullName: 'Họ và tên',
+    fullNamePlaceholder: 'Nguyễn Văn A',
+    email: 'Địa chỉ email',
+    emailPlaceholder: 'nguyenvana@gmail.com',
+    password: 'Mật khẩu',
+    passwordPlaceholder: '••••••••',
+    confirmPassword: 'Xác nhận mật khẩu',
+    createAccount: 'Tạo tài khoản',
+    alreadyHaveAccount: 'Đã có tài khoản?',
+    loginHere: 'Đăng nhập tại đây',
+    fillAllFields: 'Vui lòng điền đầy đủ thông tin',
+    passwordsMismatch: 'Mật khẩu không khớp',
+    agreeToTerms: 'Vui lòng đồng ý với Điều khoản & Điều kiện',
+    error: 'Đã xảy ra lỗi trong quá trình đăng ký'
   }
-};
+}

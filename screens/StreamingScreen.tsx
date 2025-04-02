@@ -1,7 +1,7 @@
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import { useSettingsStore } from '@/stores/settingsStore';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
-import { StackActions, useIsFocused, useNavigation } from '@react-navigation/native';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { AVPlaybackStatus, ResizeMode, Video, VideoFullscreenUpdate } from 'expo-av';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { StatusBar } from 'expo-status-bar';
@@ -10,7 +10,6 @@ import {
   ActivityIndicator,
   Animated,
   BackHandler,
-  Dimensions,
   ScrollView,
   Text,
   TouchableOpacity,

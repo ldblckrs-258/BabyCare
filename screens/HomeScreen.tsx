@@ -113,10 +113,10 @@ export default function HomeScreen() {
     <ScrollView className="flex-1 bg-neutral-100 px-2 pt-6">
       {/* Header */}
       <View className="mb-6 mt-12 px-2">
-        <Text className="text-[32px] font-medium leading-10 text-primary-600">
+        <Text className="text-3xl font-medium text-primary-600">
           {t('home.title.greeting')} {lastName},
         </Text>
-        <Text className="text-4xl font-normal text-primary-600">{t('home.title.dashboard')}</Text>
+        <Text className="text-3xl font-normal text-primary-600">{t('home.title.dashboard')}</Text>
       </View>
       {/* Cards */}
       <View className="flex flex-row gap-4">
@@ -127,7 +127,7 @@ export default function HomeScreen() {
             style={{
               boxShadow: '0px 6px 10px 4px hsl(var(--shadow))',
             }}>
-            <View className="flex w-full flex-row items-center justify-between">
+            <View className="flex w-full flex-row items-center justify-between pr-2">
               {isDeviceConnected ? (
                 <AntDesign name="checkcircle" size={24} color="#3d8d7a" />
               ) : (
@@ -135,19 +135,19 @@ export default function HomeScreen() {
               )}
               <Entypo
                 name="dots-three-horizontal"
-                size={24}
+                size={20}
                 color={isDeviceConnected ? '#b1ded0' : '#cbd5e1'}
               />
             </View>
             <View className="flex w-full">
               <Text
-                className={`mt-2 text-left text-2xl font-medium ${isDeviceConnected ? 'text-primary-500' : 'text-slate-700'}`}>
+                className={`mt-2 text-left text-xl font-medium ${isDeviceConnected ? 'text-primary-500' : 'text-slate-700'}`}>
                 {isDeviceConnected
                   ? t('home.device.connected.title')
                   : t('home.device.notConnected.title')}
               </Text>
               <Text
-                className={`text-base ${isDeviceConnected ? 'text-primary-500' : 'text-slate-500'}`}>
+                className={`text-sm ${isDeviceConnected ? 'text-primary-500' : 'text-slate-500'}`}>
                 {isDeviceConnected
                   ? t('home.device.connected.description')
                   : t('home.device.notConnected.description')}
@@ -163,12 +163,12 @@ export default function HomeScreen() {
               <Entypo name="chevron-right" size={24} color="white" />
             </View>
             <View className="flex w-full">
-              <Text className="mt-2 text-left text-2xl font-medium text-white">
+              <Text className="mt-2 text-left text-xl font-medium text-white">
                 {badPositionData.isBad
                   ? t('home.badPosition.true.title')
                   : t('home.badPosition.false.title')}
               </Text>
-              <Text className="text-base text-slate-100">
+              <Text className="text-sm text-slate-100">
                 {badPositionData.isBad
                   ? `${t('home.badPosition.true.description')} ${badPositionData.time}`
                   : t('home.badPosition.false.description')}
@@ -185,10 +185,10 @@ export default function HomeScreen() {
               <Entypo name="chevron-right" size={24} color="white" />
             </View>
             <View className="flex w-full px-4">
-              <Text className="mt-2 text-left text-2xl font-medium text-white">
+              <Text className="mt-2 text-left text-xl font-medium text-white">
                 {cryData.isCrying ? t('home.cry.true.title') : t('home.cry.false.title')}
               </Text>
-              <Text className="text-base text-slate-100">
+              <Text className="text-sm text-slate-100">
                 {cryData.isCrying
                   ? `${t('home.cry.true.description')} ${cryData.time}`
                   : t('home.cry.false.description')}
@@ -231,12 +231,12 @@ export default function HomeScreen() {
 
           {/* Clock */}
           <View
-            className="flex h-16 flex-row items-center justify-around rounded-full bg-white px-6"
+            className="flex h-16 flex-row items-center justify-center gap-4 rounded-full bg-white px-6"
             style={{
               boxShadow: '0px 6px 10px 4px hsl(var(--shadow))',
             }}>
-            <FontAwesome6 name="clock" size={26} color="#3d8d7a" />
-            <Text className="text-3xl font-bold text-primary-500">{currentTime}</Text>
+            <FontAwesome6 name="clock" size={24} color="#3d8d7a" />
+            <Text className="text-2xl font-bold text-primary-500">{currentTime}</Text>
           </View>
         </View>
       </View>

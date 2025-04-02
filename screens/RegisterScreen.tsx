@@ -1,3 +1,6 @@
+import { useAuthStore } from '../stores/authStore';
+import type { RootStackParamList } from '../types/navigation';
+import { useTranslation } from '@/lib/hooks/useTranslation';
 import Fa6 from '@expo/vector-icons/FontAwesome6';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -16,10 +19,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useAuthStore } from '../stores/authStore';
-import type { RootStackParamList } from '../types/navigation';
-
 export function RegisterScreen() {
+  const { t } = useTranslation();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -34,15 +35,15 @@ export function RegisterScreen() {
 
   const handleRegister = async () => {
     if (!fullName || !email || !password || !confirmPassword) {
-      setError('Please fill in all fields');
+      setError(t('register.fillAllFields'));
       return;
     }
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError(t('register.passwordsMismatch'));
       return;
     }
     if (!agreeToTerms) {
-      setError('Please agree to Terms & Conditions');
+      setError(t('register.agreeToTerms'));
       return;
     }
 
@@ -51,10 +52,10 @@ export function RegisterScreen() {
       if (success) {
         navigation.navigate('Main');
       } else {
-        setError(authError || 'An error occurred during registration');
+        setError(authError || t('register.error'));
       }
     } catch (err) {
-      setError(authError || 'An error occurred during registration');
+      setError(authError || t('register.error'));
     }
   };
 
@@ -63,7 +64,7 @@ export function RegisterScreen() {
       await signInWithGoogle();
       navigation.navigate('Main');
     } catch (err) {
-      setError(authError || 'An error occurred during Google sign up');
+      setError(authError || t('register.error'));
     }
   };
 
@@ -89,7 +90,9 @@ export function RegisterScreen() {
 
             {/* Register Form */}
             <View className="flex flex-col gap-4">
-              <Text className="mb-16 text-center text-3xl font-bold text-gray-900">Register</Text>
+              <Text className="mb-16 text-center text-3xl font-bold text-gray-900">
+                {t('register.title')}
+              </Text>
 
               {/* Google Sign Up */}
               <TouchableOpacity
@@ -100,22 +103,26 @@ export function RegisterScreen() {
                   className="h-6 w-6"
                   resizeMode="contain"
                 />
-                <Text className="text-base font-semibold text-gray-700">Sign up with Google</Text>
+                <Text className="text-base font-semibold text-gray-700">
+                  {t('register.signUpWithGoogle')}
+                </Text>
               </TouchableOpacity>
 
               {/* Divider */}
               <View className="flex-row items-center">
                 <View className="flex-1 border-t border-gray-300" />
-                <Text className="mx-4 text-gray-500">or sign up with</Text>
+                <Text className="mx-4 text-gray-500">{t('register.orSignUpWith')}</Text>
                 <View className="flex-1 border-t border-gray-300" />
               </View>
 
               {/* Full Name Input */}
               <View>
-                <Text className="mb-2 text-sm font-medium text-gray-700">Full Name</Text>
+                <Text className="mb-2 text-sm font-medium text-gray-700">
+                  {t('register.fullName')}
+                </Text>
                 <TextInput
                   className="rounded-lg border border-gray-300 bg-white px-4 py-3"
-                  placeholder="John Doe"
+                  placeholder={t('register.fullNamePlaceholder')}
                   value={fullName}
                   onChangeText={(text) => {
                     setFullName(text);
@@ -127,10 +134,12 @@ export function RegisterScreen() {
 
               {/* Email Input */}
               <View>
-                <Text className="mb-2 text-sm font-medium text-gray-700">Email Address</Text>
+                <Text className="mb-2 text-sm font-medium text-gray-700">
+                  {t('register.email')}
+                </Text>
                 <TextInput
                   className="rounded-lg border border-gray-300 bg-white px-4 py-3"
-                  placeholder="johndoe@gmail.com"
+                  placeholder={t('register.emailPlaceholder')}
                   value={email}
                   onChangeText={(text) => {
                     setEmail(text);
@@ -143,11 +152,13 @@ export function RegisterScreen() {
 
               {/* Password Input */}
               <View>
-                <Text className="mb-2 text-sm font-medium text-gray-700">Password</Text>
+                <Text className="mb-2 text-sm font-medium text-gray-700">
+                  {t('register.password')}
+                </Text>
                 <View className="relative">
                   <TextInput
                     className="rounded-lg border border-gray-300 bg-white px-4 py-3"
-                    placeholder="••••••••"
+                    placeholder={t('register.passwordPlaceholder')}
                     value={password}
                     onChangeText={(text) => {
                       setPassword(text);
@@ -171,11 +182,13 @@ export function RegisterScreen() {
 
               {/* Confirm Password Input */}
               <View>
-                <Text className="mb-2 text-sm font-medium text-gray-700">Confirm Password</Text>
+                <Text className="mb-2 text-sm font-medium text-gray-700">
+                  {t('register.confirmPassword')}
+                </Text>
                 <View className="relative">
                   <TextInput
                     className="rounded-lg border border-gray-300 bg-white px-4 py-3"
-                    placeholder="••••••••"
+                    placeholder={t('register.passwordPlaceholder')}
                     value={confirmPassword}
                     onChangeText={(text) => {
                       setConfirmPassword(text);
@@ -210,9 +223,12 @@ export function RegisterScreen() {
                   {agreeToTerms && <Fa6 name="check" size={12} color="#fff" />}
                 </Pressable>
                 <Text className="flex-1 text-sm text-gray-600">
-                  I agree to the{' '}
-                  <Text className="font-semibold text-primary-600">Terms & Conditions</Text> and{' '}
-                  <Text className="font-semibold text-primary-600">Privacy Policy</Text>
+                  {t('auth.agreeToTerms')}{' '}
+                  <Text className="font-semibold text-primary-600">
+                    {t('auth.termsAndConditions')}
+                  </Text>{' '}
+                  {t('auth.and')}{' '}
+                  <Text className="font-semibold text-primary-600">{t('auth.privacyPolicy')}</Text>
                 </Text>
               </View>
 
@@ -225,16 +241,16 @@ export function RegisterScreen() {
                   <ActivityIndicator color="#fff" />
                 ) : (
                   <Text className="text-center text-lg font-semibold text-white">
-                    Create Account
+                    {t('register.createAccount')}
                   </Text>
                 )}
               </TouchableOpacity>
 
               {/* Sign In Link */}
               <View className="flex-row justify-center">
-                <Text className="text-gray-600">Already have an account? </Text>
+                <Text className="text-gray-600">{t('register.alreadyHaveAccount')} </Text>
                 <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-                  <Text className="font-semibold text-primary-600">Login here</Text>
+                  <Text className="font-semibold text-primary-600">{t('register.loginHere')}</Text>
                 </TouchableOpacity>
               </View>
             </View>

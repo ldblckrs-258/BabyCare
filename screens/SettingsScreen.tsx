@@ -1,13 +1,3 @@
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-// import { Image } from 'expo-image';
-import { useState } from 'react';
-import { Image, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-
-import { useTranslation } from '@/lib/hooks/useTranslation';
-
 import { DeviceConnectionModal } from '../components/modals/DeviceConnectionModal';
 import { LanguageModal } from '../components/modals/LanguageModal';
 import { NotificationModal } from '../components/modals/NotificationModal';
@@ -16,6 +6,14 @@ import { ProfileModal } from '../components/modals/ProfileModal';
 import { useAuthStore } from '../stores/authStore';
 import { useSettingsStore } from '../stores/settingsStore';
 import type { RootStackParamList } from '../types/navigation';
+import { useTranslation } from '@/lib/hooks/useTranslation';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+// import { Image } from 'expo-image';
+import { useState } from 'react';
+import { Image, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const languages = {
   en: 'English',
@@ -163,7 +161,7 @@ export default function SettingsScreen() {
               </View>
               <Text className="text-base font-semibold text-gray-800">{t('settings.version')}</Text>
             </View>
-            <Text className="text-sm text-gray-400">0.0.3-dev</Text>
+            <Text className="text-sm text-gray-400">0.0.5</Text>
           </View>
         </View>
       </View>
