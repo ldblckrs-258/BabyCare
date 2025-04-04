@@ -75,8 +75,7 @@ export const useAuthStore = create<AuthState>((set) => {
         if (user) {
           try {
             await updateProfile(user, {
-              displayName: fullName || 'User Name',
-              photoURL: '../assets/default-avatar.png',
+              displayName: fullName || 'User Name'
             });
           } catch (profileError) {
             console.error('Error updating profile:', profileError);

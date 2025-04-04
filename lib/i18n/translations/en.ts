@@ -103,6 +103,7 @@ export const en = {
       newPassword: 'New Password',
       confirmPassword: 'Confirm New Password',
       changePasswordButton: 'Change Password',
+      saveButton: 'Save Changes',
       signOut: 'Sign Out',
     },
     deviceConnection: {

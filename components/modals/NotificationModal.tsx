@@ -1,11 +1,12 @@
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { Modal, Text, TouchableOpacity, View } from 'react-native';
-import SelectDropdown from 'react-native-select-dropdown';
-
 import { Switch } from '@/components/ui/switch';
 import { useTranslation } from '@/lib/hooks/useTranslation';
+import { simulateNotification } from '@/lib/notificationService';
+import { NotificationType } from '@/lib/notifications';
 import { useSettingsStore } from '@/stores/settingsStore';
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import SelectDropdown from 'react-native-select-dropdown';
 
 type NotificationModalProps = {
   visible: boolean;
@@ -25,12 +26,19 @@ const BadPositionThresholds = [
 ];
 
 export function NotificationModal({ visible, onClose }: NotificationModalProps) {
-  const { notifications, updateNotificationSettings } = useSettingsStore();
+  const { notifications, updateNotificationSettings, addNotification } = useSettingsStore();
   const { t } = useTranslation();
 
   const handleSave = () => {
     // Settings are already saved in the store
     onClose();
+  };
+
+  const handleTestNotification = async (type: NotificationType) => {
+    // Simulate notification
+    const notification = await simulateNotification(type);
+    // Add to store (in case the notification service failed to add it)
+    addNotification(notification);
   };
 
   return (
@@ -50,7 +58,7 @@ export function NotificationModal({ visible, onClose }: NotificationModalProps) 
           </View>
 
           {/* Notification Settings */}
-          <View className="flex-1 space-y-4">
+          <ScrollView className="flex-1 space-y-4">
             {/* Cry Detection */}
             <View className="rounded-lg bg-gray-50 p-4">
               <View className="flex-row items-center justify-between">
@@ -202,7 +210,63 @@ export function NotificationModal({ visible, onClose }: NotificationModalProps) 
                 />
               </View>
             </View>
-          </View>
+
+            {/* Test Notifications Section */}
+            <View className="mt-6">
+              <Text className="mb-2 text-lg font-semibold text-gray-800">Test Notifications</Text>
+              <View className="rounded-lg bg-gray-50 p-4">
+                <Text className="mb-3 text-sm text-gray-500">
+                  Send test notifications to verify your notification settings
+                </Text>
+
+                <View className="flex-row flex-wrap justify-between gap-2">
+                  <TouchableOpacity
+                    onPress={() => handleTestNotification('cry_alert')}
+                    className="mb-2 w-[48%] rounded-lg bg-blue-100 p-3">
+                    <View className="items-center">
+                      <FontAwesome6 name="baby" size={20} color="#5d97d3" />
+                      <Text className="mt-1 text-center text-sm font-medium text-blue-800">
+                        Cry Alert
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={() => handleTestNotification('position_alert')}
+                    className="mb-2 w-[48%] rounded-lg bg-red-100 p-3">
+                    <View className="items-center">
+                      <FontAwesome6 name="bed" size={16} color="#d26165" />
+                      <Text className="mt-1 text-center text-sm font-medium text-red-800">
+                        Position Alert
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={() => handleTestNotification('daily_report')}
+                    className="mb-2 w-[48%] rounded-lg bg-purple-100 p-3">
+                    <View className="items-center">
+                      <MaterialIcons name="assessment" size={22} color="#a855f7" />
+                      <Text className="mt-1 text-center text-sm font-medium text-purple-800">
+                        Daily Report
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={() => handleTestNotification('system')}
+                    className="mb-2 w-[48%] rounded-lg bg-green-100 p-3">
+                    <View className="items-center">
+                      <MaterialIcons name="notifications" size={22} color="#3d8d7a" />
+                      <Text className="mt-1 text-center text-sm font-medium text-green-800">
+                        System Alert
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </ScrollView>
 
           {/* Save Button */}
           <TouchableOpacity onPress={handleSave} className="mt-4 rounded-lg bg-primary-500 p-4">

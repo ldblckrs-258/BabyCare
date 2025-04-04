@@ -1,6 +1,8 @@
+import { PasswordInput } from '../inputs/PasswordInput';
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { RootStackParamList } from '@/types/navigation';
 import { MaterialIcons } from '@expo/vector-icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 // import * as ImagePicker from 'expo-image-picker';
@@ -8,6 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   Animated,
   Image,
@@ -17,7 +20,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { RootStackParamList } from '@/types/navigation';
 
 interface ProfileModalProps {
   visible: boolean;
@@ -30,29 +32,13 @@ export function ProfileModal({ visible, onClose }: ProfileModalProps) {
   const { setDeviceConnection } = useSettingsStore();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [isEditing, setIsEditing] = useState(false);
+  const [isChangingPwd, setIsChangingPwd] = useState(false);
   const [displayName, setDisplayName] = useState(user?.displayName || '');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [avatar, setAvatar] = useState(user?.photoURL || null);
-
-  const pickImage = async () => {
-    // try {
-    //   const result = await ImagePicker.launchImageLibraryAsync({
-    //     mediaTypes: ImagePicker.MediaTypeOptions.Images,
-    //     allowsEditing: true,
-    //     aspect: [1, 1],
-    //     quality: 0.8,
-    //   });
-    //   if (!result.canceled) {
-    //     setAvatar(result.assets[0].uri);
-    //     // TODO: Implement avatar upload to storage
-    //   }
-    // } catch (error) {
-    //   Alert.alert('Error', 'Failed to pick image');
-    // }
-  };
 
   const handleUpdateProfile = async () => {
     if (!displayName.trim()) {
@@ -98,6 +84,7 @@ export function ProfileModal({ visible, onClose }: ProfileModalProps) {
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
+      setIsChangingPwd(false);
     } catch (error) {
       let errorMessage = 'Failed to change password';
       if (error instanceof Error) {
@@ -142,18 +129,6 @@ export function ProfileModal({ visible, onClose }: ProfileModalProps) {
             <Text className="text-2xl font-bold text-gray-800">{t('settings.profile.title')}</Text>
             <TouchableOpacity onPress={onClose}>
               <MaterialIcons name="close" size={24} color="#6b7280" />
-            </TouchableOpacity>
-          </View>
-
-          <View className="mb-6 items-center">
-            <TouchableOpacity onPress={pickImage} disabled={isLoading}>
-              <View className="relative">
-                <Image
-                  source={avatar ? { uri: avatar } : require('../../assets/default-avatar.png')}
-                  className="h-24 w-24 rounded-full"
-                  resizeMode="cover"
-                />
-              </View>
             </TouchableOpacity>
           </View>
 
@@ -208,9 +183,11 @@ export function ProfileModal({ visible, onClose }: ProfileModalProps) {
                 </TouchableOpacity>
               </View>
             ) : (
-              <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center relative">
                 <Text className="text-base text-gray-800">{user?.displayName}</Text>
-                <TouchableOpacity onPress={() => setIsEditing(true)}>
+                <TouchableOpacity
+                  className="p-2 absolute right-0 bottom-2 right-2"
+                  onPress={() => setIsEditing(true)}>
                   <MaterialIcons name="edit" size={20} color="#5d97d3" />
                 </TouchableOpacity>
               </View>
@@ -218,55 +195,84 @@ export function ProfileModal({ visible, onClose }: ProfileModalProps) {
           </View>
 
           {/* Change Password Section - Only show if not using Google Sign In */}
-          {!user?.providerData.some((provider) => provider.providerId === 'google.com') && (
+          {isChangingPwd && (
             <View className="mb-6">
               <Text className="mb-4 text-lg font-semibold text-gray-800">
                 {t('settings.profile.changePassword')}
               </Text>
-              <TextInput
-                className="mb-3 rounded-lg border border-gray-300 px-4 py-2"
-                placeholder={t('settings.profile.currentPassword')}
-                secureTextEntry
+              <PasswordInput
                 value={currentPassword}
                 onChangeText={setCurrentPassword}
-                editable={!isLoading}
+                placeholder={t('settings.profile.currentPassword')}
+                className="mb-3"
+                disabled={isLoading}
               />
-              <TextInput
-                className="mb-3 rounded-lg border border-gray-300 px-4 py-2"
-                placeholder={t('settings.profile.newPassword')}
-                secureTextEntry
+              <PasswordInput
                 value={newPassword}
                 onChangeText={setNewPassword}
-                editable={!isLoading}
+                placeholder={t('settings.profile.newPassword')}
+                className="mb-3"
+                disabled={isLoading}
               />
-              <TextInput
-                className="mb-3 rounded-lg border border-gray-300 px-4 py-2"
-                placeholder={t('settings.profile.confirmPassword')}
-                secureTextEntry
+              <PasswordInput
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
-                editable={!isLoading}
+                placeholder={t('settings.profile.confirmPassword')}
+                className="mb-3"
+                disabled={isLoading}
               />
-              <TouchableOpacity
-                className="rounded-lg bg-blue-500 px-4 py-2"
-                onPress={handleChangePassword}
-                disabled={isLoading}>
-                <Text className="text-center text-white">
-                  {isLoading ? 'Changing...' : t('settings.profile.changePasswordButton')}
-                </Text>
-              </TouchableOpacity>
             </View>
           )}
 
-          {/* Sign Out Button */}
-          <TouchableOpacity
-            className="rounded-lg bg-secondary-500 px-4 py-4"
-            onPress={handleSignOut}
-            disabled={isLoading}>
-            <Text className="text-center text-white">
-              {isLoading ? 'Signing out...' : t('settings.profile.signOut')}
-            </Text>
-          </TouchableOpacity>
+          <View className="w-full flex flex-row items-center gap-4">
+            {isChangingPwd ? (
+              <>
+                <TouchableOpacity
+                  className="rounded-lg px-12 border border-gray-400 text-gray-800 h-[50px] flex items-center justify-center"
+                  onPress={() => setIsChangingPwd(false)}
+                  disabled={isLoading}>
+                  <Text className="text-center">{t('common.cancel')}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  className="rounded-lg flex-1 bg-primary-500 h-[50px] flex items-center justify-center"
+                  onPress={handleChangePassword}
+                  disabled={isLoading}>
+                  <Text className="text-center text-white">
+                    {isLoading ? (
+                      <ActivityIndicator color="#fff" />
+                    ) : (
+                      t('settings.profile.saveButton')
+                    )}
+                  </Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <>
+                <TouchableOpacity
+                  className="rounded-lg flex-1 bg-secondary-500 h-[50px] flex items-center justify-center"
+                  onPress={handleSignOut}
+                  disabled={isLoading}>
+                  <Text className="text-center text-white">
+                    {isLoading ? 'Signing out...' : t('settings.profile.signOut')}
+                  </Text>
+                </TouchableOpacity>
+              </>
+            )}
+            {isChangingPwd && user?.providerData[0]?.providerId !== 'google.com' && (
+              <TouchableOpacity
+                className="rounded-lg flex-1 border border-gray-400 text-gray-800 h-[50px] flex items-center justify-center"
+                onPress={() => setIsChangingPwd(true)}
+                disabled={isLoading}>
+                <Text className="text-center">
+                  {isLoading ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    t('settings.profile.changePasswordButton')
+                  )}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
       </View>
     </Modal>

@@ -9,7 +9,10 @@
       "distribution": "internal"
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "DEBUG_ENV": "true"
+      }
     },
     "production": {
       "autoIncrement": true

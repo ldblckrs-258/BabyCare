@@ -1,3 +1,4 @@
+import { PasswordInput } from '../components/inputs/PasswordInput';
 import { useAuthStore } from '../stores/authStore';
 import type { RootStackParamList } from '../types/navigation';
 import { useTranslation } from '@/lib/hooks/useTranslation';
@@ -25,8 +26,6 @@ export function RegisterScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [error, setError] = useState('');
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -155,29 +154,14 @@ export function RegisterScreen() {
                 <Text className="mb-2 text-sm font-medium text-gray-700">
                   {t('register.password')}
                 </Text>
-                <View className="relative">
-                  <TextInput
-                    className="rounded-lg border border-gray-300 bg-white px-4 py-3"
-                    placeholder={t('register.passwordPlaceholder')}
-                    value={password}
-                    onChangeText={(text) => {
-                      setPassword(text);
-                      setError('');
-                    }}
-                    secureTextEntry={!showPassword}
-                  />
-                  {password?.length > 0 ? (
-                    <TouchableOpacity
-                      className="absolute right-3 top-5"
-                      onPress={() => setShowPassword(!showPassword)}>
-                      {showPassword ? (
-                        <Fa6 name="eye" size={16} color="#bbb" />
-                      ) : (
-                        <Fa6 name="eye-slash" size={16} color="#bbb" />
-                      )}
-                    </TouchableOpacity>
-                  ) : null}
-                </View>
+                <PasswordInput
+                  value={password}
+                  onChangeText={(text) => {
+                    setPassword(text);
+                    setError('');
+                  }}
+                  placeholder={t('register.passwordPlaceholder')}
+                />
               </View>
 
               {/* Confirm Password Input */}
@@ -185,36 +169,21 @@ export function RegisterScreen() {
                 <Text className="mb-2 text-sm font-medium text-gray-700">
                   {t('register.confirmPassword')}
                 </Text>
-                <View className="relative">
-                  <TextInput
-                    className="rounded-lg border border-gray-300 bg-white px-4 py-3"
-                    placeholder={t('register.passwordPlaceholder')}
-                    value={confirmPassword}
-                    onChangeText={(text) => {
-                      setConfirmPassword(text);
-                      setError('');
-                    }}
-                    secureTextEntry={!showConfirmPassword}
-                  />
-                  {confirmPassword?.length > 0 ? (
-                    <TouchableOpacity
-                      className="absolute right-3 top-5"
-                      onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
-                      {showConfirmPassword ? (
-                        <Fa6 name="eye" size={16} color="#bbb" />
-                      ) : (
-                        <Fa6 name="eye-slash" size={16} color="#bbb" />
-                      )}
-                    </TouchableOpacity>
-                  ) : null}
-                </View>
+                <PasswordInput
+                  value={confirmPassword}
+                  onChangeText={(text) => {
+                    setConfirmPassword(text);
+                    setError('');
+                  }}
+                  placeholder={t('register.passwordPlaceholder')}
+                />
               </View>
 
               {/* Error Message */}
               {error ? <Text className="text-center text-sm text-red-500">{error}</Text> : null}
 
               {/* Terms & Conditions */}
-              <View className="flex-row items-start">
+              <View className="flex-row items-center">
                 <Pressable
                   onPress={() => setAgreeToTerms(!agreeToTerms)}
                   className={`mr-2 mt-1 h-5 w-5 items-center justify-center rounded border ${

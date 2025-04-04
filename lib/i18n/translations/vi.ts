@@ -104,6 +104,7 @@ export const vi = {
       confirmPassword: 'Xác nhận mật khẩu mới',
       changePasswordButton: 'Đổi mật khẩu',
       signOut: 'Đăng xuất',
+      saveButton: 'Lưu thay đổi',
     },
     deviceConnection: {
       title: 'Kết nối thiết bị',

@@ -188,8 +188,8 @@ export default function StreamingScreen() {
               width: '100%',
               height: '100%',
             }}>
-            <FontAwesome6 name="video-slash" size={40} color="#ffffff" />
-            <Text className="text-white text-lg mt-2">
+            <FontAwesome6 name="video-slash" size={20} color="#ffffff" />
+            <Text className="text-white text-lg mt-2 font-semibold">
               {t('settings.deviceConnection.notConnected')}
             </Text>
             <Text className="text-white text-sm mt-1 px-8 text-center">

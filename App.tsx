@@ -1,19 +1,51 @@
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { StatusBar } from 'expo-status-bar';
-
-import './lib/i18n'; // Import i18n configuration
+import './global.css';
+import './lib/i18n';
+// Import i18n configuration
+import {
+  registerForPushNotificationsAsync,
+  setupNotificationListeners,
+} from './lib/notificationService';
 import { LoginScreen } from './screens/LoginScreen';
 import MainTabs from './screens/MainTabs';
 import { RegisterScreen } from './screens/RegisterScreen';
 import { WelcomeScreen } from './screens/WelcomeScreen';
+import { useAuthStore } from './stores/authStore';
+import { useSettingsStore } from './stores/settingsStore';
 import type { RootStackParamList } from './types/navigation';
-
-import './global.css';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import * as Notifications from 'expo-notifications';
+import { StatusBar } from 'expo-status-bar';
+import { useEffect, useRef } from 'react';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
+  const notificationListener = useRef<any>();
+  const responseListener = useRef<any>();
+  const { addNotification } = useSettingsStore();
+
+  // Initialize notification permissions and listeners
+  useEffect(() => {
+    // Register for notifications
+    registerForPushNotificationsAsync().then((token) => {
+      if (token) {
+        console.log('Expo push token:', token);
+      }
+    });
+
+    // Set up notification listeners
+    const cleanupListeners = setupNotificationListeners((notification) => {
+      // Add notification to store
+      addNotification(notification);
+    });
+
+    return () => {
+      // Clean up listeners on unmount
+      cleanupListeners();
+    };
+  }, [addNotification]);
+
   return (
     <NavigationContainer>
       <Stack.Navigator

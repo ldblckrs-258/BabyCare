@@ -1,3 +1,6 @@
+import { PasswordInput } from '../components/inputs/PasswordInput';
+import { useAuthStore } from '../stores/authStore';
+import type { RootStackParamList } from '../types/navigation';
 import Fa6 from '@expo/vector-icons/FontAwesome6';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -16,13 +19,9 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useAuthStore } from '../stores/authStore';
-import type { RootStackParamList } from '../types/navigation';
-
 export function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [keepSignedIn, setKeepSignedIn] = useState(false);
   const [error, setError] = useState('');
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -125,27 +124,13 @@ export function LoginScreen() {
                     <Text className="text-sm font-medium text-blue-600">Forgot password?</Text>
                   </TouchableOpacity>
                 </View>
-                <View className="relative">
-                  <TextInput
-                    className="rounded-lg border border-gray-300 bg-white px-4 py-3"
-                    placeholder="••••••••"
-                    value={password}
-                    onChangeText={(text) => {
-                      setPassword(text);
-                      setError('');
-                    }}
-                    secureTextEntry={!showPassword}
-                  />
-                  <TouchableOpacity
-                    className="absolute right-3 top-3.5"
-                    onPress={() => setShowPassword(!showPassword)}>
-                    {showPassword ? (
-                      <Fa6 name="eye" size={16} color="#bbb" />
-                    ) : (
-                      <Fa6 name="eye-slash" size={16} color="#bbb" />
-                    )}
-                  </TouchableOpacity>
-                </View>
+                <PasswordInput
+                  value={password}
+                  onChangeText={(text) => {
+                    setPassword(text);
+                    setError('');
+                  }}
+                />
               </View>
 
               {/* Error Message */}

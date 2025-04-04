@@ -4,10 +4,9 @@ import {
   Notification,
   NotificationType,
   formatTime,
-  generateMoreNotifications,
   groupNotificationsByDate,
-  staticNotifications,
 } from '@/lib/notifications';
+import { useSettingsStore } from '@/stores/settingsStore';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { format, isToday, isYesterday } from 'date-fns';
@@ -35,36 +34,35 @@ const getNotificationIcon = (type: NotificationType) => {
 export default function HistoryScreen() {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [page, setPage] = useState(1);
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
+  const {
+    userNotifications,
+    markNotificationAsRead,
+    markAllNotificationsAsRead,
+    clearNotifications,
+  } = useSettingsStore();
 
   // Load initial notifications
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setNotifications(staticNotifications);
+    // Simulate loading time
+    const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 1000);
+    }, 800);
+    return () => clearTimeout(timer);
   }, []);
 
-  // Load more notifications
-  const loadMoreNotifications = useCallback(() => {
-    if (isLoadingMore) return;
-
-    setIsLoadingMore(true);
-    // Simulate API call
-    setTimeout(() => {
-      const moreNotifications = generateMoreNotifications(page);
-      setNotifications((prev) => [...prev, ...moreNotifications]);
-      setPage((prev) => prev + 1);
-      setIsLoadingMore(false);
-    }, 1000);
-  }, [isLoadingMore, page]);
+  // Handle notification read
+  const handleNotificationPress = useCallback(
+    (notification: Notification) => {
+      if (!notification.read) {
+        markNotificationAsRead(notification.id);
+      }
+    },
+    [markNotificationAsRead]
+  );
 
   // Group notifications by date
-  const groupedNotifications = groupNotificationsByDate(notifications);
+  const groupedNotifications = groupNotificationsByDate(userNotifications);
   const dateKeys = Object.keys(groupedNotifications).sort(
     (a, b) => new Date(b).getTime() - new Date(a).getTime()
   );
@@ -85,6 +83,7 @@ export default function HistoryScreen() {
   // Render notification item
   const renderNotificationItem = ({ item }: { item: Notification }) => (
     <TouchableOpacity
+      onPress={() => handleNotificationPress(item)}
       className={` relative mb-3 rounded-xl ${item.read ? 'bg-white' : ' border border-primary-200 bg-primary-50'}`}>
       <View className="flex-row items-center p-4">
         <View
@@ -116,17 +115,8 @@ export default function HistoryScreen() {
     </View>
   );
 
-  // Render footer (load more indicator)
-  const renderFooter = () => {
-    if (!isLoadingMore) return null;
-
-    return (
-      <View className="items-center py-4">
-        <ActivityIndicator size="small" color="#3d8d7a" />
-        <Text className="mt-2 text-sm text-gray-500">{t('history.loadingMore')}</Text>
-      </View>
-    );
-  };
+  // Determine if we have any unread notifications
+  const hasUnreadNotifications = userNotifications.some((notification) => !notification.read);
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-100">
@@ -140,11 +130,27 @@ export default function HistoryScreen() {
       {/* Header */}
       <View className="flex-row items-center justify-between px-5 py-4">
         <Text className="text-2xl font-bold text-primary-600">{t('history.allEvents')}</Text>
-        <TouchableOpacity
-          onPress={() => setShowNotificationSettings(true)}
-          className="h-10 w-10 items-center justify-center">
-          <MaterialIcons name="settings" size={24} color="#888" />
-        </TouchableOpacity>
+        <View className="flex-row">
+          {hasUnreadNotifications && (
+            <TouchableOpacity
+              onPress={() => markAllNotificationsAsRead()}
+              className="mr-3 h-10 w-10 items-center justify-center">
+              <MaterialIcons name="done-all" size={24} color="#888" />
+            </TouchableOpacity>
+          )}
+          {userNotifications.length > 0 && (
+            <TouchableOpacity
+              onPress={() => clearNotifications()}
+              className="mr-3 h-10 w-10 items-center justify-center">
+              <MaterialIcons name="delete-sweep" size={24} color="#888" />
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity
+            onPress={() => setShowNotificationSettings(true)}
+            className="h-10 w-10 items-center justify-center">
+            <MaterialIcons name="settings" size={24} color="#888" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Notification list */}
@@ -154,7 +160,7 @@ export default function HistoryScreen() {
             <ActivityIndicator size="large" color="#3d8d7a" />
             <Text className="mt-4 text-gray-600">{t('history.loading')}</Text>
           </View>
-        ) : notifications.length === 0 ? (
+        ) : userNotifications.length === 0 ? (
           <View className="flex-1 items-center justify-center">
             <MaterialIcons name="notifications-none" size={64} color="#ccc" />
             <Text className="mt-4 text-lg font-medium text-gray-600">
@@ -163,6 +169,12 @@ export default function HistoryScreen() {
             <Text className="mt-2 text-center text-gray-500">
               {t('history.notificationsWillAppearHere')}
             </Text>
+
+            <TouchableOpacity
+              onPress={() => setShowNotificationSettings(true)}
+              className="mt-6 rounded-lg bg-primary-500 px-5 py-3">
+              <Text className="text-base font-medium text-white">Test Notifications</Text>
+            </TouchableOpacity>
           </View>
         ) : (
           <FlatList
@@ -179,9 +191,6 @@ export default function HistoryScreen() {
               </View>
             )}
             contentContainerStyle={{ paddingBottom: 20 }}
-            onEndReached={loadMoreNotifications}
-            onEndReachedThreshold={0.3}
-            ListFooterComponent={renderFooter}
             showsVerticalScrollIndicator={false}
           />
         )}

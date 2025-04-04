@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n from '@/lib/i18n';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
+import { Notification } from '@/lib/notifications';
 
 interface NotificationSettings {
   cryDetection: number;
@@ -15,9 +16,14 @@ interface SettingsState {
   isDeviceConnected: boolean;
   deviceId?: string;
   notifications: NotificationSettings;
+  userNotifications: Notification[];
   setLanguage: (language: string) => void;
   setDeviceConnection: (isConnected: boolean, deviceId?: string) => void;
   updateNotificationSettings: (settings: Partial<NotificationSettings>) => void;
+  addNotification: (notification: Notification) => void;
+  markNotificationAsRead: (notificationId: string) => void;
+  markAllNotificationsAsRead: () => void;
+  clearNotifications: () => void;
 }
 
 const initialNotificationSettings: NotificationSettings = {
@@ -34,6 +40,7 @@ export const useSettingsStore = create<SettingsState>()(
       isDeviceConnected: false,
       deviceId: undefined,
       notifications: initialNotificationSettings,
+      userNotifications: [],
 
       setLanguage: (language) => {
         i18n.changeLanguage(language);
@@ -50,6 +57,30 @@ export const useSettingsStore = create<SettingsState>()(
             ...settings,
           },
         })),
+        
+      addNotification: (notification) =>
+        set((state) => ({
+          userNotifications: [notification, ...state.userNotifications],
+        })),
+        
+      markNotificationAsRead: (notificationId) =>
+        set((state) => ({
+          userNotifications: state.userNotifications.map((notification) => 
+            notification.id === notificationId 
+              ? { ...notification, read: true } 
+              : notification
+          ),
+        })),
+        
+      markAllNotificationsAsRead: () =>
+        set((state) => ({
+          userNotifications: state.userNotifications.map((notification) => ({ 
+            ...notification, 
+            read: true 
+          })),
+        })),
+        
+      clearNotifications: () => set({ userNotifications: [] }),
     }),
     {
       name: 'babycare-settings',
