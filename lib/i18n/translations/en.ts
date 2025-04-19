@@ -9,6 +9,8 @@ export const en = {
     cancel: 'Cancel',
     close: 'Close',
     back: 'Back',
+    online: 'Online',
+    offline: 'Offline',
   },
   home: {
     title: {
@@ -90,8 +92,7 @@ export const en = {
     privacyPolicy: 'Privacy Policy',
     login: 'Login',
     register: 'Register',
-  },
-  settings: {
+  },  settings: {
     title: 'Settings',
     profile: {
       title: 'Profile',
@@ -106,17 +107,114 @@ export const en = {
       saveButton: 'Save Changes',
       signOut: 'Sign Out',
     },
-    deviceConnection: {
-      title: 'Device Connection',
+    devices: {
+      title: 'Devices',
       status: 'Status',
       notConnected: 'Not Connected',
       connected: 'Connected',
-      scanQRCode: 'Scan QR Code',
-      scanQRCodeDescription: 'Scan the QR code on your device to connect',
-      helpText:
-        "Make sure your BabyCare device is turned on and within range. If you're having trouble connecting, try restarting the device.",
+    },
+    notifications: {
+      title: 'Notifications',
+      enable: 'Enable Notifications',
+      enableDescription: 'Enable notifications to receive alerts about your baby\'s status',
+      enableDailyReport: 'Enable Daily Report',
+      enableDailyReportDescription: 'Receive daily summary reports about your baby\'s sleep and crying patterns',
+      cryDetection: {
+        title: 'Cry Detection Threshold',
+        description: 'Alert when baby is crying continuously',
+      },
+      sleepPosition: {
+        title: 'Sleep Position',
+        description: 'Alert for unsafe sleeping positions',
+      },
+      deviceDisconnected: {
+        title: 'Device Disconnected',
+        description: 'Alert when device disconnects',
+      },
+      dailyReport: {
+        title: 'Daily Report',
+        description: 'Receive daily summary reports',
+      },
+    },
+    language: {
+      title: 'Language',
+      save: 'Save Language',
+    },
+    privacyAndTerms: {
+      title: 'Privacy & Terms',
+      privacyTitle: 'Privacy Policy',
+      termsTitle: 'Terms of Service',
+      dataCollection: {
+        title: 'Data Collection',
+        content:
+          "BabyCare collects data related to your baby's sleep patterns, crying episodes, and device usage. This data is used to provide you with insights and alerts about your baby's well-being.",
+      },
+      dataStorage: {
+        title: 'Data Storage',
+        content:
+          'All data is securely stored and encrypted. We use industry-standard security measures to protect your information. Your data is stored on secure servers and is only accessible to you through your authenticated account.',
+      },
+      dataSharing: {
+        title: 'Data Sharing',
+        content:
+          "We do not sell or share your personal data with third parties. Your baby's information remains private and is only used to provide the services you've requested.",
+      },
+      license: {
+        title: 'License',
+        content:
+          'BabyCare grants you a limited, non-exclusive, non-transferable license to use the application for personal, non-commercial purposes.',
+      },
+      restrictions: {
+        title: 'Restrictions',
+        content:
+          'You may not modify, distribute, or create derivative works based on our application. The app and its content remain the property of BabyCare.',
+      },
+      disclaimer: {
+        title: 'Disclaimer',
+        content:
+          'BabyCare is designed as a supplementary tool for baby monitoring and should not replace proper adult supervision. We are not responsible for any incidents that may occur while using our application.',
+      },
+      contact: {
+        title: 'Contact Us',
+        content:
+          'If you have any questions about our Privacy Policy or Terms of Service, please contact us at:',
+      },
+    },
+    version: 'Version',
+  },
+  devices: {
+    title: 'Devices',
+    addNewDevice: 'Add a New Device',
+    scanQR: 'Scan QR Code',
+    scanDescription: 'Scan the QR code on your device to connect',
+    helpText: "Make sure your BabyCare device is turned on and within range. If you're having trouble connecting, try restarting the device.",
+    connectedDevices: 'Connected Devices',
+    noDevicesConnected: 'No devices connected',
+    rename: {
+      title: 'Rename Device',
+      message: 'Enter a new name for this device:',
+    },
+    threshold: {
+      title: 'Alert Threshold',
+      message: 'Set alert threshold in minutes:',
+    },
+    thresholds: {
+      title: 'Alert Thresholds',
+      crying: 'Crying Threshold',
+      cryingDescription: 'Set the threshold for crying detection',
+      position: 'Position Threshold',
+      positionDescription: 'Set the threshold for sleep position detection',
+      seconds: 'seconds',
+    },
+    disconnect: {
+      title: 'Disconnect Device',
+      message: 'Are you sure you want to disconnect this device?',
+      confirm: 'Disconnect',
+    },
+    options: {
+      rename: 'Rename Device',
+      threshold: 'Change Alert Threshold',
       disconnect: 'Disconnect Device',
-      disconnectDescription: 'Disconnect your BabyCare device from this account',
     },
     notifications: {
       title: 'Notification Settings',
@@ -206,7 +304,9 @@ export const en = {
     }
   },
   streaming: {
+    title: 'Streaming Camera',
     live: 'Live',
+    tapToView: 'Tap to view',
     streamInfo: 'Stream Information',
     connectingToStream: 'Connecting to stream...',
     retry: 'Retry',

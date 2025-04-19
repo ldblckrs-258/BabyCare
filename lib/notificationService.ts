@@ -150,7 +150,7 @@ export async function sendLocalNotification(notification: Notification) {
   // Return a new notification with the added data
   return {
     ...notification,
-    timestamp: new Date(),
+    timestamp: new Date().toISOString(), // Store timestamp as ISO string
     read: false,
   };
 }
@@ -184,11 +184,42 @@ export async function simulateNotification(type: NotificationType) {
     type,
     title,
     message,
-    timestamp: new Date(),
+    timestamp: new Date().toISOString(), // Store timestamp as ISO string
     read: false,
   };
   
-  return await sendLocalNotification(notification);
+  // Send the local notification but don't return the result directly
+  // This prevents the duplicate addition since the notification will be added  through the notification listeners
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: notification.title,
+      body: notification.message,
+      data: { 
+        notification,
+        // Add a flag to identify this as a simulated notification that's already been processed
+        manuallyAdded: true 
+      },
+      sound: true,
+      badge: 1,
+      categoryIdentifier: getNotificationCategoryDetails(notification.type).categoryId,
+      ...(Platform.OS === 'android' && {
+        icon: getNotificationCategoryDetails(notification.type).icon,
+        color: notification.type === 'cry_alert' 
+          ? '#5d97d3' 
+          : notification.type === 'position_alert' 
+            ? '#d26165' 
+            : notification.type === 'daily_report' 
+              ? '#a855f7' 
+              : '#3d8d7a',
+        vibrationPattern: getNotificationCategoryDetails(notification.type).vibration,
+        priority: getNotificationCategoryDetails(notification.type).importance.toString(),
+      }),
+    },
+    trigger: null,
+  });
+  
+  // Return the notification for immediate UI updates
+  return notification;
 }
 
 // Add notification listener setup

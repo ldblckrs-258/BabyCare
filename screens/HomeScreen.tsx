@@ -1,11 +1,7 @@
 import { useTranslation } from '@/lib/hooks/useTranslation';
-import {
-  Notification,
-  NotificationType,
-  formatTime,
-  staticNotifications,
-} from '@/lib/notifications';
+import { Notification, NotificationType, formatTime, parseISODate } from '@/lib/notifications';
 import { useAuthStore } from '@/stores/authStore';
+import { useDeviceStore } from '@/stores/deviceStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Entypo from '@expo/vector-icons/Entypo';
@@ -34,7 +30,9 @@ const getNotificationIcon = (type: NotificationType) => {
 };
 
 export default function HomeScreen() {
-  const { isDeviceConnected } = useSettingsStore();
+  const { userNotifications } = useSettingsStore();
+  const { devices } = useDeviceStore();
+  const isDeviceConnected = devices.some((device) => device.status === 'connected');
   const { user } = useAuthStore();
   const { t } = useTranslation();
   const navigation = useNavigation();
@@ -83,15 +81,12 @@ export default function HomeScreen() {
 
   // Load latest notifications
   useEffect(() => {
-    // Simulate API call to get notifications
-    setTimeout(() => {
-      // Get the 3 most recent notifications
-      const latest = [...staticNotifications]
-        .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
-        .slice(0, 3);
-      setLatestNotifications(latest);
-    }, 500);
-  }, []);
+    // Get the 3 most recent notifications
+    const latest = [...userNotifications]
+      .sort((a, b) => parseISODate(b.timestamp).getTime() - parseISODate(a.timestamp).getTime())
+      .slice(0, 3);
+    setLatestNotifications(latest);
+  }, [userNotifications]);
 
   // Update time
   useEffect(() => {
@@ -252,11 +247,11 @@ export default function HomeScreen() {
         </View>
 
         {latestNotifications.length > 0 ? (
-          <View className="rounded-xl bg-white py-3 px-2 shadow flex flex-col gap-1">
+          <View className="rounded-xl bg-white py-3 gap-2 px-2 shadow flex flex-col">
             {latestNotifications.map((notification) => (
-              <TouchableOpacity
+              <View
                 key={notification.id}
-                className={`relative mb-2 rounded-xl p-2 pb-1`}>
+                className={`relative rounded-xl px-2 py-2 ${notification.read ? '' : 'bg-primary-500/10'}`}>
                 <View className="flex-row items-center">
                   <View
                     className={`mr-3 h-10 w-10 items-center justify-center rounded-full ${
@@ -276,10 +271,10 @@ export default function HomeScreen() {
                     </Text>
                   </View>
                   {!notification.read && (
-                    <View className="absolute right-3 top-3 h-3 w-3 rounded-full bg-primary-500" />
+                    <View className="absolute right-1 top-0 h-3 w-3 rounded-full bg-primary-500" />
                   )}
                 </View>
-              </TouchableOpacity>
+              </View>
             ))}
           </View>
         ) : (

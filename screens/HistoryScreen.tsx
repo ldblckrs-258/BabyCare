@@ -5,6 +5,7 @@ import {
   NotificationType,
   formatTime,
   groupNotificationsByDate,
+  parseISODate,
 } from '@/lib/notifications';
 import { useSettingsStore } from '@/stores/settingsStore';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
@@ -69,7 +70,7 @@ export default function HistoryScreen() {
 
   // Format dates for display
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
+    const date = parseISODate(dateString);
 
     if (isToday(date)) {
       return t('history.today');

@@ -2,7 +2,7 @@
   "expo": {
     "name": "BabyCare",
     "slug": "babycare",
-    "version": "0.0.5",
+    "version": "0.0.6",
     "web": {
       "favicon": "./assets/babycare_logo.png"
     },

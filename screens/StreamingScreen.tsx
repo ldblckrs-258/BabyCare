@@ -1,319 +1,188 @@
+import { StreamingModal } from '@/components/modals/StreamingModal';
 import { useTranslation } from '@/lib/hooks/useTranslation';
-import { useSettingsStore } from '@/stores/settingsStore';
+import { Connection, useConnectionStore } from '@/stores/connectionStore';
+import { Device, useDeviceStore } from '@/stores/deviceStore';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
-import { useIsFocused, useNavigation } from '@react-navigation/native';
-import { AVPlaybackStatus, ResizeMode, Video, VideoFullscreenUpdate } from 'expo-av';
-import * as ScreenOrientation from 'expo-screen-orientation';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useNavigation } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useRef, useState } from 'react';
-import {
-  ActivityIndicator,
-  Animated,
-  BackHandler,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, Text, TouchableOpacity, View } from 'react-native';
+import { Card, FAB } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+type DeviceWithConnection = {
+  device: Device;
+  connection: Connection;
+};
 
 export default function StreamingScreen() {
   const { t } = useTranslation();
-  const video = useRef<Video>(null);
-  const [status, setStatus] = useState<AVPlaybackStatus>({} as AVPlaybackStatus);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const { isDeviceConnected } = useSettingsStore();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
-  const isFocused = useIsFocused();
-  const fadeAnim = useRef(new Animated.Value(1)).current;
-  const [controlsVisible, setControlsVisible] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedDevice, setSelectedDevice] = useState<DeviceWithConnection | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
-  // This would be your actual stream URL from your device
-  const streamUrl =
-    'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4'; // Placeholder stream URL
+  const { connections } = useConnectionStore();
+  const { devices, getDeviceById } = useDeviceStore();
 
-  // Hide header when screen is focused
-  useEffect(() => {
-    if (isFocused) {
-      navigation.setOptions({
-        headerShown: false,
-      });
-    }
-    return () => {
-      // Restore header when screen is unfocused
-      navigation.setOptions({
-        headerShown: true,
-      });
-    };
-  }, [isFocused, navigation]);
+  // Combine device and connection data
+  const connectedDevices = connections
+    .map((connection) => {
+      const device = getDeviceById(connection.deviceId);
+      if (device) {
+        return {
+          device,
+          connection,
+        };
+      }
+      return null;
+    })
+    .filter((item) => item !== null) as DeviceWithConnection[];
 
   useEffect(() => {
-    // Simulate connecting to the stream
+    // Simulate loading connected devices
     const timeout = setTimeout(() => {
       setIsLoading(false);
-    }, 2000);
+    }, 1000);
 
     return () => clearTimeout(timeout);
   }, []);
 
-  // Handle back button press in fullscreen mode
-  useEffect(() => {
-    const backAction = () => {
-      if (isFullscreen && video.current) {
-        video.current.dismissFullscreenPlayer();
-        return true; // Prevent default behavior (app exit)
-      }
-      return false; // Let the default behavior happen (go back)
-    };
-
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
-    return () => backHandler.remove();
-  }, [isFullscreen]);
-
-  // Auto-hide controls after a few seconds in fullscreen mode
-  useEffect(() => {
-    let timeout: NodeJS.Timeout;
-
-    if (isFullscreen && controlsVisible) {
-      timeout = setTimeout(() => {
-        Animated.timing(fadeAnim, {
-          toValue: 0,
-          duration: 500,
-          useNativeDriver: true,
-        }).start(() => {
-          setControlsVisible(false);
-        });
-      }, 3000);
-    }
-
-    return () => {
-      if (timeout) clearTimeout(timeout);
-    };
-  }, [isFullscreen, controlsVisible, fadeAnim]);
-
-  const handleVideoError = (error: string) => {
-    console.error('Video playback error:', error);
-    setError(t('streaming.errorMessage.connectionFailed'));
-    setIsLoading(false);
+  const openStreamingModal = (deviceWithConnection: DeviceWithConnection) => {
+    setSelectedDevice(deviceWithConnection);
+    setModalVisible(true);
   };
 
-  const handlePlayPause = async () => {
-    if (video.current) {
-      if (status.isLoaded && status.isPlaying) {
-        await video.current.pauseAsync();
-      } else if (status.isLoaded) {
-        await video.current.playAsync();
-      }
-    }
+  const closeStreamingModal = () => {
+    setModalVisible(false);
   };
 
-  const toggleFullscreen = async () => {
-    if (video.current) {
-      if (isFullscreen) {
-        video.current.dismissFullscreenPlayer();
-      } else {
-        video.current.presentFullscreenPlayer();
-      }
-    }
-  };
+  const renderDeviceCard = ({ item }: { item: DeviceWithConnection }) => {
+    const isOnline = item.device.status === 'online';
 
-  const handleFullscreenUpdate = async ({
-    fullscreenUpdate,
-  }: {
-    fullscreenUpdate: VideoFullscreenUpdate;
-  }) => {
-    switch (fullscreenUpdate) {
-      case VideoFullscreenUpdate.PLAYER_WILL_PRESENT:
-        // The player is about to enter fullscreen
-        setIsFullscreen(true);
-        setControlsVisible(true);
-        fadeAnim.setValue(1);
-
-        // Hide tab bar when entering fullscreen
-        navigation.setOptions({
-          tabBarStyle: { display: 'none' },
-        });
-        break;
-      case VideoFullscreenUpdate.PLAYER_DID_PRESENT:
-        // The player finished presenting in fullscreen
-        // Lock to landscape orientation
-        await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
-        break;
-      case VideoFullscreenUpdate.PLAYER_WILL_DISMISS:
-        // The player is about to dismiss fullscreen
-        break;
-      case VideoFullscreenUpdate.PLAYER_DID_DISMISS:
-        // The player finished dismissing fullscreen
-        setIsFullscreen(false);
-
-        // Show tab bar when exiting fullscreen
-        navigation.setOptions({
-          tabBarStyle: { display: 'flex' },
-        });
-
-        // Return to portrait orientation
-        await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
-        break;
-    }
-  };
-
-  const showControls = () => {
-    if (isFullscreen && !controlsVisible) {
-      setControlsVisible(true);
-      fadeAnim.setValue(1);
-    }
-  };
-
-  const renderVideoContainer = () => {
     return (
-      <TouchableOpacity
-        activeOpacity={1}
-        onPress={showControls}
-        style={{
-          width: '100%',
-          aspectRatio: 16 / 9,
-          backgroundColor: 'black',
-          position: 'relative',
-        }}>
-        {!isDeviceConnected ? (
+      <Card className="mb-4 overflow-hidden" onPress={() => openStreamingModal(item)}>
+        <View className="relative">
+          {/* Preview Image */}
+          <View className="bg-black aspect-video items-center justify-center">
+            {isOnline ? (
+              <View className="w-full h-full items-center justify-center">
+                {/* Placeholder stream preview */}
+                <View className="absolute inset-0 bg-black opacity-70" />
+                <FontAwesome6 name="video" size={32} color="#ffffff" />
+                <Text className="text-white mt-2">{t('streaming.tapToView')}</Text>
+                {/* Live indicator */}
+                <View className="absolute bottom-3 left-3 flex-row items-center bg-black/50 rounded-full px-2 py-1">
+                  <View className="size-2 bg-rose-500 rounded-full mr-1" />
+                  <Text className="text-white text-xs">{t('streaming.live')}</Text>
+                </View>
+              </View>
+            ) : (
+              <View className="items-center justify-center">
+                <FontAwesome6 name="video-slash" size={32} color="#888888" />
+                <Text className="text-gray-400 mt-2">{t('common.offline')}</Text>
+              </View>
+            )}
+          </View>
+
+          {/* Status indicator */}
           <View
-            style={{
-              position: 'absolute',
-              inset: 0,
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '100%',
-              height: '100%',
-            }}>
-            <FontAwesome6 name="video-slash" size={20} color="#ffffff" />
-            <Text className="text-white text-lg mt-2 font-semibold">
-              {t('settings.deviceConnection.notConnected')}
-            </Text>
-            <Text className="text-white text-sm mt-1 px-8 text-center">
-              {t('settings.deviceConnection.helpText')}
-            </Text>
-          </View>
-        ) : isLoading ? (
-          <View
-            style={{
-              position: 'absolute',
-              inset: 0,
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '100%',
-              height: '100%',
-            }}>
-            <ActivityIndicator size="large" color="#3d8d7a" />
-            <Text className="text-white text-base mt-2">{t('streaming.connectingToStream')}</Text>
-          </View>
-        ) : error ? (
-          <View
-            style={{
-              position: 'absolute',
-              inset: 0,
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '100%',
-              height: '100%',
-            }}>
-            <FontAwesome6 name="exclamation-circle" size={40} color="#d26165" />
-            <Text className="text-white text-base mt-2">{error}</Text>
-            <TouchableOpacity
-              className="mt-4 bg-primary-500 py-2 px-4 rounded-full"
-              onPress={() => {
-                setIsLoading(true);
-                setError(null);
-                setTimeout(() => setIsLoading(false), 2000);
-              }}>
-              <Text className="text-white">{t('streaming.retry')}</Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <Video
-            ref={video}
-            source={{ uri: streamUrl }}
-            rate={1.0}
-            volume={1.0}
-            isMuted={false}
-            resizeMode={ResizeMode.CONTAIN}
-            shouldPlay={true}
-            isLooping={true}
-            useNativeControls={false}
-            style={{ width: '100%', height: '100%' }}
-            onFullscreenUpdate={handleFullscreenUpdate}
-            onPlaybackStatusUpdate={(status) => setStatus(() => status)}
-            onError={handleVideoError}
-          />
-        )}
-
-        {/* Custom video controls overlay - only show when not in fullscreen mode */}
-        {isDeviceConnected && !isLoading && !error && !isFullscreen && (
-          <View className="absolute bottom-0 left-0 right-0 flex-row justify-between items-center px-2 bg-black/40">
-            <View className="flex-row items-center">
-              <TouchableOpacity
-                className="w-12 h-12 rounded-full items-center justify-center"
-                onPress={handlePlayPause}>
-                <FontAwesome6
-                  name={status.isLoaded && status.isPlaying ? 'pause' : 'play'}
-                  size={16}
-                  color="#ffffff"
-                />
-              </TouchableOpacity>
-              <View className="size-2 bg-rose-500 rounded-full ml-2" />
-              <Text className="text-white ml-2">{t('streaming.live')}</Text>
-            </View>
-
-            <TouchableOpacity
-              className="w-12 h-12 rounded-full items-center justify-center"
-              onPress={toggleFullscreen}>
-              <FontAwesome6 name="expand" size={16} color="#ffffff" />
-            </TouchableOpacity>
-          </View>
-        )}
-      </TouchableOpacity>
-    );
-  };
-
-  return (
-    <View style={{ flex: 1, backgroundColor: '#f5f5f5', paddingTop: insets.top }}>
-      <StatusBar style="light" backgroundColor="#000000" />
-      {renderVideoContainer()}
-
-      <ScrollView style={{ flex: 1, paddingHorizontal: 16, paddingTop: 24 }}>
-        <View className="bg-white rounded-xl p-4 shadow">
-          <Text className="text-lg font-medium text-primary-600 mb-2">
-            {t('streaming.streamInfo')}
-          </Text>
-          <View className="flex-row justify-between mb-2">
-            <Text className="text-gray-600">{t('streaming.status.title')}:</Text>
-            <Text
-              className={`font-medium ${isDeviceConnected ? 'text-primary-500' : 'text-secondary-500'}`}>
-              {isDeviceConnected
-                ? isLoading
-                  ? t('streaming.status.connecting')
-                  : error
-                    ? t('streaming.status.error')
-                    : t('streaming.status.active')
-                : t('streaming.status.disconnected')}
-            </Text>
-          </View>
-          <View className="flex-row justify-between mb-2">
-            <Text className="text-gray-600">{t('streaming.quality.title')}:</Text>
-            <Text className="font-medium text-gray-800">
-              {isDeviceConnected && !isLoading && !error ? t('streaming.quality.hd') : '—'}
-            </Text>
-          </View>
-          <View className="flex-row justify-between">
-            <Text className="text-gray-600">{t('streaming.connection.title')}:</Text>
-            <Text className="font-medium text-gray-800">
-              {isDeviceConnected && !isLoading && !error ? t('streaming.connection.wifi') : '—'}
+            className={`absolute top-2 right-2 flex-row items-center rounded-full px-2 py-1 ${isOnline ? 'bg-green-500' : 'bg-gray-500'}`}>
+            <Text className="text-white text-xs font-medium">
+              {isOnline ? t('common.online') : t('common.offline')}
             </Text>
           </View>
         </View>
-      </ScrollView>
+
+        <Card.Content className="pt-3 pb-3">
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center">
+              <MaterialIcons name="videocam" size={18} color="#3d8d7a" />
+              <Text className="ml-2 text-base font-medium">{item.connection.name}</Text>
+            </View>
+            <TouchableOpacity
+              className="h-8 w-8 rounded-full items-center justify-center"
+              onPress={() => openStreamingModal(item)}>
+              <MaterialIcons name="chevron-right" size={24} color="#3d8d7a" />
+            </TouchableOpacity>
+          </View>
+        </Card.Content>
+      </Card>
+    );
+  };
+
+  const renderEmptyList = () => (
+    <View className="flex-1 items-center justify-center py-16">
+      <FontAwesome6 name="video-slash" size={50} color="#d1d5db" />
+      <Text className="mt-4 text-lg font-semibold text-gray-600">
+        {t('streaming.noDevicesConnected')}
+      </Text>
+      <Text className="mt-2 text-center text-gray-500 px-6">
+        {t('streaming.connectDeviceMessage')}
+      </Text>
+      <TouchableOpacity
+        className="mt-6 bg-primary-500 py-3 px-6 rounded-full"
+        onPress={() => navigation.navigate('Settings' as never)}>
+        <Text className="text-white font-medium">{t('streaming.goToSettings')}</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  return (
+    <View style={{ flex: 1, backgroundColor: '#f5f5f5', paddingTop: insets.top }}>
+      <StatusBar style="dark" backgroundColor="#f5f5f5" />
+
+      {/* Header */}
+      <View className="px-5 py-4 mt-1">
+        <Text className="text-2xl font-bold text-primary-600">{t('streaming.title')}</Text>
+      </View>
+
+      {/* Device List */}
+      {isLoading ? (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" color="#3d8d7a" />
+          <Text className="mt-4 text-base text-gray-600">{t('streaming.loadingDevices')}</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={connectedDevices}
+          renderItem={renderDeviceCard}
+          keyExtractor={(item) => item.connection.id}
+          contentContainerStyle={{
+            padding: 16,
+            flexGrow: connectedDevices.length === 0 ? 1 : undefined,
+          }}
+          ListEmptyComponent={renderEmptyList}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
+
+      {/* Add Device FAB */}
+      <FAB
+        icon="plus"
+        style={{
+          position: 'absolute',
+          margin: 16,
+          right: 0,
+          bottom: 0,
+          backgroundColor: '#3d8d7a',
+        }}
+        color="#fff"
+        onPress={() => navigation.navigate('Settings' as never)}
+      />
+
+      {/* Streaming Modal */}
+      {selectedDevice && (
+        <StreamingModal
+          visible={modalVisible}
+          onClose={closeStreamingModal}
+          deviceId={selectedDevice.device.id}
+          deviceName={selectedDevice.connection.name}
+          isConnected={selectedDevice.device.status === 'online'}
+        />
+      )}
     </View>
   );
 }

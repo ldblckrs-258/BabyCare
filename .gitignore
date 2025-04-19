@@ -26,3 +26,4 @@ android
 .cursor/
 .env
 .cursorignore
+.docs/

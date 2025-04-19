@@ -17,6 +17,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as Notifications from 'expo-notifications';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef } from 'react';
+import { PaperProvider } from 'react-native-paper';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -36,8 +37,21 @@ export default function App() {
 
     // Set up notification listeners
     const cleanupListeners = setupNotificationListeners((notification) => {
-      // Add notification to store
-      addNotification(notification);
+      // Check if this is from a notification that was manually added in the UI
+      // If it has the manuallyAdded flag in the data, don't add it again
+      const notificationData = Notifications.getLastNotificationResponseAsync()
+        .then((response) => {
+          if (response && response.notification.request.content.data.manuallyAdded) {
+            // Skip adding this notification as it was already added
+            return;
+          }
+          // Otherwise add notification to store
+          addNotification(notification);
+        })
+        .catch(() => {
+          // If we can't check, add it anyway
+          addNotification(notification);
+        });
     });
 
     return () => {
@@ -47,18 +61,20 @@ export default function App() {
   }, [addNotification]);
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        initialRouteName="Welcome"
-        screenOptions={{
-          headerShown: false,
-        }}>
-        <Stack.Screen name="Welcome" component={WelcomeScreen} />
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Register" component={RegisterScreen} />
-        <Stack.Screen name="Main" component={MainTabs} />
-      </Stack.Navigator>
-      <StatusBar style="auto" />
-    </NavigationContainer>
+    <PaperProvider>
+      <NavigationContainer>
+        <Stack.Navigator
+          initialRouteName="Welcome"
+          screenOptions={{
+            headerShown: false,
+          }}>
+          <Stack.Screen name="Welcome" component={WelcomeScreen} />
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Register" component={RegisterScreen} />
+          <Stack.Screen name="Main" component={MainTabs} />
+        </Stack.Navigator>
+        <StatusBar style="auto" />
+      </NavigationContainer>
+    </PaperProvider>
   );
 }

@@ -9,6 +9,8 @@ export const vi = {
     cancel: 'Hủy',
     close: 'Đóng',
     back: 'Quay lại',
+    online: 'Trực tuyến',
+    offline: 'Ngoại tuyến',
   },
   home: {
     title: {
@@ -90,8 +92,7 @@ export const vi = {
     privacyPolicy: 'Chính sách bảo mật',
     login: 'Đăng nhập',
     register: 'Đăng ký',
-  },
-  settings: {
+  },  settings: {
     title: 'Cài đặt',
     profile: {
       title: 'Hồ sơ',
@@ -106,15 +107,100 @@ export const vi = {
       signOut: 'Đăng xuất',
       saveButton: 'Lưu thay đổi',
     },
-    deviceConnection: {
-      title: 'Kết nối thiết bị',
+    devices: {
+      title: 'Thiết bị',
       status: 'Trạng thái',
       notConnected: 'Chưa kết nối',
       connected: 'Đã kết nối',
-      scanQRCode: 'Quét mã QR',
-      scanQRCodeDescription: 'Quét mã QR trên thiết bị của bạn để kết nối',
-      helpText:
-        'Đảm bảo thiết bị BabyCare của bạn đã được bật và trong phạm vi kết nối. Nếu bạn gặp khó khăn trong việc kết nối, hãy thử khởi động lại thiết bị.',
+    },
+    notifications: {
+      title: 'Thông báo',
+      enable: 'Bật thông báo',
+      enableDescription: 'Bật thông báo để nhận cảnh báo về tình trạng của bé',
+      crySensitivity: 'Độ nhạy phát hiện khóc',
+      enableDailyReport: 'Báo cáo hàng ngày',
+      enableDailyReportDescription: 'Nhận báo cáo hàng ngày về tình trạng của bé',
+    },
+    language: {
+      title: 'Ngôn ngữ',
+      save: 'Lưu ngôn ngữ',
+    },
+    privacyAndTerms: {
+      title: 'Quyền riêng tư & Điều khoản',
+      privacyTitle: 'Chính sách quyền riêng tư',
+      termsTitle: 'Điều khoản dịch vụ',
+      dataCollection: {
+        title: 'Thu thập dữ liệu',
+        content:
+          'BabyCare thu thập dữ liệu liên quan đến thói quen ngủ, tiếng khóc và việc sử dụng thiết bị của bé. Dữ liệu này được sử dụng để cung cấp cho bạn những thông tin chi tiết và cảnh báo về sức khỏe của bé.',
+      },
+      dataStorage: {
+        title: 'Lưu trữ dữ liệu',
+        content:
+          'Tất cả dữ liệu được lưu trữ an toàn và mã hóa. Chúng tôi sử dụng các biện pháp bảo mật tiêu chuẩn để bảo vệ thông tin của bạn. Dữ liệu của bạn được lưu trữ trên các máy chủ an toàn và chỉ có thể truy cập thông qua tài khoản đã xác thực của bạn.',
+      },
+      dataSharing: {
+        title: 'Chia sẻ dữ liệu',
+        content:
+          'Chúng tôi không bán hoặc chia sẻ dữ liệu cá nhân của bạn với bên thứ ba. Thông tin của bé vẫn được giữ riêng tư và chỉ được sử dụng để cung cấp các dịch vụ mà bạn đã yêu cầu.',
+      },
+      license: {
+        title: 'Giấy phép',
+        content:
+          'BabyCare cấp cho bạn giấy phép có giới hạn, không độc quyền, không thể chuyển nhượng để sử dụng ứng dụng cho mục đích cá nhân, phi thương mại.',
+      },
+      restrictions: {
+        title: 'Hạn chế',
+        content:
+          'Bạn không được sửa đổi, phân phối hoặc tạo các tác phẩm phái sinh dựa trên ứng dụng của chúng tôi. Ứng dụng và nội dung của nó vẫn là tài sản của BabyCare.',
+      },
+      disclaimer: {
+        title: 'Tuyên bố miễn trừ',
+        content:
+          'BabyCare được thiết kế như một công cụ hỗ trợ theo dõi em bé và không nên thay thế việc giám sát của người lớn. Chúng tôi không chịu trách nhiệm về bất kỳ sự cố nào có thể xảy ra trong quá trình sử dụng ứng dụng.',
+      },
+      contact: {
+        title: 'Liên hệ với chúng tôi',
+        content:
+          'Nếu bạn có bất kỳ câu hỏi nào về Chính sách Quyền riêng tư hoặc Điều khoản Dịch vụ, vui lòng liên hệ với chúng tôi tại:',
+      },
+    
+    },
+    version: 'Phiên bản',
+  },
+  devices: {
+    title: 'Thiết bị',
+    addNewDevice: 'Thêm thiết bị mới',
+    scanQR: 'Quét mã QR',
+    scanDescription: 'Quét mã QR trên thiết bị của bạn để kết nối',
+    helpText: 'Đảm bảo thiết bị BabyCare của bạn đã được bật và trong phạm vi kết nối. Nếu bạn gặp khó khăn trong việc kết nối, hãy thử khởi động lại thiết bị.',
+    connectedDevices: 'Thiết bị đã kết nối',
+    noDevicesConnected: 'Không có thiết bị được kết nối',
+    rename: {
+      title: 'Đổi tên thiết bị',
+      message: 'Nhập tên mới cho thiết bị này:',
+    },
+    threshold: {
+      title: 'Ngưỡng cảnh báo',
+      message: 'Đặt ngưỡng cảnh báo theo phút:',
+    },
+    thresholds: {
+      title: 'Ngưỡng cảnh báo',
+      crying: 'Ngưỡng khóc',
+      cryingDescription: 'Thiết lập ngưỡng cảnh báo khi bé khóc',
+      position: 'Ngưỡng tư thế',
+      positionDescription: 'Thiết lập ngưỡng cảnh báo khi bé nằm ở tư thế không an toàn',
+      seconds: 'giây',
+    },
+    disconnect: {
+      title: 'Ngắt kết nối thiết bị',
+      message: 'Bạn có chắc chắn muốn ngắt kết nối thiết bị này?',
+      confirm: 'Ngắt kết nối',
+    },
+    options: {
+      rename: 'Đổi tên thiết bị',
+      threshold: 'Thay đổi ngưỡng cảnh báo',
+      disconnect: 'Ngắt kết nối thiết bị',
     },
     notifications: {
       title: 'Cài đặt thông báo',
@@ -204,7 +290,9 @@ export const vi = {
     }
   },
   streaming: {
+    title: 'Theo dõi trực tiếp',
     live: 'Trực tiếp',
+    tapToView: 'Nhấn để xem',
     streamInfo: 'Thông tin stream',
     connectingToStream: 'Đang kết nối stream...',
     retry: 'Thử lại',
