@@ -179,10 +179,10 @@ export function StreamingModal({
             }}>
             <FontAwesome6 name="video-slash" size={20} color="#ffffff" />
             <Text className="text-white text-lg mt-2 font-semibold">
-              {t('settings.deviceConnection.notConnected')}
+              {t('settings.devices.notConnected')}
             </Text>
             <Text className="text-white text-sm mt-1 px-8 text-center">
-              {t('settings.deviceConnection.helpText')}
+              {t('settings.devices.helpText')}
             </Text>
           </View>
         ) : isLoading ? (

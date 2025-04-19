@@ -92,7 +92,8 @@ export const en = {
     privacyPolicy: 'Privacy Policy',
     login: 'Login',
     register: 'Register',
-  },  settings: {
+  },  
+  settings: {
     title: 'Settings',
     profile: {
       title: 'Profile',
@@ -112,6 +113,7 @@ export const en = {
       status: 'Status',
       notConnected: 'Not Connected',
       connected: 'Connected',
+      helpText: 'Make sure your BabyCare device is turned on and connected to the internet.',
     },
     notifications: {
       title: 'Notifications',
@@ -332,6 +334,8 @@ export const en = {
   },
   statistics: {
     title: 'Statistics',
+    selectDevice: 'Select Device',
+    noDevices: 'No devices connected',
     todayOverview: 'Today Overview',
     badPosition: 'Bad Position',
     crying: 'Crying',

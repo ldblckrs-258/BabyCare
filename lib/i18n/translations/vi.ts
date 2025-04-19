@@ -318,6 +318,8 @@ export const vi = {
   },
   statistics: {
     title: 'Thống kê',
+    selectDevice: 'Chọn thiết bị',
+    noDevices: 'Không có thiết bị nào',
     todayOverview: 'Tổng quan hôm nay',
     badPosition: 'Tư thế không tốt',
     crying: 'Khóc',
