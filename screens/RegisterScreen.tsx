@@ -58,15 +58,6 @@ export function RegisterScreen() {
     }
   };
 
-  const handleGoogleSignUp = async () => {
-    try {
-      await signInWithGoogle();
-      navigation.navigate('Main');
-    } catch (err) {
-      setError(authError || t('register.error'));
-    }
-  };
-
   return (
     <SafeAreaView className="flex-1 bg-neutral-100">
       <KeyboardAvoidingView
@@ -77,9 +68,9 @@ export function RegisterScreen() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ flexGrow: 1 }}
           className="flex-1">
-          <View className="flex px-6 py-4 pb-8">
+          <View className="flex px-6 py-4 pb-8 flex-1">
             {/* Header with back button */}
-            <View className="mb-6">
+            <View className="mb-4">
               <TouchableOpacity
                 onPress={() => navigation.goBack()}
                 className="h-10 w-10 items-center justify-center rounded-full bg-white">
@@ -88,31 +79,10 @@ export function RegisterScreen() {
             </View>
 
             {/* Register Form */}
-            <View className="flex flex-col gap-4">
-              <Text className="mb-16 text-center text-3xl font-bold text-gray-900">
+            <View className="flex flex-col gap-4 flex-1 justify-center pb-14">
+              <Text className="mb-12 text-center text-3xl font-bold text-gray-900">
                 {t('register.title')}
               </Text>
-
-              {/* Google Sign Up */}
-              <TouchableOpacity
-                onPress={handleGoogleSignUp}
-                className="flex-row items-center justify-center space-x-2 rounded-lg bg-white p-4">
-                <Image
-                  source={require('../assets/google-icon.png')}
-                  className="h-6 w-6"
-                  resizeMode="contain"
-                />
-                <Text className="text-base font-semibold text-gray-700">
-                  {t('register.signUpWithGoogle')}
-                </Text>
-              </TouchableOpacity>
-
-              {/* Divider */}
-              <View className="flex-row items-center">
-                <View className="flex-1 border-t border-gray-300" />
-                <Text className="mx-4 text-gray-500">{t('register.orSignUpWith')}</Text>
-                <View className="flex-1 border-t border-gray-300" />
-              </View>
 
               {/* Full Name Input */}
               <View>
@@ -204,8 +174,8 @@ export function RegisterScreen() {
               {/* Register Button */}
               <TouchableOpacity
                 onPress={handleRegister}
-                disabled={loading}
-                className="rounded-lg bg-primary-500 px-4 py-3">
+                disabled={loading || !agreeToTerms}
+                className="rounded-lg bg-primary-500 px-4 py-3 disabled:opacity-50">
                 {loading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (

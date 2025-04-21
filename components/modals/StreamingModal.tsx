@@ -3,7 +3,6 @@ import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { AVPlaybackStatus, ResizeMode, Video, VideoFullscreenUpdate } from 'expo-av';
 import * as ScreenOrientation from 'expo-screen-orientation';
-import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -275,8 +274,6 @@ export function StreamingModal({
       statusBarTranslucent>
       <View className="flex-1 bg-white">
         <View style={{ paddingTop: insets.top }} className="flex-1">
-          <StatusBar style="light" backgroundColor="#000000" />
-
           {/* Header */}
           <View className="flex-row items-center justify-between p-4 border-b border-gray-200">
             <View className="flex-row items-center">

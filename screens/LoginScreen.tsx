@@ -22,18 +22,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 export function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [keepSignedIn, setKeepSignedIn] = useState(false);
   const [error, setError] = useState('');
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { signIn, signInWithGoogle, loading, error: authError } = useAuthStore();
-
   const handleLogin = async () => {
     if (!email || !password) {
       setError('Please enter email and password');
       return;
     }
     try {
-      const success = await signIn(email, password, keepSignedIn);
+      const success = await signIn(email, password);
       if (success) {
         navigation.replace('Main');
       } else {
@@ -78,9 +76,8 @@ export function LoginScreen() {
             </View>
 
             {/* Login Form */}
-            <View className="flex flex-col gap-6">
-              <Text className="mb-16 text-center text-3xl font-bold text-gray-900">Login</Text>
-
+            <View className="flex flex-col gap-6 flex-1 justify-center pb-24">
+              <Text className="mb-14 text-center text-3xl font-bold text-gray-900">Login</Text>
               {/* Google Sign In */}
               <TouchableOpacity
                 onPress={handleGoogleSignIn}
@@ -92,14 +89,12 @@ export function LoginScreen() {
                 />
                 <Text className="text-base font-semibold text-gray-700">Login with Google</Text>
               </TouchableOpacity>
-
               {/* Divider */}
               <View className="flex-row items-center">
                 <View className="flex-1 border-t border-gray-300" />
                 <Text className="mx-4 text-gray-500">or login with</Text>
                 <View className="flex-1 border-t border-gray-300" />
               </View>
-
               {/* Email Input */}
               <View>
                 <Text className="mb-2 text-sm font-medium text-gray-700">Email</Text>
@@ -115,7 +110,6 @@ export function LoginScreen() {
                   autoCapitalize="none"
                 />
               </View>
-
               {/* Password Input */}
               <View>
                 <View className="mb-2 flex-row justify-between">
@@ -132,22 +126,8 @@ export function LoginScreen() {
                   }}
                 />
               </View>
-
               {/* Error Message */}
               {error ? <Text className="text-center text-sm text-red-500">{error}</Text> : null}
-
-              {/* Keep Signed In */}
-              <View className="flex-row items-center">
-                <Pressable
-                  onPress={() => setKeepSignedIn(!keepSignedIn)}
-                  className={`mr-2 h-5 w-5 items-center justify-center rounded border ${
-                    keepSignedIn ? 'border-primary-500 bg-primary-500' : 'border-gray-300'
-                  }`}>
-                  {keepSignedIn && <Fa6 name="check" size={12} color="#fff" />}
-                </Pressable>
-                <Text className="text-sm text-gray-600">Keep logged in</Text>
-              </View>
-
               {/* Login Button */}
               <TouchableOpacity
                 onPress={handleLogin}
@@ -159,7 +139,6 @@ export function LoginScreen() {
                   <Text className="text-center text-lg font-semibold text-white">Login</Text>
                 )}
               </TouchableOpacity>
-
               {/* Sign Up Link */}
               <View className="flex-row justify-center">
                 <Text className="text-gray-600">Don't have an account? </Text>

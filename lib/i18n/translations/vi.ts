@@ -11,45 +11,17 @@ export const vi = {
     back: 'Quay lại',
     online: 'Trực tuyến',
     offline: 'Ngoại tuyến',
+    connected: 'Đã kết nối',
+    disconnected: 'Ngắt kết nối',
+    notConnected: 'Chưa kết nối',
   },
   home: {
     title: {
       greeting: 'Xin chào',
       dashboard: 'Bảng điều khiển của bạn',
     },
-    device: {
-      connected: {
-        title: 'Đã kết nối',
-        description: 'Đang theo dõi',
-      },
-      notConnected: {
-        title: 'Chưa kết nối',
-        description: 'Không có thiết bị nào',
-      },
-    },
-    badPosition: {
-      true: {
-        title: 'Tư thế không tốt',
-        description: 'Liên tục trong',
-      },
-      false: {
-        title: 'Tư thế tốt',
-        description: 'Mọi thứ đều ổn',
-      },
-    },
-    cry: {
-      true: {
-        title: 'Đang khóc',
-        description: 'Liên tục trong',
-      },
-      false: {
-        title: 'Không khóc',
-        description: 'Mọi thứ đều ổn',
-      },
-    },
-    latestEvents: 'Sự kiện gần đây',
-    viewAll: 'Xem tất cả',
-    noRecentEvents: 'Không có sự kiện gần đây',
+    devices: 'Thiết bị của bạn',
+    lastUpdated: 'Cập nhật lần cuối',
   },
   welcome: {
     slides: {

@@ -68,28 +68,32 @@ export const useDeviceHook = (): DeviceHookReturn => {
       const deviceRef = doc(firestore, 'devices', deviceId);
       const deviceSnap = await getDoc(deviceRef);
       
-      if (!deviceSnap.exists()) {
-        // Create the device in Firestore
+      if (!deviceSnap.exists()) {        // Create the device in Firestore
         const newDevice: Device = {
           id: deviceId,
-          status: 'online',
+          uri: '',
+          isOnline: true,
           cryingThreshold: DEFAULT_CRYING_THRESHOLD,
-          positionThreshold: DEFAULT_POSITION_THRESHOLD,
+          sideThreshold: DEFAULT_POSITION_THRESHOLD,
+          proneThreshold: DEFAULT_POSITION_THRESHOLD,
+          noBlanketThreshold: DEFAULT_POSITION_THRESHOLD,
           createdAt: new Date()
         };
         
         await setDoc(deviceRef, newDevice);
         
         // Add to local device store
-        deviceStore.addDevice(newDevice);
-      } else {
+        deviceStore.addDevice(newDevice);      } else {
         // Device exists, update local store if needed
         const deviceData = deviceSnap.data() as Device;
         deviceStore.addDevice({
           id: deviceId,
-          status: deviceData.status || 'online',
+          uri: deviceData.uri || '',
+          isOnline: deviceData.isOnline !== undefined ? deviceData.isOnline : true,
           cryingThreshold: deviceData.cryingThreshold || DEFAULT_CRYING_THRESHOLD,
-          positionThreshold: deviceData.positionThreshold || DEFAULT_POSITION_THRESHOLD,
+          sideThreshold: deviceData.sideThreshold || DEFAULT_POSITION_THRESHOLD,
+          proneThreshold: deviceData.proneThreshold || DEFAULT_POSITION_THRESHOLD,
+          noBlanketThreshold: deviceData.noBlanketThreshold || DEFAULT_POSITION_THRESHOLD,
           createdAt: deviceData.createdAt ? new Date(deviceData.createdAt) : new Date(),
           updatedAt: deviceData.updatedAt ? new Date(deviceData.updatedAt) : undefined
         });

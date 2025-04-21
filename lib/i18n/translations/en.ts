@@ -11,45 +11,23 @@ export const en = {
     back: 'Back',
     online: 'Online',
     offline: 'Offline',
+    connected: 'Connected',
+    disconnected: 'Disconnected',
+    notConnected: 'Not connected',
   },
   home: {
     title: {
       greeting: 'Hello',
       dashboard: 'Your Monitor Dashboard',
     },
-    device: {
-      connected: {
-        title: 'Connected',
-        description: 'Under surveillance',
-      },
-      notConnected: {
-        title: 'Not Connected',
-        description: 'No device connected',
-      },
+    devices: 'Devices',
+    noDevices: {
+      title: 'No devices connected',
+      description:
+        'Connect your BabyCare device to monitor your baby\'s sleep and crying patterns.',
+      button: 'Connect a Device',
     },
-    badPosition: {
-      true: {
-        title: 'Bad position',
-        description: 'Continuously for',
-      },
-      false: {
-        title: 'Good position',
-        description: 'Everything is fine',
-      },
-    },
-    cry: {
-      true: {
-        title: 'Crying',
-        description: 'Continuously for',
-      },
-      false: {
-        title: 'Not crying',
-        description: 'Everything is fine',
-      },
-    },
-    latestEvents: 'Latest Events',
-    viewAll: 'View all',
-    noRecentEvents: 'No recent events',
+    lastUpdated: 'Last updated',
   },
   welcome: {
     slides: {

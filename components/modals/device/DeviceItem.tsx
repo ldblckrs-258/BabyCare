@@ -32,7 +32,7 @@ export function DeviceItem({ connection, device }: DeviceItemProps) {
           <View className="flex-row items-center gap-2">
             <Text className="text-base font-medium text-gray-800">{connection.name}</Text>
             <View className="size-1 rounded-full bg-gray-300" />
-            {device?.status === 'online' ? (
+            {device?.isOnline ? (
               <Text className="inline text-green-700">{t('common.online')}</Text>
             ) : (
               <Text className="inline text-red-700">{t('common.offline')}</Text>
@@ -41,7 +41,8 @@ export function DeviceItem({ connection, device }: DeviceItemProps) {
           {device && (
             <View className="mt-1 flex-row">
               <Text className="text-xs text-gray-500">
-                Cry: {device.cryingThreshold}s • Position: {device.positionThreshold}s
+                Cry: {device.cryingThreshold}s • Prone: {device.proneThreshold}s • No Blanket:{' '}
+                {device.noBlanketThreshold}s • Side: {device.sideThreshold}s
               </Text>
             </View>
           )}
@@ -105,7 +106,9 @@ export function DeviceItem({ connection, device }: DeviceItemProps) {
         <ThresholdModal
           deviceId={connection.deviceId}
           cryingThreshold={device.cryingThreshold}
-          positionThreshold={device.positionThreshold}
+          sideThreshold={device.sideThreshold}
+          proneThreshold={device.proneThreshold}
+          noBlanketThreshold={device.noBlanketThreshold}
           visible={thresholdModalVisible}
           onClose={() => setThresholdModalVisible(false)}
         />

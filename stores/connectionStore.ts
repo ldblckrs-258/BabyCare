@@ -115,63 +115,6 @@ export const useConnectionStore = create<ConnectionState>()(
       },
 
       clearAllConnections: () => set({ connections: [], selectedConnectionId: undefined, isConnected: false }),
-
-      /* Original implementation (commented for development)
-      connections: [],
-      selectedConnectionId: undefined,
-      isConnected: false,
-
-      addConnection: (connection) => 
-        set((state) => ({
-          connections: [...state.connections, connection],
-          isConnected: true,
-          selectedConnectionId: connection.id
-        })),
-
-      removeConnection: (connectionId) =>
-        set((state) => {
-          const updatedConnections = state.connections.filter(conn => conn.id !== connectionId);
-          return { 
-            connections: updatedConnections,
-            isConnected: updatedConnections.length > 0,
-            selectedConnectionId: updatedConnections.length > 0 ? updatedConnections[0].id : undefined
-          };
-        }),
-
-      updateConnection: (connectionId, updates) =>
-        set((state) => ({
-          connections: state.connections.map(connection => 
-            connection.id === connectionId 
-              ? { ...connection, ...updates, updatedAt: new Date() } 
-              : connection
-          )
-        })),
-        
-      selectConnection: (connectionId) => 
-        set((state) => {
-          const connection = state.connections.find(c => c.id === connectionId);
-          if (connection) {
-            return { selectedConnectionId: connectionId };
-          }
-          return state;
-        }),
-
-      setConnectionStatus: (isConnected, connectionId = undefined) =>
-        set((state) => {
-          if (connectionId) {
-            return { 
-              isConnected, 
-              selectedConnectionId: isConnected ? connectionId : undefined
-            };
-          }
-          return { isConnected, selectedConnectionId: isConnected ? state.selectedConnectionId : undefined };
-        }),
-        
-      getConnectionByDeviceId: (deviceId: string) => {
-        const state = get();
-        return state.connections.find(connection => connection.deviceId === deviceId);
-      },
-      */
     }),
     {
       name: 'babycare-connections',

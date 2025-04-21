@@ -5,7 +5,6 @@ import { Device, useDeviceStore } from '@/stores/deviceStore';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
-import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { Card, FAB } from 'react-native-paper';
@@ -60,14 +59,12 @@ export default function StreamingScreen() {
   };
 
   const renderDeviceCard = ({ item }: { item: DeviceWithConnection }) => {
-    const isOnline = item.device.status === 'online';
-
     return (
       <Card className="mb-4 overflow-hidden" onPress={() => openStreamingModal(item)}>
         <View className="relative">
           {/* Preview Image */}
           <View className="bg-black aspect-video items-center justify-center">
-            {isOnline ? (
+            {item.device.isOnline ? (
               <View className="w-full h-full items-center justify-center">
                 {/* Placeholder stream preview */}
                 <View className="absolute inset-0 bg-black opacity-70" />
@@ -89,9 +86,9 @@ export default function StreamingScreen() {
 
           {/* Status indicator */}
           <View
-            className={`absolute top-2 right-2 flex-row items-center rounded-full px-2 py-1 ${isOnline ? 'bg-green-500' : 'bg-gray-500'}`}>
+            className={`absolute top-2 right-2 flex-row items-center rounded-full px-2 py-1 ${item.device.isOnline ? 'bg-green-500' : 'bg-gray-500'}`}>
             <Text className="text-white text-xs font-medium">
-              {isOnline ? t('common.online') : t('common.offline')}
+              {item.device.isOnline ? t('common.online') : t('common.offline')}
             </Text>
           </View>
         </View>
@@ -132,8 +129,6 @@ export default function StreamingScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: '#f5f5f5', paddingTop: insets.top }}>
-      <StatusBar style="dark" backgroundColor="#f5f5f5" />
-
       {/* Header */}
       <View className="px-5 py-4 mt-1">
         <Text className="text-2xl font-bold text-primary-600">{t('streaming.title')}</Text>
@@ -180,7 +175,7 @@ export default function StreamingScreen() {
           onClose={closeStreamingModal}
           deviceId={selectedDevice.device.id}
           deviceName={selectedDevice.connection.name}
-          isConnected={selectedDevice.device.status === 'online'}
+          isConnected={selectedDevice.device.isOnline}
         />
       )}
     </View>
