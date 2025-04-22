@@ -1,4 +1,6 @@
+import { NotificationDetailModal } from '@/components/modals/NotificationDetailModal';
 import { NotificationModal } from '@/components/modals/NotificationModal';
+import { TestNotificationModal } from '@/components/modals/TestNotificationModal';
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import {
   Notification,
@@ -8,6 +10,7 @@ import {
   parseISODate,
 } from '@/lib/notifications';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { Ionicons } from '@expo/vector-icons';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { format, isToday, isYesterday } from 'date-fns';
@@ -19,12 +22,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 // Get icon for notification type
 const getNotificationIcon = (type: NotificationType) => {
   switch (type) {
-    case 'cry_alert':
-      return <FontAwesome6 name="baby" size={20} color="#5d97d3" />;
-    case 'position_alert':
-      return <FontAwesome6 name="bed" size={16} color="#d26165" />;
-    case 'daily_report':
-      return <MaterialIcons name="assessment" size={22} color="#a855f7" />;
+    case 'crying':
+      return <Ionicons name="water" size={20} color="#5d97d3" />;
+    case 'prone':
+      return <FontAwesome6 name="baby" size={20} color="#d26165" />;
+    case 'side':
+      return <FontAwesome6 name="baby" size={20} color="#d97706" />;
+    case 'noBlanket':
+      return <FontAwesome6 name="bed" size={20} color="#a855f7" />;
     case 'system':
       return <MaterialIcons name="notifications" size={22} color="#3d8d7a" />;
     default:
@@ -36,6 +41,9 @@ export default function HistoryScreen() {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(true);
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
+  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
+  const [showNotificationDetail, setShowNotificationDetail] = useState(false);
+  const [showTestNotificationModal, setShowTestNotificationModal] = useState(false);
   const {
     userNotifications,
     markNotificationAsRead,
@@ -51,13 +59,16 @@ export default function HistoryScreen() {
     }, 800);
     return () => clearTimeout(timer);
   }, []);
-
-  // Handle notification read
+  // Handle notification read and show detail modal
   const handleNotificationPress = useCallback(
     (notification: Notification) => {
+      // Mark as read if needed
       if (!notification.read) {
         markNotificationAsRead(notification.id);
       }
+      // Show notification detail
+      setSelectedNotification(notification);
+      setShowNotificationDetail(true);
     },
     [markNotificationAsRead]
   );
@@ -94,7 +105,7 @@ export default function HistoryScreen() {
         <View className="flex-1">
           <Text className="text-base font-semibold text-gray-800">{item.title}</Text>
           <Text className="text-sm text-gray-600">
-            {item.message}{' '}
+            {item.message}
             <Text className="mt-1 inline-block text-xs text-gray-400">
               {formatTime(item.timestamp)}
             </Text>
@@ -122,12 +133,6 @@ export default function HistoryScreen() {
   return (
     <SafeAreaView className="flex-1 bg-neutral-100">
       <StatusBar style="dark" />
-      {showNotificationSettings && (
-        <View
-          className="absolute inset-0 z-10 bg-black/50"
-          style={{ height: '100%', width: '100%' }}
-        />
-      )}
       {/* Header */}
       <View className="flex-row items-center justify-between px-5 py-4">
         <Text className="text-2xl font-bold text-primary-600">{t('history.allEvents')}</Text>
@@ -153,7 +158,6 @@ export default function HistoryScreen() {
           </TouchableOpacity>
         </View>
       </View>
-
       {/* Notification list */}
       <View className="flex-1 px-5">
         {isLoading ? (
@@ -170,12 +174,6 @@ export default function HistoryScreen() {
             <Text className="mt-2 text-center text-gray-500">
               {t('history.notificationsWillAppearHere')}
             </Text>
-
-            <TouchableOpacity
-              onPress={() => setShowNotificationSettings(true)}
-              className="mt-6 rounded-lg bg-primary-500 px-5 py-3">
-              <Text className="text-base font-medium text-white">Test Notifications</Text>
-            </TouchableOpacity>
           </View>
         ) : (
           <FlatList
@@ -195,12 +193,28 @@ export default function HistoryScreen() {
             showsVerticalScrollIndicator={false}
           />
         )}
+        <TouchableOpacity
+          onPress={() => setShowTestNotificationModal(true)}
+          className="mb-10 rounded-lg bg-primary-500 px-5 py-3 mx-28 ">
+          <Text className="text-base font-medium text-white text-center">Test Notifications</Text>
+        </TouchableOpacity>
       </View>
-
       {/* Notification Settings Modal */}
       <NotificationModal
         visible={showNotificationSettings}
         onClose={() => setShowNotificationSettings(false)}
+      />
+      {/* Notification Detail Modal */}
+      <NotificationDetailModal
+        visible={showNotificationDetail}
+        onClose={() => setShowNotificationDetail(false)}
+        notification={selectedNotification}
+      />
+
+      {/* Test Notification Modal (DEV ONLY) */}
+      <TestNotificationModal
+        visible={showTestNotificationModal}
+        onClose={() => setShowTestNotificationModal(false)}
       />
     </SafeAreaView>
   );

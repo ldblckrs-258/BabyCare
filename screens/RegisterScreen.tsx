@@ -162,11 +162,11 @@ export function RegisterScreen() {
                   {agreeToTerms && <Fa6 name="check" size={12} color="#fff" />}
                 </Pressable>
                 <Text className="flex-1 text-sm text-gray-600">
-                  {t('auth.agreeToTerms')}{' '}
+                  {t('auth.agreeToTerms')}
                   <Text className="font-semibold text-primary-600">
                     {t('auth.termsAndConditions')}
-                  </Text>{' '}
-                  {t('auth.and')}{' '}
+                  </Text>
+                  {t('auth.and')}
                   <Text className="font-semibold text-primary-600">{t('auth.privacyPolicy')}</Text>
                 </Text>
               </View>

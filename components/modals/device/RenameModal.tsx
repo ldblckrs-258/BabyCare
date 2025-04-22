@@ -1,5 +1,6 @@
 import { useDeviceHook } from '@/lib/hooks/useDeviceHook';
 import { useTranslation } from '@/lib/hooks/useTranslation';
+import { useConnectionStore } from '@/stores/connectionStore';
 import { useState } from 'react';
 import { Text, TextInput, View } from 'react-native';
 import { Button, Modal, Portal } from 'react-native-paper';
@@ -14,10 +15,14 @@ type RenameModalProps = {
 export function RenameModal({ visible, onClose, connectionId, currentName }: RenameModalProps) {
   const { t } = useTranslation();
   const { renameConnection } = useDeviceHook();
+  const updateConnection = useConnectionStore((state) => state.updateConnection);
   const [newName, setNewName] = useState(currentName || '');
-
   const handleRename = async () => {
     if (newName.trim() !== '') {
+      // First update the local store directly to ensure UI updates immediately
+      updateConnection(connectionId, { name: newName.trim() });
+
+      // Then update in Firestore (this will happen asynchronously)
       await renameConnection(connectionId, newName.trim());
       onClose();
     }

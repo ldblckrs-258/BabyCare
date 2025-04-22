@@ -41,7 +41,7 @@ export function DeviceItem({ connection, device }: DeviceItemProps) {
           {device && (
             <View className="mt-1 flex-row">
               <Text className="text-xs text-gray-500">
-                Cry: {device.cryingThreshold}s • Prone: {device.proneThreshold}s • No Blanket:{' '}
+                Cry: {device.cryingThreshold}s • Prone: {device.proneThreshold}s • No Blanket:
                 {device.noBlanketThreshold}s • Side: {device.sideThreshold}s
               </Text>
             </View>

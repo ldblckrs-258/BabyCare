@@ -54,21 +54,27 @@ export function ThresholdModal({
     });
     onClose();
   };
-
   // Generate picker items for different ranges
-  const generatePickerItems = (min: number, max: number, step: number = 1) => {
+  const generatePickerItems = (
+    min: number,
+    max: number,
+    step: number = 1,
+    includeZero: boolean = true,
+    selectedValue: number = 0
+  ) => {
     const items = [];
+
+    // Add "Off" option (0 value) if includeZero is true
+    if (includeZero) {
+      items.push(<Picker.Item key={0} label={t('devices.thresholds.off')} value={0} />);
+    }
+
+    // Add regular number options with seconds suffix
     for (let i = min; i <= max; i += step) {
-      items.push(<Picker.Item key={i} label={i.toString()} value={i} />);
+      items.push(<Picker.Item key={i} label={`${i}`} value={i} />);
     }
     return items;
   };
-
-  // Crying threshold range: 10-120 seconds
-  const cryingPickerItems = generatePickerItems(10, 120);
-
-  // Other thresholds range: 10-60 seconds
-  const otherPickerItems = generatePickerItems(10, 60);
 
   return (
     <Portal>
@@ -89,73 +95,80 @@ export function ThresholdModal({
             {t('devices.thresholds.title')}
           </Text>
 
-          <View className="mb-5">
-            <Text className="mb-2 text-base font-medium px-4 text-center">
-              {t('devices.thresholds.crying')} ({cryingThreshold} {t('devices.thresholds.seconds')})
-            </Text>
+          <View className="mb-5 flex-row">
+            <View className="flex-1 flex-col justify-center">
+              <Text className="mb-1 text-base font-medium px-4">
+                {t('devices.thresholds.crying')}
+              </Text>
+              <Text className="px-4 text-xs text-gray-500">
+                {t('devices.thresholds.cryingDescription')}
+              </Text>
+            </View>
             <View style={styles.pickerContainer}>
               <Picker
                 selectedValue={cryingThreshold}
                 onValueChange={(value) => setCryingThreshold(value)}
                 style={styles.picker}>
-                {cryingPickerItems}
+                {generatePickerItems(10, 240, 10)}
               </Picker>
             </View>
-            <Text className="mt-1 px-4 text-xs text-gray-500 text-center">
-              {t('devices.thresholds.cryingDescription')}
-            </Text>
           </View>
 
-          <View className="mb-5">
-            <Text className="mb-2 text-base font-medium px-4 text-center">
-              {t('devices.thresholds.side')} ({sideThreshold} {t('devices.thresholds.seconds')})
-            </Text>
+          <View className="mb-5 flex-row">
+            <View className="flex-1 flex-col justify-center">
+              <Text className="mb-1 text-base font-medium px-4">
+                {t('devices.thresholds.side')}
+              </Text>
+              <Text className="px-4 text-xs text-gray-500">
+                {t('devices.thresholds.sideDescription')}
+              </Text>
+            </View>
             <View style={styles.pickerContainer}>
               <Picker
                 selectedValue={sideThreshold}
                 onValueChange={(value) => setSideThreshold(value)}
                 style={styles.picker}>
-                {otherPickerItems}
+                {generatePickerItems(5, 180, 5)}
               </Picker>
             </View>
-            <Text className="mt-1 text-xs text-gray-500 px-4 text-center">
-              {t('devices.thresholds.sideDescription')}
-            </Text>
           </View>
 
-          <View className="mb-5">
-            <Text className="mb-2 text-base font-medium px-4 text-center">
-              {t('devices.thresholds.prone')} ({proneThreshold} {t('devices.thresholds.seconds')})
-            </Text>
+          <View className="mb-5 flex-row">
+            <View className="flex-1 flex-col justify-center">
+              <Text className="mb-1 text-base font-medium px-4">
+                {t('devices.thresholds.prone')}
+              </Text>
+              <Text className="px-4 text-xs text-gray-500">
+                {t('devices.thresholds.proneDescription')}
+              </Text>
+            </View>
             <View style={styles.pickerContainer}>
               <Picker
                 selectedValue={proneThreshold}
                 onValueChange={(value) => setProneThreshold(value)}
                 style={styles.picker}>
-                {otherPickerItems}
+                {generatePickerItems(5, 180, 5)}
               </Picker>
             </View>
-            <Text className="mt-1 text-xs text-gray-500 px-4 text-center">
-              {t('devices.thresholds.proneDescription')}
-            </Text>
           </View>
 
-          <View className="mb-5">
-            <Text className="mb-2 text-base font-medium px-4 text-center">
-              {t('devices.thresholds.noBlanket')} ({noBlanketThreshold}{' '}
-              {t('devices.thresholds.seconds')})
-            </Text>
+          <View className="mb-5 flex-row">
+            <View className="flex-1 flex-col justify-center">
+              <Text className="mb-1 text-base font-medium px-4">
+                {t('devices.thresholds.noBlanket')}
+              </Text>
+              <Text className="px-4 text-xs text-gray-500">
+                {t('devices.thresholds.noBlanketDescription')}
+              </Text>
+            </View>
             <View style={styles.pickerContainer}>
               <Picker
                 selectedValue={noBlanketThreshold}
                 onValueChange={(value) => setNoBlanketThreshold(value)}
                 style={styles.picker}>
-                {otherPickerItems}
+                {generatePickerItems(10, 360, 10)}
               </Picker>
             </View>
-            <Text className="mt-1 text-xs text-gray-500 px-4 text-center">
-              {t('devices.thresholds.noBlanketDescription')}
-            </Text>
           </View>
 
           <View className="mt-4 flex-row justify-end gap-4">
@@ -178,9 +191,17 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderRadius: 8,
     overflow: 'hidden',
-    marginHorizontal: 20,
+    marginHorizontal: 0,
+    paddingVertical: 0,
   },
   picker: {
-    height: 150,
+    height: 36,
+    width: 92,
+    transform: [{ translateY: -8 }],
+  },
+  buttonContainer: {
+    marginTop: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
 });

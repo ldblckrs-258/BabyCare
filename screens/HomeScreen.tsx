@@ -1,48 +1,22 @@
+import type { RootStackParamList } from '../types/navigation';
 import { DeviceCard, NoDevicesCard } from '@/components/dashboard';
 import { useDeviceHook } from '@/lib/hooks/useDeviceHook';
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import { useAuthStore } from '@/stores/authStore';
 import { useNavigation } from '@react-navigation/native';
-import React, { useEffect, useMemo, useState } from 'react';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useMemo, useState } from 'react';
 import { RefreshControl, ScrollView, Text, View } from 'react-native';
 import { ActivityIndicator } from 'react-native-paper';
-
-// Mock data for crying/position status - in a real app this would come from your backend
-const mockDeviceStatus: {
-  crying: { [key: string]: { isCrying: boolean; duration: number } };
-  position: { [key: string]: { isBadPosition: boolean; duration: number } };
-} = {
-  crying: {
-    'device-001': { isCrying: true, duration: 90 },
-    'device-002': { isCrying: false, duration: 0 },
-    'device-003': { isCrying: false, duration: 0 },
-  },
-  position: {
-    'device-001': { isBadPosition: false, duration: 0 },
-    'device-002': { isBadPosition: false, duration: 0 },
-    'device-003': { isBadPosition: true, duration: 138 },
-  },
-};
 
 export default function HomeScreen() {
   const { t } = useTranslation();
   const { user } = useAuthStore();
-  const navigation = useNavigation();
-  const {
-    devices,
-    connections,
-    loading,
-    error,
-    connectDevice,
-    getConnectionByDeviceId,
-    selectConnection,
-  } = useDeviceHook();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { devices, loading, error, getConnectionByDeviceId, selectConnection } = useDeviceHook();
 
   // State for the UI
   const [refreshing, setRefreshing] = useState(false);
-  const [chartData, setChartData] = useState(
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].map((value) => ({ value }))
-  );
 
   // User's name from auth store
   const lastName = useMemo(
@@ -50,40 +24,38 @@ export default function HomeScreen() {
     [user?.displayName]
   );
 
-  // Effect to update chart data periodically (for demo purposes)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setChartData((prevData) => {
-        const newValue = Math.floor(Math.random() * 10); // Random value between 0-9
-        const newData = [...prevData.slice(1), { value: newValue }];
-        return newData;
-      });
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, []);
-
   // Refresh handler
   const onRefresh = async () => {
     setRefreshing(true);
-    // In a real app, you would refresh data from your backend here
-    setTimeout(() => {
+    try {
+      await getConnectionByDeviceId(user?.uid || '');
+    } catch (error) {
+      console.error('Error refreshing devices:', error);
+    } finally {
       setRefreshing(false);
-    }, 1000);
+    }
   };
 
-  // Navigation handler for device selection
+  // Navigation handler for device selection and streaming modal opening
   const handleSelectDevice = (deviceId: string) => {
     const connection = getConnectionByDeviceId(deviceId);
     if (connection) {
+      // Select the connection first
       selectConnection(connection.id);
-      navigation.navigate('Streaming' as never);
+
+      // Navigate to streaming screen and pass the selected device params
+      navigation.navigate('Streaming', {
+        deviceId: deviceId,
+        connectionId: connection.id,
+        openModal: true, // Flag to automatically open the streaming modal
+      });
     }
   };
 
   return (
     <ScrollView
       className="flex-1 bg-neutral-100 px-2 pt-6"
+      contentContainerClassName="flex flex-col min-h-full"
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
       {/* Header */}
       <View className="mb-6 mt-12 px-2">
@@ -109,7 +81,8 @@ export default function HomeScreen() {
 
       {/* Devices section */}
       {!loading && (
-        <View className="px-2">
+        <View
+          className={`flex-1 px-2 ${devices.length === 0 ? 'flex items-center justify-center pb-32' : ''}`}>
           {devices.length === 0 ? (
             <NoDevicesCard />
           ) : (
@@ -120,20 +93,22 @@ export default function HomeScreen() {
                   {t('home.devices')}
                 </Text>
 
-                {devices.map((device) => {
-                  const connection = getConnectionByDeviceId(device.id);
+                {devices
+                  .sort((a, b) => (b.isOnline ? 1 : 0) - (a.isOnline ? 1 : 0))
+                  .map((device) => {
+                    const connection = getConnectionByDeviceId(device.id);
 
-                  if (!connection) return null;
+                    if (!connection) return null;
 
-                  return (
-                    <DeviceCard
-                      key={device.id}
-                      device={device}
-                      connection={connection}
-                      onPress={handleSelectDevice}
-                    />
-                  );
-                })}
+                    return (
+                      <DeviceCard
+                        key={device.id}
+                        device={device}
+                        connection={connection}
+                        onPress={handleSelectDevice}
+                      />
+                    );
+                  })}
               </View>
             </>
           )}

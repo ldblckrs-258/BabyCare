@@ -47,7 +47,10 @@
       "package": "com.babycare.pbl5app",
       "permissions": [
         "android.permission.CAMERA"
-      ]
+      ],
+      "useNextNotificationsApi": true,
+      "enableBackgroundNotification": true,
+      "priority": "max"
     },
     "extra": {
       "router": {

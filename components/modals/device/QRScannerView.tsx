@@ -1,7 +1,7 @@
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useEffect, useState } from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 import { Camera, useCameraDevice, useCodeScanner } from 'react-native-vision-camera';
 
 type QRScannerViewProps = {
@@ -12,6 +12,7 @@ type QRScannerViewProps = {
 export function QRScannerView({ onClose, onQRCodeScanned }: QRScannerViewProps) {
   const { t } = useTranslation();
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const device = useCameraDevice('back');
 
   // Request camera permissions
@@ -25,9 +26,13 @@ export function QRScannerView({ onClose, onQRCodeScanned }: QRScannerViewProps) 
   // Set up code scanner
   const codeScanner = useCodeScanner({
     codeTypes: ['qr'],
-    onCodeScanned: (codes) => {
-      if (codes.length > 0 && codes[0].value) {
-        onQRCodeScanned({ data: codes[0].value });
+    onCodeScanned: async (codes) => {
+      if (codes.length > 0 && codes[0].value && !isLoading) {
+        setIsLoading(true);
+        // Process QR code and then close
+        await onQRCodeScanned({ data: codes[0].value });
+        onClose();
+        setIsLoading(false);
       }
     },
   });
@@ -61,10 +66,17 @@ export function QRScannerView({ onClose, onQRCodeScanned }: QRScannerViewProps) 
       </View>
     );
   }
-
   return (
     <View className="flex-1">
       <Camera device={device} isActive={true} codeScanner={codeScanner} style={{ flex: 1 }} />
+
+      {/* Loading Overlay */}
+      {isLoading && (
+        <View className="absolute inset-0 h-full w-full items-center justify-center bg-black/70">
+          <ActivityIndicator size="large" color="#3b82f6" />
+          <Text className="mt-4 text-lg font-medium text-white">{t('common.connecting')}...</Text>
+        </View>
+      )}
 
       {/* Black Overlay */}
       <View className="absolute inset-0 h-full w-full pb-10">

@@ -1,6 +1,9 @@
 import { useTranslation } from '@/lib/hooks/useTranslation';
+import { RootStackParamList } from '@/types/navigation';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AVPlaybackStatus, ResizeMode, Video, VideoFullscreenUpdate } from 'expo-av';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { useEffect, useRef, useState } from 'react';
@@ -40,7 +43,7 @@ export function StreamingModal({
   const insets = useSafeAreaInsets();
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const [controlsVisible, setControlsVisible] = useState(true);
-
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   // This would be your actual stream URL from your device
   const streamUrl =
     'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4'; // Placeholder stream URL
@@ -282,8 +285,14 @@ export function StreamingModal({
               </TouchableOpacity>
               <Text className="text-lg font-bold text-gray-800">{deviceName}</Text>
             </View>
-            <TouchableOpacity>
-              <MaterialIcons name="more-vert" size={24} color="#333" />
+            <TouchableOpacity
+              onPress={() => {
+                onClose();
+                navigation.navigate('Settings', {
+                  modal: 'devices',
+                });
+              }}>
+              <MaterialIcons name="settings" size={24} color="#333" />
             </TouchableOpacity>
           </View>
 

@@ -1,7 +1,7 @@
 import { format } from 'date-fns';
 
 // Notification types
-export type NotificationType = 'cry_alert' | 'position_alert' | 'daily_report' | 'system';
+export type NotificationType = 'crying' | 'prone' | 'side' | 'noBlanket' | 'system';
 
 // Notification interface
 export interface Notification {
@@ -9,8 +9,12 @@ export interface Notification {
   type: NotificationType;
   title: string;
   message: string;
-  timestamp: string; // Changed from Date | string to string (ISO format)
+  timestamp: string; // ISO format
   read: boolean;
+  imageUrl?: string; // Optional URL to the image captured during the event
+  duration?: number; // Duration of the event in minutes
+  deviceId?: string; // ID of the device that triggered the notification
+  deviceName?: string; // Name of the device that triggered the notification
 }
 
 

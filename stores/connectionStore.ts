@@ -27,41 +27,14 @@ interface ConnectionState {
   clearAllConnections: () => void;
 }
 
-// TEMPORARY: Static mock connections for UI testing
-const mockConnections: Connection[] = [
-  {
-    id: 'conn-001',
-    userId: 'user-001',
-    deviceId: 'device-001',
-    name: 'Baby Room Camera',
-    createdAt: new Date(2024, 3, 15),
-    updatedAt: new Date()
-  },
-  {
-    id: 'conn-002',
-    userId: 'user-001',
-    deviceId: 'device-002',
-    name: 'Living Room Monitor', 
-    createdAt: new Date(2024, 2, 20),
-    updatedAt: new Date(2024, 3, 10)
-  },
-  {
-    id: 'conn-003',
-    userId: 'user-001',
-    deviceId: 'device-003',
-    name: 'Nursery Camera',
-    createdAt: new Date(2024, 3, 18),
-    updatedAt: new Date()
-  }
-];
 
 export const useConnectionStore = create<ConnectionState>()(
   persist(
     (set, get) => ({
       // TEMPORARY: Using static mock connections instead of empty array
-      connections: mockConnections,
-      selectedConnectionId: mockConnections.length > 0 ? mockConnections[0].id : undefined,
-      isConnected: mockConnections.length > 0,
+      connections: [],
+      selectedConnectionId: undefined,
+      isConnected: false,
 
       addConnection: (connection) => 
         set((state) => ({

@@ -52,106 +52,13 @@ interface DeviceState {
   clearNotifications: (deviceId?: string) => void;
 }
 
-// TEMPORARY: Static mock devices for UI testing
-const mockDevices: Device[] = [
-  {
-    id: 'device-001',
-    uri: 'rtsp://example.com/stream1',
-    isOnline: true,
-    cryingThreshold: 70,
-    sideThreshold: 45,
-    proneThreshold: 40,
-    noBlanketThreshold: 60,
-    createdAt: new Date(2024, 3, 15),
-    updatedAt: new Date(),
-  },
-  {
-    id: 'device-002',
-    uri: 'rtsp://example.com/stream2',
-    isOnline: false,
-    cryingThreshold: 65,
-    sideThreshold: 50,
-    proneThreshold: 35,
-    noBlanketThreshold: 55,
-    createdAt: new Date(2024, 2, 20),
-    updatedAt: new Date(2024, 3, 10),
-  },
-  {
-    id: 'device-003',
-    uri: 'rtsp://example.com/stream3',
-    isOnline: true,
-    cryingThreshold: 75,
-    sideThreshold: 40,
-    proneThreshold: 45,
-    noBlanketThreshold: 50,
-    createdAt: new Date(2024, 3, 18),
-    updatedAt: new Date(),
-  },
-];
-
-// TEMPORARY: Mock events for testing
-const mockEvents: DeviceEvent[] = [
-  {
-    id: 'event-001',
-    deviceId: 'device-001',
-    type: 'Crying',
-    time: new Date(2024, 3, 20, 14, 30),
-  },
-  {
-    id: 'event-002',
-    deviceId: 'device-001',
-    type: 'NoCrying',
-    time: new Date(2024, 3, 20, 14, 35),
-  },
-  {
-    id: 'event-003',
-    deviceId: 'device-002',
-    type: 'Side',
-    time: new Date(2024, 3, 19, 21, 15),
-  },
-  {
-    id: 'event-004',
-    deviceId: 'device-003',
-    type: 'Prone',
-    time: new Date(2024, 3, 20, 9, 45),
-  }
-];
-
-// TEMPORARY: Mock notifications for testing
-const mockNotifications: DeviceNotification[] = [
-  {
-    id: 'notif-001',
-    deviceId: 'device-001',
-    type: 'Crying',
-    duration: 300,
-    time: new Date(2024, 3, 20, 14, 30),
-    imageUrl: 'https://res.cloudinary.com/demo/image/upload/crying1.jpg',
-  },
-  {
-    id: 'notif-002',
-    deviceId: 'device-002',
-    type: 'Side',
-    duration: 180,
-    time: new Date(2024, 3, 19, 21, 15),
-    imageUrl: 'https://res.cloudinary.com/demo/image/upload/side1.jpg',
-  },
-  {
-    id: 'notif-003',
-    deviceId: 'device-003',
-    type: 'Prone',
-    duration: 240,
-    time: new Date(2024, 3, 20, 9, 45),
-    imageUrl: 'https://res.cloudinary.com/demo/image/upload/prone1.jpg',
-  }
-];
 
 export const useDeviceStore = create<DeviceState>()(
   persist(
     (set, get) => ({
-      // TEMPORARY: Using static mock data instead of empty arrays
-      devices: mockDevices,
-      events: mockEvents,
-      notifications: mockNotifications,
+      devices: [],
+      events: [],
+      notifications: [],
 
       addDevice: (device) => 
         set((state) => {

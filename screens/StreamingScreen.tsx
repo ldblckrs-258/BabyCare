@@ -1,53 +1,45 @@
+import type { RootStackParamList } from '../types/navigation';
 import { StreamingModal } from '@/components/modals/StreamingModal';
+import { DeviceWithConnection, useDeviceHook } from '@/lib/hooks';
 import { useTranslation } from '@/lib/hooks/useTranslation';
-import { Connection, useConnectionStore } from '@/stores/connectionStore';
-import { Device, useDeviceStore } from '@/stores/deviceStore';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import type { RouteProp } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Text, TouchableOpacity, View } from 'react-native';
-import { Card, FAB } from 'react-native-paper';
+import { Card } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-type DeviceWithConnection = {
-  device: Device;
-  connection: Connection;
-};
 
 export default function StreamingScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
-  const [isLoading, setIsLoading] = useState(true);
+  const route = useRoute<RouteProp<RootStackParamList, 'Streaming'>>();
+  const [isLoading, setIsLoading] = useState(false);
   const [selectedDevice, setSelectedDevice] = useState<DeviceWithConnection | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
-
-  const { connections } = useConnectionStore();
-  const { devices, getDeviceById } = useDeviceStore();
-
-  // Combine device and connection data
-  const connectedDevices = connections
-    .map((connection) => {
-      const device = getDeviceById(connection.deviceId);
-      if (device) {
-        return {
-          device,
-          connection,
-        };
-      }
-      return null;
-    })
-    .filter((item) => item !== null) as DeviceWithConnection[];
-
+  const { connectedDevices } = useDeviceHook();
+  // Handle automatic modal opening from navigation params
   useEffect(() => {
-    // Simulate loading connected devices
-    const timeout = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
+    // We don't need connectedDevices as a dependency since we can access it in the callback
+    const handleNavigationParams = async () => {
+      // Check if we received navigation params with deviceId and openModal flag
+      if (route.params?.deviceId && route.params?.openModal) {
+        const deviceId = route.params.deviceId;
 
-    return () => clearTimeout(timeout);
-  }, []);
+        // Find the device with the given ID from the connectedDevices array
+        const foundDevice = connectedDevices.find((device) => device.device.id === deviceId);
+
+        // If found, open the streaming modal with this device
+        if (foundDevice) {
+          openStreamingModal(foundDevice);
+        }
+      }
+    };
+
+    handleNavigationParams();
+  }, [route.params]);
 
   const openStreamingModal = (deviceWithConnection: DeviceWithConnection) => {
     setSelectedDevice(deviceWithConnection);
@@ -63,44 +55,39 @@ export default function StreamingScreen() {
       <Card className="mb-4 overflow-hidden" onPress={() => openStreamingModal(item)}>
         <View className="relative">
           {/* Preview Image */}
-          <View className="bg-black aspect-video items-center justify-center">
-            {item.device.isOnline ? (
-              <View className="w-full h-full items-center justify-center">
-                {/* Placeholder stream preview */}
-                <View className="absolute inset-0 bg-black opacity-70" />
-                <FontAwesome6 name="video" size={32} color="#ffffff" />
-                <Text className="text-white mt-2">{t('streaming.tapToView')}</Text>
-                {/* Live indicator */}
-                <View className="absolute bottom-3 left-3 flex-row items-center bg-black/50 rounded-full px-2 py-1">
-                  <View className="size-2 bg-rose-500 rounded-full mr-1" />
-                  <Text className="text-white text-xs">{t('streaming.live')}</Text>
+          {item.device.isOnline && (
+            <>
+              <View className="bg-black aspect-video items-center justify-center">
+                <View className="w-full h-full items-center justify-center">
+                  {/* Placeholder stream preview */}
+                  <View className="absolute inset-0 bg-black opacity-70" />
+                  <FontAwesome6 name="video" size={32} color="#ffffff" />
+                  <Text className="text-white mt-2">{t('streaming.tapToView')}</Text>
+                  {/* Live indicator */}
+                  <View className="absolute bottom-3 left-3 flex-row items-center bg-black/50 rounded-full px-2 py-1">
+                    <View className="size-2 bg-rose-500 rounded-full mr-1" />
+                    <Text className="text-white text-xs">{t('streaming.live')}</Text>
+                  </View>
                 </View>
               </View>
-            ) : (
-              <View className="items-center justify-center">
-                <FontAwesome6 name="video-slash" size={32} color="#888888" />
-                <Text className="text-gray-400 mt-2">{t('common.offline')}</Text>
+              <View className="absolute flex-row items-center rounded-full px-2 py-1 right-2 top-2 bg-green-500">
+                <Text className="text-white text-xs font-medium">{t('common.online')}</Text>
               </View>
-            )}
-          </View>
-
-          {/* Status indicator */}
-          <View
-            className={`absolute top-2 right-2 flex-row items-center rounded-full px-2 py-1 ${item.device.isOnline ? 'bg-green-500' : 'bg-gray-500'}`}>
-            <Text className="text-white text-xs font-medium">
-              {item.device.isOnline ? t('common.online') : t('common.offline')}
-            </Text>
-          </View>
+            </>
+          )}
         </View>
-
-        <Card.Content className="pt-3 pb-3">
+        <Card.Content className="pt-5">
           <View className="flex-row items-center justify-between">
             <View className="flex-row items-center">
-              <MaterialIcons name="videocam" size={18} color="#3d8d7a" />
+              {item.device.isOnline ? (
+                <MaterialIcons name="videocam" size={18} color="#3d8d7a" />
+              ) : (
+                <MaterialIcons name="videocam-off" size={18} color="#999" />
+              )}
               <Text className="ml-2 text-base font-medium">{item.connection.name}</Text>
             </View>
             <TouchableOpacity
-              className="h-8 w-8 rounded-full items-center justify-center"
+              className="w-8 rounded-full items-center justify-center"
               onPress={() => openStreamingModal(item)}>
               <MaterialIcons name="chevron-right" size={24} color="#3d8d7a" />
             </TouchableOpacity>
@@ -142,7 +129,9 @@ export default function StreamingScreen() {
         </View>
       ) : (
         <FlatList
-          data={connectedDevices}
+          data={connectedDevices.sort(
+            (a, b) => (b.device.isOnline ? 1 : 0) - (a.device.isOnline ? 1 : 0)
+          )}
           renderItem={renderDeviceCard}
           keyExtractor={(item) => item.connection.id}
           contentContainerStyle={{
@@ -153,20 +142,6 @@ export default function StreamingScreen() {
           showsVerticalScrollIndicator={false}
         />
       )}
-
-      {/* Add Device FAB */}
-      <FAB
-        icon="plus"
-        style={{
-          position: 'absolute',
-          margin: 16,
-          right: 0,
-          bottom: 0,
-          backgroundColor: '#3d8d7a',
-        }}
-        color="#fff"
-        onPress={() => navigation.navigate('Settings' as never)}
-      />
 
       {/* Streaming Modal */}
       {selectedDevice && (

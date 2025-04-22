@@ -6,9 +6,12 @@ import { useAuthStore } from '../stores/authStore';
 import { useDeviceStore } from '../stores/deviceStore';
 import { useSettingsStore } from '../stores/settingsStore';
 import { useTranslation } from '@/lib/hooks/useTranslation';
+import { RootStackParamList } from '@/types/navigation';
 import EntypoIcons from '@expo/vector-icons/Entypo';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { useState } from 'react';
+import { useRoute } from '@react-navigation/native';
+import type { RouteProp } from '@react-navigation/native';
+import { useEffect, useState } from 'react';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -23,7 +26,6 @@ export default function SettingsScreen() {
   const { user } = useAuthStore();
   const { language, setLanguage } = useSettingsStore();
   const { devices } = useDeviceStore();
-
   // Modal visibility states
   const [deviceModalVisible, setDeviceModalVisible] = useState(false);
   const [notificationModalVisible, setNotificationModalVisible] = useState(false);
@@ -32,11 +34,34 @@ export default function SettingsScreen() {
 
   // Language dropdown state
   const [languageDropdownOpen, setLanguageDropdownOpen] = useState(false);
+  const route = useRoute<RouteProp<RootStackParamList, 'Settings'>>();
 
   const handleLanguageSelect = (selectedLanguage: string) => {
     setLanguage(selectedLanguage);
     setLanguageDropdownOpen(false);
   };
+
+  useEffect(() => {
+    // Check if the route params contain a modal to open
+    if (route.params?.modal) {
+      switch (route.params.modal) {
+        case 'devices':
+          setDeviceModalVisible(true);
+          break;
+        case 'notifications':
+          setNotificationModalVisible(true);
+          break;
+        case 'privacy':
+          setPrivacyModalVisible(true);
+          break;
+        case 'profile':
+          setProfileModalVisible(true);
+          break;
+        default:
+          break;
+      }
+    }
+  }, [route.params]);
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-100">
@@ -85,7 +110,6 @@ export default function SettingsScreen() {
               <MaterialIcons name="chevron-right" size={24} color="#ccc" />
             </View>
           </TouchableOpacity>
-
           {/* Notification */}
           <TouchableOpacity
             className="flex-row items-center justify-between p-4"
@@ -147,7 +171,6 @@ export default function SettingsScreen() {
               </View>
             )}
           </View>
-
           {/* Privacy & Terms */}
           <TouchableOpacity
             className="flex-row items-center justify-between p-4"
@@ -162,7 +185,6 @@ export default function SettingsScreen() {
             </View>
             <MaterialIcons name="chevron-right" size={24} color="#ccc" />
           </TouchableOpacity>
-
           {/* Version */}
           <View className="flex-row items-center justify-between p-4">
             <View className="flex-row items-center">
@@ -175,20 +197,16 @@ export default function SettingsScreen() {
           </View>
         </View>
       </View>
-
       {/* Modals */}
       <DeviceModal visible={deviceModalVisible} onClose={() => setDeviceModalVisible(false)} />
-
       <NotificationModal
         visible={notificationModalVisible}
         onClose={() => setNotificationModalVisible(false)}
       />
-
       <PrivacyTermsModal
         visible={privacyModalVisible}
         onClose={() => setPrivacyModalVisible(false)}
       />
-
       <ProfileModal visible={profileModalVisible} onClose={() => setProfileModalVisible(false)} />
     </SafeAreaView>
   );

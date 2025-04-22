@@ -12,6 +12,7 @@ export const en = {
     online: 'Online',
     offline: 'Offline',
     connected: 'Connected',
+    connecting: 'Connecting',
     disconnected: 'Disconnected',
     notConnected: 'Not connected',
   },
@@ -27,7 +28,15 @@ export const en = {
         'Connect your BabyCare device to monitor your baby\'s sleep and crying patterns.',
       button: 'Connect a Device',
     },
-    lastUpdated: 'Last updated',
+    crying: 'Crying',
+    notCrying: 'Not crying',
+    supine: 'Supine',
+    prone: 'Prone',
+    side: 'Side',
+    blanket: 'Blanket',
+    noBlanket: 'No blanket',
+    continuouslyFor: 'Continuously for',
+    seconds: 'seconds',
   },
   welcome: {
     slides: {
@@ -177,14 +186,18 @@ export const en = {
     threshold: {
       title: 'Alert Threshold',
       message: 'Set alert threshold in minutes:',
-    },
-    thresholds: {
+    },    thresholds: {
       title: 'Alert Thresholds',
       crying: 'Crying Threshold',
-      cryingDescription: 'Set the threshold for crying detection',
-      position: 'Position Threshold',
-      positionDescription: 'Set the threshold for sleep position detection',
+      cryingDescription: 'Threshold for crying detection in seconds',
+      side: 'Side Threshold',
+      sideDescription: 'Threshold for side detection in seconds',
+      prone: 'Prone Threshold',
+      proneDescription: 'Threshold for prone detection in seconds',
+      noBlanket: 'No Blanket Threshold',
+      noBlanketDescription: 'Threshold for blanket detection in seconds',
       seconds: 'seconds',
+      off: 'Off',
     },
     disconnect: {
       title: 'Disconnect Device',
