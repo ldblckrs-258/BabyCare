@@ -42,13 +42,36 @@ export function DeviceItem({ data }: DeviceItemProps) {
             )}
           </View>
           {data.device && (
-            <View className="mt-1 flex-row">
-              <Text className="text-xs text-gray-500">
-                Cry: {data.device.cryingThreshold}s • Prone: {data.device.proneThreshold}s • No
-                Blanket:
-                {data.device.noBlanketThreshold}s • Side: {data.device.sideThreshold}s
-              </Text>
-            </View>
+            <>
+              <View className="mt-1 flex-row items-center">
+                <Text className="text-xs text-gray-500 flex-1">
+                  {t('devices.shortThreshold.cry')}:{' '}
+                  {data.device.cryingThreshold
+                    ? data.device.cryingThreshold + 's'
+                    : t('devices.thresholds.off')}
+                </Text>
+                <Text className="text-xs text-gray-500 flex-1">
+                  {t('devices.shortThreshold.side')}:{' '}
+                  {data.device.sideThreshold
+                    ? data.device.sideThreshold + 's'
+                    : t('devices.thresholds.off')}
+                </Text>
+              </View>
+              <View className="mt-1 flex-row items-center">
+                <Text className="text-xs text-gray-500 flex-1">
+                  {t('devices.shortThreshold.prone')}:{' '}
+                  {data.device.proneThreshold
+                    ? data.device.proneThreshold + 's'
+                    : t('devices.thresholds.off')}
+                </Text>
+                <Text className="text-xs text-gray-500 flex-1">
+                  {t('devices.shortThreshold.noBlanket')}:{' '}
+                  {data.device.noBlanketThreshold
+                    ? data.device.noBlanketThreshold + 's'
+                    : t('devices.thresholds.off')}{' '}
+                </Text>
+              </View>
+            </>
           )}
         </View>
         <View

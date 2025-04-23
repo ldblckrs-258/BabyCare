@@ -90,7 +90,6 @@ export async function registerForPushNotificationsAsync() {
   // Get FCM token
   try {
     const token = await messaging().getToken();
-    console.log('FCM Token:', token);
     return token;
   } catch (error) {
     console.error('Error getting FCM token:', error);

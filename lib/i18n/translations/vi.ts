@@ -165,6 +165,7 @@ export const vi = {
     rename: {
       title: 'Đổi tên thiết bị',
       message: 'Nhập tên mới cho thiết bị này:',
+      placeholder: 'Tên thiết bị',
     },
     threshold: {
       title: 'Ngưỡng cảnh báo',
@@ -182,6 +183,12 @@ export const vi = {
       noBlanketDescription: 'Ngưỡng cảnh báo khi bé không đắp chăn tính bằng giây',
       seconds: 'giây',
       off: 'Tắt',
+    },
+    shortThreshold: {
+      cry: 'Khóc',
+      side: 'Nằm nghiêng',
+      prone: 'Nằm sấp',
+      noBlanket: 'Không đắp chăn',
     },
     disconnect: {
       title: 'Ngắt kết nối thiết bị',

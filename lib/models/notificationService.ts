@@ -2,7 +2,15 @@ import {
   registerForPushNotificationsAsync,
   setupNotificationHandlers,
 } from '@/lib/pushNotification';
-import firestore from '@react-native-firebase/firestore';
+import {
+  arrayRemove,
+  arrayUnion,
+  doc,
+  getFirestore,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+} from '@react-native-firebase/firestore';
 import messaging from '@react-native-firebase/messaging';
 
 export class NotificationService {
@@ -12,21 +20,22 @@ export class NotificationService {
   static async initialize(userId: string) {
     try {
       const token = await registerForPushNotificationsAsync();
-      if (token) {
-        this.currentToken = token;
-        const userRef = firestore().collection('users').doc(userId);
-
-        await userRef.set(
-          {
-            fcmTokens: firestore.FieldValue.arrayUnion(token),
-            updatedAt: firestore.FieldValue.serverTimestamp(),
-          },
-          { merge: true }
-        );
-
-        console.log('Push notification token saved:', token);
+      // Nếu token đã được đăng ký rồi thì không đăng ký lại nữa
+      if (!token || token === this.currentToken) {
+        // Không log lại nếu đã đăng ký
+        return;
       }
-
+      this.currentToken = token;
+      const firestore = getFirestore();
+      const userRef = doc(firestore, 'users', userId);
+      await setDoc(
+        userRef,
+        {
+          fcmTokens: arrayUnion(token),
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
       this.cleanupFn = setupNotificationHandlers();
     } catch (error) {
       console.error('NotificationService initialization error:', error);
@@ -38,18 +47,17 @@ export class NotificationService {
       this.cleanupFn();
       this.cleanupFn = null;
     }
-
     if (userId && this.currentToken) {
       try {
-        const userRef = firestore().collection('users').doc(userId);
-        await userRef.update({
-          fcmTokens: firestore.FieldValue.arrayRemove(this.currentToken),
+        const firestore = getFirestore();
+        const userRef = doc(firestore, 'users', userId);
+        await updateDoc(userRef, {
+          fcmTokens: arrayRemove(this.currentToken),
         });
         console.log('Token removed on logout:', this.currentToken);
       } catch (err) {
         console.error('Error removing token on logout:', err);
       }
-
       this.currentToken = null;
     }
   }
@@ -57,21 +65,17 @@ export class NotificationService {
   static listenForTokenRefresh(userId: string) {
     messaging().onTokenRefresh(async (newToken) => {
       try {
-        const userRef = firestore().collection('users').doc(userId);
-
-        // Xoá token cũ
+        const firestore = getFirestore();
+        const userRef = doc(firestore, 'users', userId);
         if (this.currentToken) {
-          await userRef.update({
-            fcmTokens: firestore.FieldValue.arrayRemove(this.currentToken),
+          await updateDoc(userRef, {
+            fcmTokens: arrayRemove(this.currentToken),
           });
         }
-
-        // Lưu token mới
-        await userRef.update({
-          fcmTokens: firestore.FieldValue.arrayUnion(newToken),
-          updatedAt: firestore.FieldValue.serverTimestamp(),
+        await updateDoc(userRef, {
+          fcmTokens: arrayUnion(newToken),
+          updatedAt: serverTimestamp(),
         });
-
         this.currentToken = newToken;
         console.log('Token refreshed:', newToken);
       } catch (err) {

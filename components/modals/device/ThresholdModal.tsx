@@ -3,7 +3,7 @@ import { useTranslation } from '@/lib/hooks/useTranslation';
 import { Picker } from '@react-native-picker/picker';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { Button, Modal, Portal } from 'react-native-paper';
+import { ActivityIndicator, Button, Modal, Portal } from 'react-native-paper';
 
 type ThresholdModalProps = {
   visible: boolean;
@@ -27,17 +27,17 @@ export function ThresholdModal({
   const { t } = useTranslation();
   const { updateDeviceThresholds } = useDeviceHook();
 
-  const [cryingThreshold, setCryingThreshold] = useState(initialCryingThreshold || 60);
-  const [sideThreshold, setSideThreshold] = useState(initialSideThreshold || 30);
-  const [proneThreshold, setProneThreshold] = useState(initialProneThreshold || 30);
-  const [noBlanketThreshold, setNoBlanketThreshold] = useState(initialNoBlanketThreshold || 30);
-
+  const [cryingThreshold, setCryingThreshold] = useState(initialCryingThreshold);
+  const [sideThreshold, setSideThreshold] = useState(initialSideThreshold);
+  const [proneThreshold, setProneThreshold] = useState(initialProneThreshold);
+  const [noBlanketThreshold, setNoBlanketThreshold] = useState(initialNoBlanketThreshold);
+  const [loading, setLoading] = useState(false);
   // Update state when props change
   useEffect(() => {
-    setCryingThreshold(initialCryingThreshold || 60);
-    setSideThreshold(initialSideThreshold || 30);
-    setProneThreshold(initialProneThreshold || 30);
-    setNoBlanketThreshold(initialNoBlanketThreshold || 30);
+    setCryingThreshold(initialCryingThreshold);
+    setSideThreshold(initialSideThreshold);
+    setProneThreshold(initialProneThreshold);
+    setNoBlanketThreshold(initialNoBlanketThreshold);
   }, [
     initialCryingThreshold,
     initialSideThreshold,
@@ -46,12 +46,14 @@ export function ThresholdModal({
   ]);
 
   const handleSave = async () => {
+    setLoading(true);
     await updateDeviceThresholds(deviceId, {
       cryingThreshold,
       sideThreshold,
       proneThreshold,
       noBlanketThreshold,
     });
+    setLoading(false);
     onClose();
   };
   // Generate picker items for different ranges
@@ -104,13 +106,15 @@ export function ThresholdModal({
                 {t('devices.thresholds.cryingDescription')}
               </Text>
             </View>
-            <View style={styles.pickerContainer}>
-              <Picker
-                selectedValue={cryingThreshold}
-                onValueChange={(value) => setCryingThreshold(value)}
-                style={styles.picker}>
-                {generatePickerItems(10, 240, 10)}
-              </Picker>
+            <View>
+              <View style={styles.pickerContainer}>
+                <Picker
+                  selectedValue={cryingThreshold}
+                  onValueChange={(value) => setCryingThreshold(value)}
+                  style={styles.picker}>
+                  {generatePickerItems(10, 240, 10)}
+                </Picker>
+              </View>
             </View>
           </View>
 
@@ -123,13 +127,15 @@ export function ThresholdModal({
                 {t('devices.thresholds.sideDescription')}
               </Text>
             </View>
-            <View style={styles.pickerContainer}>
-              <Picker
-                selectedValue={sideThreshold}
-                onValueChange={(value) => setSideThreshold(value)}
-                style={styles.picker}>
-                {generatePickerItems(5, 180, 5)}
-              </Picker>
+            <View>
+              <View style={styles.pickerContainer}>
+                <Picker
+                  selectedValue={sideThreshold}
+                  onValueChange={(value) => setSideThreshold(value)}
+                  style={styles.picker}>
+                  {generatePickerItems(5, 180, 5)}
+                </Picker>
+              </View>
             </View>
           </View>
 
@@ -142,13 +148,15 @@ export function ThresholdModal({
                 {t('devices.thresholds.proneDescription')}
               </Text>
             </View>
-            <View style={styles.pickerContainer}>
-              <Picker
-                selectedValue={proneThreshold}
-                onValueChange={(value) => setProneThreshold(value)}
-                style={styles.picker}>
-                {generatePickerItems(5, 180, 5)}
-              </Picker>
+            <View>
+              <View style={styles.pickerContainer}>
+                <Picker
+                  selectedValue={proneThreshold}
+                  onValueChange={(value) => setProneThreshold(value)}
+                  style={styles.picker}>
+                  {generatePickerItems(5, 180, 5)}
+                </Picker>
+              </View>
             </View>
           </View>
 
@@ -161,22 +169,29 @@ export function ThresholdModal({
                 {t('devices.thresholds.noBlanketDescription')}
               </Text>
             </View>
-            <View style={styles.pickerContainer}>
-              <Picker
-                selectedValue={noBlanketThreshold}
-                onValueChange={(value) => setNoBlanketThreshold(value)}
-                style={styles.picker}>
-                {generatePickerItems(10, 360, 10)}
-              </Picker>
+            <View>
+              <View style={styles.pickerContainer}>
+                <Picker
+                  selectedValue={noBlanketThreshold}
+                  onValueChange={(value) => setNoBlanketThreshold(value)}
+                  style={styles.picker}>
+                  {generatePickerItems(10, 360, 10)}
+                </Picker>
+              </View>
             </View>
           </View>
 
           <View className="mt-4 flex-row justify-end gap-4">
-            <Button mode="outlined" textColor="#666" onPress={onClose}>
+            <Button mode="outlined" textColor="#666" onPress={onClose} disabled={loading}>
               {t('common.cancel')}
             </Button>
-            <Button mode="contained" buttonColor="#3d8d7a" onPress={handleSave}>
-              {t('common.save')}
+            <Button
+              className="w-[80px]"
+              mode="contained"
+              buttonColor="#3d8d7a"
+              onPress={handleSave}
+              disabled={loading}>
+              {loading ? <ActivityIndicator color="white" size={20} /> : t('common.save')}
             </Button>
           </View>
         </View>
@@ -193,6 +208,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     marginHorizontal: 0,
     paddingVertical: 0,
+    marginVertical: 'auto',
   },
   picker: {
     height: 36,

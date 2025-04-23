@@ -186,6 +186,7 @@ export const en = {
     rename: {
       title: 'Rename Device',
       message: 'Enter a new name for this device:',
+      placeholder: 'Enter device name',
     },
     threshold: {
       title: 'Alert Threshold',
@@ -203,6 +204,12 @@ export const en = {
       noBlanketDescription: 'Threshold for blanket detection in seconds',
       seconds: 'seconds',
       off: 'Off',
+    },
+    shortThreshold: {
+      cry: 'Cry',
+      side: 'Side',
+      prone: 'Prone',
+      noBlanket: 'No Blanket',
     },
     disconnect: {
       title: 'Disconnect Device',

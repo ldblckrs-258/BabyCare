@@ -1,5 +1,15 @@
 import { Device } from '@/stores/deviceStore';
-import firestore from '@react-native-firebase/firestore';
+import {
+  collection,
+  doc,
+  getDoc,
+  getFirestore,
+  onSnapshot,
+  query,
+  setDoc,
+  updateDoc,
+  where,
+} from '@react-native-firebase/firestore';
 
 const DEFAULT_CRYING_THRESHOLD = 60; // secs
 const DEFAULT_POSITION_THRESHOLD = 30; // secs
@@ -13,22 +23,22 @@ export class DeviceService {
    */
   static async getDevice(deviceId: string): Promise<Device | null> {
     try {
-      const deviceRef = firestore().collection('devices').doc(deviceId);
-      const deviceSnap = await deviceRef.get();
+      const firestore = getFirestore();
+      const deviceRef = doc(firestore, 'devices', deviceId);
+      const deviceSnap = await getDoc(deviceRef);
 
       if (!deviceSnap.exists) {
         return null;
       }
-
       const deviceData = deviceSnap.data() as Device;
       return {
         id: deviceData.id,
         uri: deviceData.uri || '',
         isOnline: deviceData.isOnline !== undefined ? deviceData.isOnline : true,
-        cryingThreshold: deviceData.cryingThreshold || DEFAULT_CRYING_THRESHOLD,
-        sideThreshold: deviceData.sideThreshold || DEFAULT_POSITION_THRESHOLD,
-        proneThreshold: deviceData.proneThreshold || DEFAULT_POSITION_THRESHOLD,
-        noBlanketThreshold: deviceData.noBlanketThreshold || DEFAULT_POSITION_THRESHOLD,
+        cryingThreshold: deviceData.cryingThreshold,
+        sideThreshold: deviceData.sideThreshold,
+        proneThreshold: deviceData.proneThreshold,
+        noBlanketThreshold: deviceData.noBlanketThreshold,
         createdAt: deviceData.createdAt ? new Date(deviceData.createdAt) : new Date(),
         updatedAt: deviceData.updatedAt ? new Date(deviceData.updatedAt) : undefined,
       };
@@ -46,23 +56,22 @@ export class DeviceService {
     deviceData?: Partial<Device>
   ): Promise<Device> {
     try {
-      const deviceRef = firestore().collection('devices').doc(deviceId);
-      const deviceSnap = await deviceRef.get();
-
+      const firestore = getFirestore();
+      const deviceRef = doc(firestore, 'devices', deviceId);
+      const deviceSnap = await getDoc(deviceRef);
       if (!deviceSnap.exists) {
         // Create new device
         const newDevice: Device = {
           id: deviceId,
           uri: deviceData?.uri || '',
           isOnline: deviceData?.isOnline !== undefined ? deviceData.isOnline : true,
-          cryingThreshold: deviceData?.cryingThreshold || DEFAULT_CRYING_THRESHOLD,
-          sideThreshold: deviceData?.sideThreshold || DEFAULT_POSITION_THRESHOLD,
-          proneThreshold: deviceData?.proneThreshold || DEFAULT_POSITION_THRESHOLD,
-          noBlanketThreshold: deviceData?.noBlanketThreshold || DEFAULT_POSITION_THRESHOLD,
+          cryingThreshold: DEFAULT_CRYING_THRESHOLD,
+          sideThreshold: DEFAULT_POSITION_THRESHOLD,
+          proneThreshold: DEFAULT_POSITION_THRESHOLD,
+          noBlanketThreshold: DEFAULT_POSITION_THRESHOLD,
           createdAt: new Date(),
         };
-
-        await deviceRef.set(newDevice);
+        await setDoc(deviceRef, newDevice);
         return newDevice;
       } else {
         // Return existing device data
@@ -71,10 +80,10 @@ export class DeviceService {
           id: deviceId,
           uri: existingData.uri || '',
           isOnline: existingData.isOnline !== undefined ? existingData.isOnline : true,
-          cryingThreshold: existingData.cryingThreshold || DEFAULT_CRYING_THRESHOLD,
-          sideThreshold: existingData.sideThreshold || DEFAULT_POSITION_THRESHOLD,
-          proneThreshold: existingData.proneThreshold || DEFAULT_POSITION_THRESHOLD,
-          noBlanketThreshold: existingData.noBlanketThreshold || DEFAULT_POSITION_THRESHOLD,
+          cryingThreshold: existingData.cryingThreshold,
+          sideThreshold: existingData.sideThreshold,
+          proneThreshold: existingData.proneThreshold,
+          noBlanketThreshold: existingData.noBlanketThreshold,
           createdAt: existingData.createdAt ? new Date(existingData.createdAt) : new Date(),
           updatedAt: existingData.updatedAt ? new Date(existingData.updatedAt) : undefined,
         };
@@ -90,8 +99,9 @@ export class DeviceService {
    */
   static async updateDevice(deviceId: string, updates: Partial<Device>): Promise<void> {
     try {
-      const deviceRef = firestore().collection('devices').doc(deviceId);
-      await deviceRef.update({
+      const firestore = getFirestore();
+      const deviceRef = doc(firestore, 'devices', deviceId);
+      await updateDoc(deviceRef, {
         ...updates,
         updatedAt: new Date(),
       });
@@ -109,32 +119,27 @@ export class DeviceService {
     if (deviceIds.length === 0) {
       return () => {}; // No-op if no device IDs
     }
-
-    return firestore()
-      .collection('devices')
-      .where('id', 'in', deviceIds)
-      .onSnapshot((snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-          const deviceData = change.doc.data() as Device;
-
-          if (change.type === 'added' || change.type === 'modified') {
-            const device: Device = {
-              id: deviceData.id,
-              uri: deviceData.uri || '',
-              isOnline: deviceData.isOnline !== undefined ? deviceData.isOnline : true,
-              cryingThreshold: deviceData.cryingThreshold || DEFAULT_CRYING_THRESHOLD,
-              sideThreshold: deviceData.sideThreshold || DEFAULT_POSITION_THRESHOLD,
-              proneThreshold: deviceData.proneThreshold || DEFAULT_POSITION_THRESHOLD,
-              noBlanketThreshold: deviceData.noBlanketThreshold || DEFAULT_POSITION_THRESHOLD,
-              createdAt: deviceData.createdAt ? new Date(deviceData.createdAt) : new Date(),
-              updatedAt: deviceData.updatedAt ? new Date(deviceData.updatedAt) : undefined,
-            };
-
-            onUpdate(device);
-          }
-        });
+    const firestore = getFirestore();
+    const devicesCol = collection(firestore, 'devices');
+    const q = query(devicesCol, where('id', 'in', deviceIds));
+    return onSnapshot(q, (snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        const deviceData = change.doc.data() as Device;
+        if (change.type === 'added' || change.type === 'modified') {
+          const device: Device = {
+            id: deviceData.id,
+            uri: deviceData.uri || '',
+            isOnline: deviceData.isOnline !== undefined ? deviceData.isOnline : true,
+            cryingThreshold: deviceData.cryingThreshold,
+            sideThreshold: deviceData.sideThreshold,
+            proneThreshold: deviceData.proneThreshold,
+            noBlanketThreshold: deviceData.noBlanketThreshold,
+            createdAt: deviceData.createdAt ? new Date(deviceData.createdAt) : new Date(),
+            updatedAt: deviceData.updatedAt ? new Date(deviceData.updatedAt) : undefined,
+          };
+          onUpdate(device);
+        }
       });
+    });
   }
 }
-
-export { DEFAULT_CRYING_THRESHOLD, DEFAULT_POSITION_THRESHOLD };

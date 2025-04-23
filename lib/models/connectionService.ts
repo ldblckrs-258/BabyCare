@@ -1,10 +1,11 @@
-import { firestore } from '@/lib/firebase';
 import { Connection } from '@/stores/connectionStore';
 import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   getDocs,
+  getFirestore,
   onSnapshot,
   query,
   setDoc,
@@ -23,13 +24,12 @@ export class ConnectionService {
    */
   static async getUserConnections(userId: string): Promise<Connection[]> {
     try {
+      const firestore = getFirestore();
       const connectionsQuery = query(
         collection(firestore, 'connections'),
         where('userId', '==', userId)
       );
-
       const snapshot = await getDocs(connectionsQuery);
-
       return snapshot.docs.map((doc) => {
         const data = doc.data();
         return {
@@ -56,6 +56,7 @@ export class ConnectionService {
     name?: string
   ): Promise<Connection> {
     try {
+      const firestore = getFirestore();
       const connectionId = uuidv4();
       const newConnection: Connection = {
         id: connectionId,
@@ -64,11 +65,9 @@ export class ConnectionService {
         name: name || `Device ${Date.now()}`,
         createdAt: new Date(),
       };
-
       // Add connection to Firestore
       const connectionRef = doc(firestore, 'connections', connectionId);
       await setDoc(connectionRef, newConnection);
-
       return newConnection;
     } catch (err) {
       console.error('Error creating connection:', err);
@@ -81,6 +80,7 @@ export class ConnectionService {
    */
   static async updateConnection(connectionId: string, updates: Partial<Connection>): Promise<void> {
     try {
+      const firestore = getFirestore();
       const connectionRef = doc(firestore, 'connections', connectionId);
       await updateDoc(connectionRef, {
         ...updates,
@@ -97,6 +97,7 @@ export class ConnectionService {
    */
   static async deleteConnection(connectionId: string): Promise<void> {
     try {
+      const firestore = getFirestore();
       const connectionRef = doc(firestore, 'connections', connectionId);
       await deleteDoc(connectionRef);
     } catch (err) {
@@ -115,16 +116,15 @@ export class ConnectionService {
     onModified: (connection: Connection) => void,
     onRemoved: (connectionId: string) => void
   ): () => void {
+    const firestore = getFirestore();
     const connectionsQuery = query(
       collection(firestore, 'connections'),
       where('userId', '==', userId)
     );
-
     return onSnapshot(connectionsQuery, (snapshot) => {
       // Handle initial load and updates
       snapshot.docChanges().forEach((change) => {
         const connectionData = change.doc.data() as Connection;
-
         if (change.type === 'added' || change.type === 'modified') {
           const connection: Connection = {
             id: connectionData.id,
@@ -134,7 +134,6 @@ export class ConnectionService {
             createdAt: connectionData.createdAt ? new Date(connectionData.createdAt) : new Date(),
             updatedAt: connectionData.updatedAt ? new Date(connectionData.updatedAt) : undefined,
           };
-
           if (change.type === 'added') {
             onAdded(connection);
           } else {

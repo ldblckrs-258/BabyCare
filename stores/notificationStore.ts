@@ -1,5 +1,15 @@
 import { Notification } from '@/lib/notifications';
-import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
+import {
+  collection,
+  doc,
+  getFirestore,
+  onSnapshot,
+  orderBy,
+  query,
+  updateDoc,
+  where,
+  writeBatch,
+} from '@react-native-firebase/firestore';
 import { create } from 'zustand';
 
 interface NotificationState {
@@ -21,7 +31,9 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
 
   markAsRead: async (id: string) => {
     try {
-      await firestore().collection('notifications').doc(id).update({ read: true });
+      const firestore = getFirestore();
+      const notificationRef = doc(firestore, 'notifications', id);
+      await updateDoc(notificationRef, { read: true });
       set((state) => ({
         notifications: state.notifications.map((n) => (n.id === id ? { ...n, read: true } : n)),
         unreadCount: state.unreadCount - 1,
@@ -33,15 +45,15 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
 
   markAllAsRead: async () => {
     try {
-      const batch = firestore().batch();
+      const firestore = getFirestore();
+      const batch = writeBatch(firestore);
       get()
         .notifications.filter((n) => !n.read)
         .forEach((n) => {
-          const ref = firestore().collection('notifications').doc(n.id);
+          const ref = doc(firestore, 'notifications', n.id);
           batch.update(ref, { read: true });
         });
       await batch.commit();
-
       set((state) => ({
         notifications: state.notifications.map((n) => ({ ...n, read: true })),
         unreadCount: 0,
@@ -53,37 +65,31 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
 
   subscribeToNotifications: (userId: string) => {
     set({ isLoading: true });
-
-    // Create query for user's notifications, ordered by timestamp
-    const unsubscribe = firestore()
-      .collection('notifications')
-      .where('userId', '==', userId)
-      .orderBy('timestamp', 'desc')
-      .onSnapshot(
-        (snapshot: FirebaseFirestoreTypes.QuerySnapshot) => {
-          const notifications = snapshot.docs.map(
-            (doc: FirebaseFirestoreTypes.DocumentSnapshot) => ({
-              id: doc.id,
-              ...doc.data(),
-            })
-          ) as Notification[];
-
-          set({
-            notifications,
-            unreadCount: notifications.filter((n) => !n.read).length,
-            isLoading: false,
-            error: null,
-          });
-        },
-        (error: Error) => {
-          console.error('Error fetching notifications:', error);
-          set({
-            error: 'Failed to load notifications',
-            isLoading: false,
-          });
-        }
-      );
-
+    const firestore = getFirestore();
+    const notificationsCol = collection(firestore, 'notifications');
+    const q = query(notificationsCol, where('userId', '==', userId), orderBy('timestamp', 'desc'));
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const notifications = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Notification[];
+        set({
+          notifications,
+          unreadCount: notifications.filter((n) => !n.read).length,
+          isLoading: false,
+          error: null,
+        });
+      },
+      (error: Error) => {
+        console.error('Error fetching notifications:', error);
+        set({
+          error: 'Failed to load notifications',
+          isLoading: false,
+        });
+      }
+    );
     return unsubscribe;
   },
 }));

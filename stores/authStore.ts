@@ -93,14 +93,14 @@ export const useAuthStore = create<AuthState>()(
           try {
             set({ loading: true, error: null });
             await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-            const signInResult = await GoogleSignin.signIn();
+            const userInfo = await GoogleSignin.signIn();
+            const { idToken } = await GoogleSignin.getTokens();
 
-            const { accessToken } = await GoogleSignin.getTokens();
-            if (!accessToken) {
-              set({ error: 'No access token present in Google Sign-In response', loading: false });
-              return false;
+            if (!idToken) {
+              throw new Error('No idToken returned from Google Sign-In');
             }
-            const googleCredential = auth.GoogleAuthProvider.credential(accessToken);
+
+            const googleCredential = auth.GoogleAuthProvider.credential(idToken);
             const userCredential = await auth().signInWithCredential(googleCredential);
 
             set({ user: userCredential.user, loading: false });
