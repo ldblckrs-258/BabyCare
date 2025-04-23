@@ -15,6 +15,9 @@ export const en = {
     connecting: 'Connecting',
     disconnected: 'Disconnected',
     notConnected: 'Not connected',
+    noDevices: 'No devices connected',
+    connectFirst: 'Go to settings to connect your device first',
+    deviceSettings: 'Device Settings',
   },
   home: {
     title: {
@@ -24,8 +27,7 @@ export const en = {
     devices: 'Devices',
     noDevices: {
       title: 'No devices connected',
-      description:
-        'Connect your BabyCare device to monitor your baby\'s sleep and crying patterns.',
+      description: "Connect your BabyCare device to monitor your baby's sleep and crying patterns.",
       button: 'Connect a Device',
     },
     crying: 'Crying',
@@ -79,7 +81,7 @@ export const en = {
     privacyPolicy: 'Privacy Policy',
     login: 'Login',
     register: 'Register',
-  },  
+  },
   settings: {
     title: 'Settings',
     profile: {
@@ -105,9 +107,10 @@ export const en = {
     notifications: {
       title: 'Notifications',
       enable: 'Enable Notifications',
-      enableDescription: 'Enable notifications to receive alerts about your baby\'s status',
+      enableDescription: "Enable notifications to receive alerts about your baby's status",
       enableDailyReport: 'Enable Daily Report',
-      enableDailyReportDescription: 'Receive daily summary reports about your baby\'s sleep and crying patterns',
+      enableDailyReportDescription:
+        "Receive daily summary reports about your baby's sleep and crying patterns",
       cryDetection: {
         title: 'Cry Detection Threshold',
         description: 'Alert when baby is crying continuously',
@@ -176,7 +179,8 @@ export const en = {
     addNewDevice: 'Add a New Device',
     scanQR: 'Scan QR Code',
     scanDescription: 'Scan the QR code on your device to connect',
-    helpText: "Make sure your BabyCare device is turned on and within range. If you're having trouble connecting, try restarting the device.",
+    helpText:
+      "Make sure your BabyCare device is turned on and within range. If you're having trouble connecting, try restarting the device.",
     connectedDevices: 'Connected Devices',
     noDevicesConnected: 'No devices connected',
     rename: {
@@ -186,7 +190,8 @@ export const en = {
     threshold: {
       title: 'Alert Threshold',
       message: 'Set alert threshold in minutes:',
-    },    thresholds: {
+    },
+    thresholds: {
       title: 'Alert Thresholds',
       crying: 'Crying Threshold',
       cryingDescription: 'Threshold for crying detection in seconds',
@@ -293,8 +298,8 @@ export const en = {
       cryAlert: 'Cry Alert',
       positionAlert: 'Sleep Position Alert',
       dailyReport: 'Daily Report',
-      system: 'System Notification'
-    }
+      system: 'System Notification',
+    },
   },
   streaming: {
     title: 'Streaming Camera',
@@ -321,7 +326,7 @@ export const en = {
     },
     errorMessage: {
       connectionFailed: 'Could not connect to the stream',
-    }
+    },
   },
   statistics: {
     title: 'Statistics',
@@ -336,7 +341,7 @@ export const en = {
     longestPeriod: 'Longest period',
     longestDuration: 'Longest duration',
     correlate: 'Correlate',
-    min: 'min'
+    min: 'min',
   },
   register: {
     title: 'Register',
@@ -355,6 +360,6 @@ export const en = {
     fillAllFields: 'Please fill in all fields',
     passwordsMismatch: 'Passwords do not match',
     agreeToTerms: 'Please agree to Terms & Conditions',
-    error: 'An error occurred during registration'
-  }
-}
+    error: 'An error occurred during registration',
+  },
+};

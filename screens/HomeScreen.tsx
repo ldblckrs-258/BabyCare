@@ -1,5 +1,6 @@
 import type { RootStackParamList } from '../types/navigation';
-import { DeviceCard, NoDevicesCard } from '@/components/dashboard';
+import { EmptyCard } from '@/components/EmptyCard';
+import { DeviceCard } from '@/components/dashboard';
 import { useDeviceHook } from '@/lib/hooks/useDeviceHook';
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import { useAuthStore } from '@/stores/authStore';
@@ -13,7 +14,8 @@ export default function HomeScreen() {
   const { t } = useTranslation();
   const { user } = useAuthStore();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { devices, loading, error, getConnectionByDeviceId, selectConnection } = useDeviceHook();
+  const { connectedDevices, loading, error, getConnectionByDeviceId, selectConnection } =
+    useDeviceHook();
 
   // State for the UI
   const [refreshing, setRefreshing] = useState(false);
@@ -82,9 +84,9 @@ export default function HomeScreen() {
       {/* Devices section */}
       {!loading && (
         <View
-          className={`flex-1 px-2 ${devices.length === 0 ? 'flex items-center justify-center pb-32' : ''}`}>
-          {devices.length === 0 ? (
-            <NoDevicesCard />
+          className={`flex-1 px-2 ${connectedDevices.length === 0 ? 'flex items-center justify-center pb-32' : ''}`}>
+          {connectedDevices.length === 0 ? (
+            <EmptyCard />
           ) : (
             <>
               {/* Device cards */}
@@ -93,21 +95,14 @@ export default function HomeScreen() {
                   {t('home.devices')}
                 </Text>
 
-                {devices
-                  .sort((a, b) => (b.isOnline ? 1 : 0) - (a.isOnline ? 1 : 0))
-                  .map((device) => {
-                    const connection = getConnectionByDeviceId(device.id);
+                {connectedDevices
+                  .sort((a, b) => (b.device.isOnline ? 1 : 0) - (a.device.isOnline ? 1 : 0))
+                  .map((data) => {
+                    const connection = getConnectionByDeviceId(data.device.id);
 
                     if (!connection) return null;
 
-                    return (
-                      <DeviceCard
-                        key={device.id}
-                        device={device}
-                        connection={connection}
-                        onPress={handleSelectDevice}
-                      />
-                    );
+                    return <DeviceCard data={data} onPress={handleSelectDevice} />;
                   })}
               </View>
             </>

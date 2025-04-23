@@ -1,3 +1,4 @@
+import { EmptyCard } from '@/components/EmptyCard';
 import {
   BadPositionChart,
   CorrelationChart,
@@ -7,6 +8,7 @@ import {
 } from '@/components/statistics';
 import { useDeviceHook } from '@/lib/hooks/useDeviceHook';
 import { useTranslation } from '@/lib/hooks/useTranslation';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useEffect, useMemo, useState } from 'react';
 import { SafeAreaView, ScrollView, Text, View } from 'react-native';
 
@@ -93,12 +95,22 @@ export default function StatisticsScreen() {
     // In a real app, you would fetch data specific to the selected device here
   };
 
+  if (connections.length === 0) {
+    return (
+      <SafeAreaView className="flex-1 bg-neutral-50 pt-12">
+        <View className="px-5 py-4 flex-row items-center justify-start">
+          <Text className="text-2xl font-bold text-primary-600">{t('statistics.title')}</Text>
+        </View>
+        <EmptyCard />
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView className="flex-1 bg-neutral-50 pt-12">
       {/* Header */}
       <View className="px-5 py-4 flex-row items-center justify-between">
         <Text className="text-2xl font-bold text-primary-600">{t('statistics.title')}</Text>
-
         {/* Device Selector Dropdown */}
         <DeviceSelector selectedDeviceId={selectedDeviceId} onSelectDevice={handleSelectDevice} />
       </View>

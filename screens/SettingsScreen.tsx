@@ -3,8 +3,8 @@ import { NotificationModal } from '../components/modals/NotificationModal';
 import { PrivacyTermsModal } from '../components/modals/PrivacyTermsModal';
 import { ProfileModal } from '../components/modals/ProfileModal';
 import { useAuthStore } from '../stores/authStore';
-import { useDeviceStore } from '../stores/deviceStore';
 import { useSettingsStore } from '../stores/settingsStore';
+import { useDeviceHook } from '@/lib/hooks';
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import { RootStackParamList } from '@/types/navigation';
 import EntypoIcons from '@expo/vector-icons/Entypo';
@@ -25,12 +25,12 @@ export default function SettingsScreen() {
   const { t } = useTranslation();
   const { user } = useAuthStore();
   const { language, setLanguage } = useSettingsStore();
-  const { devices } = useDeviceStore();
   // Modal visibility states
   const [deviceModalVisible, setDeviceModalVisible] = useState(false);
   const [notificationModalVisible, setNotificationModalVisible] = useState(false);
   const [privacyModalVisible, setPrivacyModalVisible] = useState(false);
   const [profileModalVisible, setProfileModalVisible] = useState(false);
+  const { connectedDevices } = useDeviceHook();
 
   // Language dropdown state
   const [languageDropdownOpen, setLanguageDropdownOpen] = useState(false);
@@ -103,7 +103,7 @@ export default function SettingsScreen() {
             </View>
             <View className="flex-row items-center">
               <Text className="mr-2 text-sm text-gray-400">
-                {devices.length > 0
+                {connectedDevices.length > 0
                   ? t('settings.devices.connected')
                   : t('settings.devices.notConnected')}
               </Text>

@@ -29,20 +29,20 @@ export interface DeviceNotification {
   type: 'Side' | 'Prone' | 'Blanket' | 'NoBlanket' | 'Crying';
   duration: number;
   time: Date;
-  imageUrl: string;
+  imageUrl?: string;
 }
 
 interface DeviceState {
   devices: Device[];
   events: DeviceEvent[];
   notifications: DeviceNotification[];
-  
+
   // Device management actions
   addDevice: (device: Device) => void;
   getDeviceById: (deviceId: string) => Device | undefined;
   updateDevice: (deviceId: string, updates: Partial<Device>) => void;
   clearAllDevices: () => void;
-  
+
   // Event and notification actions
   addEvent: (event: DeviceEvent) => void;
   getEventsByDeviceId: (deviceId: string) => DeviceEvent[];
@@ -52,7 +52,6 @@ interface DeviceState {
   clearNotifications: (deviceId?: string) => void;
 }
 
-
 export const useDeviceStore = create<DeviceState>()(
   persist(
     (set, get) => ({
@@ -60,12 +59,12 @@ export const useDeviceStore = create<DeviceState>()(
       events: [],
       notifications: [],
 
-      addDevice: (device) => 
+      addDevice: (device) =>
         set((state) => {
           // Only add if device doesn't already exist
-          if (!state.devices.some(d => d.id === device.id)) {
+          if (!state.devices.some((d) => d.id === device.id)) {
             return {
-              devices: [...state.devices, device]
+              devices: [...state.devices, device],
             };
           }
           return state;
@@ -73,57 +72,57 @@ export const useDeviceStore = create<DeviceState>()(
 
       getDeviceById: (deviceId: string) => {
         const state = get();
-        return state.devices.find(device => device.id === deviceId);
+        return state.devices.find((device) => device.id === deviceId);
       },
 
       updateDevice: (deviceId: string, updates) =>
         set((state) => ({
-          devices: state.devices.map(device => 
-            device.id === deviceId 
-              ? { ...device, ...updates, updatedAt: new Date() } 
-              : device
-          )
+          devices: state.devices.map((device) =>
+            device.id === deviceId ? { ...device, ...updates, updatedAt: new Date() } : device
+          ),
         })),
 
       clearAllDevices: () => set({ devices: [] }),
-      
+
       // Event management
-      addEvent: (event) => 
+      addEvent: (event) =>
         set((state) => ({
-          events: [...state.events, event]
+          events: [...state.events, event],
         })),
-        
+
       getEventsByDeviceId: (deviceId: string) => {
         const state = get();
-        return state.events.filter(event => event.deviceId === deviceId);
+        return state.events.filter((event) => event.deviceId === deviceId);
       },
-      
+
       // Notification management
-      addNotification: (notification) => 
+      addNotification: (notification) =>
         set((state) => ({
-          notifications: [...state.notifications, notification]
+          notifications: [...state.notifications, notification],
         })),
-        
+
       getNotificationsByDeviceId: (deviceId: string) => {
         const state = get();
-        return state.notifications.filter(notification => notification.deviceId === deviceId);
+        return state.notifications.filter((notification) => notification.deviceId === deviceId);
       },
-      
-      clearEvents: (deviceId) => 
+
+      clearEvents: (deviceId) =>
         set((state) => {
           if (deviceId) {
             return {
-              events: state.events.filter(event => event.deviceId !== deviceId)
+              events: state.events.filter((event) => event.deviceId !== deviceId),
             };
           }
           return { events: [] };
         }),
-        
-      clearNotifications: (deviceId) => 
+
+      clearNotifications: (deviceId) =>
         set((state) => {
           if (deviceId) {
             return {
-              notifications: state.notifications.filter(notification => notification.deviceId !== deviceId)
+              notifications: state.notifications.filter(
+                (notification) => notification.deviceId !== deviceId
+              ),
             };
           }
           return { notifications: [] };

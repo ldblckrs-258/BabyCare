@@ -15,6 +15,9 @@ export const vi = {
     connecting: 'Đang kết nối',
     disconnected: 'Ngắt kết nối',
     notConnected: 'Chưa kết nối',
+    noDevices: 'Không có thiết bị nào',
+    connectFirst: 'Mở phần cài đặt để kết nối thiết bị đầu tiên',
+    deviceSettings: 'Thiết lập thiết bị',
   },
   home: {
     title: {
@@ -74,7 +77,8 @@ export const vi = {
     privacyPolicy: 'Chính sách bảo mật',
     login: 'Đăng nhập',
     register: 'Đăng ký',
-  },  settings: {
+  },
+  settings: {
     title: 'Cài đặt',
     profile: {
       title: 'Hồ sơ',
@@ -146,7 +150,6 @@ export const vi = {
         content:
           'Nếu bạn có bất kỳ câu hỏi nào về Chính sách Quyền riêng tư hoặc Điều khoản Dịch vụ, vui lòng liên hệ với chúng tôi tại:',
       },
-    
     },
     version: 'Phiên bản',
   },
@@ -155,7 +158,8 @@ export const vi = {
     addNewDevice: 'Thêm thiết bị mới',
     scanQR: 'Quét mã QR',
     scanDescription: 'Quét mã QR trên thiết bị của bạn để kết nối',
-    helpText: 'Đảm bảo thiết bị BabyCare của bạn đã được bật và trong phạm vi kết nối. Nếu bạn gặp khó khăn trong việc kết nối, hãy thử khởi động lại thiết bị.',
+    helpText:
+      'Đảm bảo thiết bị BabyCare của bạn đã được bật và trong phạm vi kết nối. Nếu bạn gặp khó khăn trong việc kết nối, hãy thử khởi động lại thiết bị.',
     connectedDevices: 'Thiết bị đã kết nối',
     noDevicesConnected: 'Không có thiết bị được kết nối',
     rename: {
@@ -273,8 +277,8 @@ export const vi = {
       cryAlert: 'Cảnh báo khóc',
       positionAlert: 'Cảnh báo tư thế ngủ',
       dailyReport: 'Báo cáo hàng ngày',
-      system: 'Thông báo hệ thống'
-    }
+      system: 'Thông báo hệ thống',
+    },
   },
   streaming: {
     title: 'Theo dõi trực tiếp',
@@ -301,7 +305,7 @@ export const vi = {
     },
     errorMessage: {
       connectionFailed: 'Không thể kết nối đến stream',
-    }
+    },
   },
   statistics: {
     title: 'Thống kê',
@@ -316,7 +320,7 @@ export const vi = {
     longestPeriod: 'Giai đoạn dài nhất',
     longestDuration: 'Thời lượng dài nhất',
     correlate: 'Tương quan',
-    min: 'phút'
+    min: 'phút',
   },
   register: {
     title: 'Đăng ký',
@@ -335,6 +339,6 @@ export const vi = {
     fillAllFields: 'Vui lòng điền đầy đủ thông tin',
     passwordsMismatch: 'Mật khẩu không khớp',
     agreeToTerms: 'Vui lòng đồng ý với Điều khoản & Điều kiện',
-    error: 'Đã xảy ra lỗi trong quá trình đăng ký'
-  }
-}
+    error: 'Đã xảy ra lỗi trong quá trình đăng ký',
+  },
+};

@@ -1,28 +1,31 @@
 import { RenameModal } from './RenameModal';
 import { ThresholdModal } from './ThresholdModal';
-import { useDeviceHook } from '@/lib/hooks/useDeviceHook';
+import { DeviceWithConnection, useDeviceHook } from '@/lib/hooks/useDeviceHook';
 import { useTranslation } from '@/lib/hooks/useTranslation';
-import { Connection } from '@/stores/connectionStore';
-import { Device } from '@/stores/deviceStore';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useNavigation } from '@react-navigation/native';
 import { useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { Menu } from 'react-native-paper';
 
 type DeviceItemProps = {
-  connection: Connection;
-  device?: Device;
+  data: DeviceWithConnection;
 };
 
-export function DeviceItem({ connection, device }: DeviceItemProps) {
+export function DeviceItem({ data }: DeviceItemProps) {
   const { t } = useTranslation();
   const { disconnectDevice } = useDeviceHook();
+  const navigation = useNavigation();
   const [menuVisible, setMenuVisible] = useState(false);
   const [renameModalVisible, setRenameModalVisible] = useState(false);
   const [thresholdModalVisible, setThresholdModalVisible] = useState(false);
 
-  const handleDisconnect = (connectionId: string) => {
-    disconnectDevice(connectionId);
+  const handleDisconnect = async (connectionId: string) => {
+    try {
+      await disconnectDevice(connectionId);
+    } catch (error) {
+      console.error('Error disconnecting device:', error);
+    }
   };
 
   return (
@@ -30,19 +33,20 @@ export function DeviceItem({ connection, device }: DeviceItemProps) {
       <View className="flex-row items-center justify-between">
         <View className="flex-1">
           <View className="flex-row items-center gap-2">
-            <Text className="text-base font-medium text-gray-800">{connection.name}</Text>
+            <Text className="text-base font-medium text-gray-800">{data.connection.name}</Text>
             <View className="size-1 rounded-full bg-gray-300" />
-            {device?.isOnline ? (
+            {data.device?.isOnline ? (
               <Text className="inline text-green-700">{t('common.online')}</Text>
             ) : (
               <Text className="inline text-red-700">{t('common.offline')}</Text>
             )}
           </View>
-          {device && (
+          {data.device && (
             <View className="mt-1 flex-row">
               <Text className="text-xs text-gray-500">
-                Cry: {device.cryingThreshold}s • Prone: {device.proneThreshold}s • No Blanket:
-                {device.noBlanketThreshold}s • Side: {device.sideThreshold}s
+                Cry: {data.device.cryingThreshold}s • Prone: {data.device.proneThreshold}s • No
+                Blanket:
+                {data.device.noBlanketThreshold}s • Side: {data.device.sideThreshold}s
               </Text>
             </View>
           )}
@@ -84,7 +88,7 @@ export function DeviceItem({ connection, device }: DeviceItemProps) {
             <Menu.Item
               onPress={() => {
                 setMenuVisible(false);
-                handleDisconnect(connection.id);
+                handleDisconnect(data.connection.id);
               }}
               title={t('devices.options.disconnect')}
               leadingIcon="link-off"
@@ -95,22 +99,22 @@ export function DeviceItem({ connection, device }: DeviceItemProps) {
 
       {renameModalVisible && (
         <RenameModal
-          connectionId={connection.id}
-          currentName={connection.name}
+          connectionId={data.connection.id}
+          currentName={data.connection.name}
           visible={renameModalVisible}
           onClose={() => setRenameModalVisible(false)}
         />
       )}
 
-      {thresholdModalVisible && device && (
+      {thresholdModalVisible && (
         <ThresholdModal
-          deviceId={connection.deviceId}
-          cryingThreshold={device.cryingThreshold}
-          sideThreshold={device.sideThreshold}
-          proneThreshold={device.proneThreshold}
-          noBlanketThreshold={device.noBlanketThreshold}
+          deviceId={data.device?.id || ''}
           visible={thresholdModalVisible}
           onClose={() => setThresholdModalVisible(false)}
+          cryingThreshold={data.device?.cryingThreshold || 0}
+          sideThreshold={data.device?.sideThreshold || 0}
+          proneThreshold={data.device?.proneThreshold || 0}
+          noBlanketThreshold={data.device?.noBlanketThreshold || 0}
         />
       )}
     </View>

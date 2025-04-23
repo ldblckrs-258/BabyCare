@@ -1,4 +1,5 @@
 import type { RootStackParamList } from '../types/navigation';
+import { EmptyCard } from '@/components/EmptyCard';
 import { StreamingModal } from '@/components/modals/StreamingModal';
 import { DeviceWithConnection, useDeviceHook } from '@/lib/hooks';
 import { useTranslation } from '@/lib/hooks/useTranslation';
@@ -97,23 +98,6 @@ export default function StreamingScreen() {
     );
   };
 
-  const renderEmptyList = () => (
-    <View className="flex-1 items-center justify-center py-16">
-      <FontAwesome6 name="video-slash" size={50} color="#d1d5db" />
-      <Text className="mt-4 text-lg font-semibold text-gray-600">
-        {t('streaming.noDevicesConnected')}
-      </Text>
-      <Text className="mt-2 text-center text-gray-500 px-6">
-        {t('streaming.connectDeviceMessage')}
-      </Text>
-      <TouchableOpacity
-        className="mt-6 bg-primary-500 py-3 px-6 rounded-full"
-        onPress={() => navigation.navigate('Settings' as never)}>
-        <Text className="text-white font-medium">{t('streaming.goToSettings')}</Text>
-      </TouchableOpacity>
-    </View>
-  );
-
   return (
     <View style={{ flex: 1, backgroundColor: '#f5f5f5', paddingTop: insets.top }}>
       {/* Header */}
@@ -138,7 +122,7 @@ export default function StreamingScreen() {
             padding: 16,
             flexGrow: connectedDevices.length === 0 ? 1 : undefined,
           }}
-          ListEmptyComponent={renderEmptyList}
+          ListEmptyComponent={EmptyCard}
           showsVerticalScrollIndicator={false}
         />
       )}

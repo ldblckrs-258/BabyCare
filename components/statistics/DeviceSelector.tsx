@@ -62,7 +62,7 @@ export default function DeviceSelector({ selectedDeviceId, onSelectDevice }: Dev
     return (
       <View className="flex-row items-center justify-between bg-white rounded-lg px-3 py-2 shadow-sm">
         <ActivityIndicator size="small" color="#3D8D7A" />
-        <Text className="text-base text-gray-600 ml-2">Loading devices...</Text>
+        <Text className="text-base text-gray-600 ml-2">{t('common.loading')}</Text>
       </View>
     );
   }

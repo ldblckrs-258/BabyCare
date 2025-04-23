@@ -43,7 +43,7 @@ export function DeviceModal({ visible, onClose }: DeviceModalProps) {
 
   return (
     <SlideModal visible={visible} onClose={onClose} title={t('devices.title')}>
-      <DeviceModalContent onClose={onClose} scanMode={scanMode} setScanMode={setScanMode} />
+      <DeviceModalContent setScanMode={setScanMode} />
     </SlideModal>
   );
 }

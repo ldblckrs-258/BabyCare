@@ -1,6 +1,5 @@
+import { DeviceWithConnection } from '@/lib/hooks';
 import { useTranslation } from '@/lib/hooks/useTranslation';
-import { Connection } from '@/stores/connectionStore';
-import { Device } from '@/stores/deviceStore';
 import { Ionicons } from '@expo/vector-icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Entypo from '@expo/vector-icons/Entypo';
@@ -10,8 +9,7 @@ import { Text, View } from 'react-native';
 import { Card } from 'react-native-paper';
 
 interface DeviceCardProps {
-  device: Device;
-  connection: Connection;
+  data: DeviceWithConnection;
   onPress: (deviceId: string) => void;
 }
 
@@ -62,7 +60,7 @@ const generateRandomMockupStatus = () => {
   };
 };
 
-const DeviceCard = ({ device, connection, onPress }: DeviceCardProps) => {
+const DeviceCard = ({ data, onPress }: DeviceCardProps) => {
   const { t } = useTranslation();
   // Generate unique random status for each card instance
   const [mockupStatus] = useState(generateRandomMockupStatus());
@@ -106,33 +104,33 @@ const DeviceCard = ({ device, connection, onPress }: DeviceCardProps) => {
   return (
     <Card
       className="mb-4 overflow-hidden rounded-3xl bg-white"
-      style={device.isOnline ? {} : { shadowColor: 'transparent' }}
-      onPress={() => onPress(device.id)}
+      style={data.device.isOnline ? {} : { shadowColor: 'transparent' }}
+      onPress={() => onPress(data.device.id)}
       mode="elevated">
       <Card.Content className="p-4 bg-white">
         <View className="flex-row justify-between items-center">
           <View className="flex-row items-center">
             <View
               className={`h-10 w-10 items-center justify-center rounded-full ${
-                device.isOnline ? 'bg-primary-100' : 'bg-slate-100'
+                data.device.isOnline ? 'bg-primary-100' : 'bg-slate-100'
               }`}>
               <AntDesign
-                name={device.isOnline ? 'checkcircle' : 'disconnect'}
-                size={device.isOnline ? 24 : 20}
-                color={device.isOnline ? '#3d8d7a' : '#f59e0b'}
+                name={data.device.isOnline ? 'checkcircle' : 'disconnect'}
+                size={data.device.isOnline ? 24 : 20}
+                color={data.device.isOnline ? '#3d8d7a' : '#f59e0b'}
               />
             </View>
             <View className="ml-3">
-              <Text className="text-lg font-bold text-gray-800">{connection.name}</Text>
+              <Text className="text-lg font-bold text-gray-800">{data.connection.name}</Text>
               <Text
-                className={`text-sm ${device.isOnline ? 'text-primary-500' : 'text-slate-500'}`}>
-                {device.isOnline ? t('common.online') : t('common.offline')}
+                className={`text-sm ${data.device.isOnline ? 'text-primary-500' : 'text-slate-500'}`}>
+                {data.device.isOnline ? t('common.online') : t('common.offline')}
               </Text>
             </View>
           </View>
           <Entypo name="chevron-right" size={24} color="#ccc" />
         </View>
-        {device.isOnline && (
+        {data.device.isOnline && (
           <View className="mt-2 flex-row items-center justify-between gap-2">
             <View
               className={`flex-1 py-2 px-3 h-full rounded flex-col items-center ${mockupStatus.crying.isDetected ? 'bg-tertiary-100' : ''}`}>

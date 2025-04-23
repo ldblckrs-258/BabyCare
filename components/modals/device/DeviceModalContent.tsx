@@ -1,18 +1,13 @@
 import { DeviceList } from './DeviceList';
-import { useDeviceHook } from '@/lib/hooks/useDeviceHook';
 import { useTranslation } from '@/lib/hooks/useTranslation';
-import { useEffect } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 
 type DeviceModalContentProps = {
-  onClose: () => void;
-  scanMode: boolean;
   setScanMode: (mode: boolean) => void;
 };
 
-export function DeviceModalContent({ onClose, scanMode, setScanMode }: DeviceModalContentProps) {
+export function DeviceModalContent({ setScanMode }: DeviceModalContentProps) {
   const { t } = useTranslation();
-  const { connections } = useDeviceHook();
 
   return (
     <View className="flex-1">
@@ -27,7 +22,7 @@ export function DeviceModalContent({ onClose, scanMode, setScanMode }: DeviceMod
         </TouchableOpacity>
       </View>
 
-      <DeviceList connections={connections} />
+      <DeviceList />
     </View>
   );
 }
