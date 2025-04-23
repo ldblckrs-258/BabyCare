@@ -27,3 +27,4 @@ android
 .env
 .cursorignore
 .docs/
+google-services.json

@@ -1,7 +1,17 @@
-import { doc, deleteDoc, setDoc, updateDoc, query, where, collection, onSnapshot, getDocs } from 'firebase/firestore';
 import { firestore } from '@/lib/firebase';
 import { Connection } from '@/stores/connectionStore';
-import "react-native-get-random-values";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  onSnapshot,
+  query,
+  setDoc,
+  updateDoc,
+  where,
+} from '@react-native-firebase/firestore';
+import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -17,10 +27,10 @@ export class ConnectionService {
         collection(firestore, 'connections'),
         where('userId', '==', userId)
       );
-      
+
       const snapshot = await getDocs(connectionsQuery);
-      
-      return snapshot.docs.map(doc => {
+
+      return snapshot.docs.map((doc) => {
         const data = doc.data();
         return {
           id: data.id,
@@ -28,7 +38,7 @@ export class ConnectionService {
           deviceId: data.deviceId,
           name: data.name,
           createdAt: data.createdAt ? new Date(data.createdAt) : new Date(),
-          updatedAt: data.updatedAt ? new Date(data.updatedAt) : undefined
+          updatedAt: data.updatedAt ? new Date(data.updatedAt) : undefined,
         } as Connection;
       });
     } catch (err) {
@@ -41,8 +51,8 @@ export class ConnectionService {
    * Create a new connection
    */
   static async createConnection(
-    userId: string, 
-    deviceId: string, 
+    userId: string,
+    deviceId: string,
     name?: string
   ): Promise<Connection> {
     try {
@@ -52,13 +62,13 @@ export class ConnectionService {
         userId: userId,
         deviceId: deviceId,
         name: name || `Device ${Date.now()}`,
-        createdAt: new Date()
+        createdAt: new Date(),
       };
-      
+
       // Add connection to Firestore
       const connectionRef = doc(firestore, 'connections', connectionId);
       await setDoc(connectionRef, newConnection);
-      
+
       return newConnection;
     } catch (err) {
       console.error('Error creating connection:', err);
@@ -69,15 +79,12 @@ export class ConnectionService {
   /**
    * Update a connection
    */
-  static async updateConnection(
-    connectionId: string, 
-    updates: Partial<Connection>
-  ): Promise<void> {
+  static async updateConnection(connectionId: string, updates: Partial<Connection>): Promise<void> {
     try {
       const connectionRef = doc(firestore, 'connections', connectionId);
       await updateDoc(connectionRef, {
         ...updates,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       });
     } catch (err) {
       console.error('Error updating connection:', err);
@@ -103,7 +110,7 @@ export class ConnectionService {
    * @returns Function to unsubscribe
    */
   static listenToUserConnections(
-    userId: string, 
+    userId: string,
     onAdded: (connection: Connection) => void,
     onModified: (connection: Connection) => void,
     onRemoved: (connectionId: string) => void
@@ -112,12 +119,12 @@ export class ConnectionService {
       collection(firestore, 'connections'),
       where('userId', '==', userId)
     );
-    
+
     return onSnapshot(connectionsQuery, (snapshot) => {
       // Handle initial load and updates
       snapshot.docChanges().forEach((change) => {
         const connectionData = change.doc.data() as Connection;
-        
+
         if (change.type === 'added' || change.type === 'modified') {
           const connection: Connection = {
             id: connectionData.id,
@@ -125,9 +132,9 @@ export class ConnectionService {
             deviceId: connectionData.deviceId,
             name: connectionData.name,
             createdAt: connectionData.createdAt ? new Date(connectionData.createdAt) : new Date(),
-            updatedAt: connectionData.updatedAt ? new Date(connectionData.updatedAt) : undefined
+            updatedAt: connectionData.updatedAt ? new Date(connectionData.updatedAt) : undefined,
           };
-          
+
           if (change.type === 'added') {
             onAdded(connection);
           } else {

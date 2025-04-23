@@ -25,7 +25,7 @@ const getNotificationIcon = (type: NotificationType) => {
     case 'side':
       return <FontAwesome6 name="baby" size={26} color="#d97706" />;
     case 'noBlanket':
-      return <FontAwesome6 name="bed" size={26} color="#a855f7" />;
+      return <FontAwesome6 name="bed" size={20} color="#a855f7" />;
     case 'system':
       return <MaterialIcons name="notifications" size={28} color="#3d8d7a" />;
     default:

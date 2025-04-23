@@ -1,6 +1,5 @@
 import { NotificationDetailModal } from '@/components/modals/NotificationDetailModal';
 import { NotificationModal } from '@/components/modals/NotificationModal';
-import { TestNotificationModal } from '@/components/modals/TestNotificationModal';
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import {
   Notification,
@@ -9,7 +8,8 @@ import {
   groupNotificationsByDate,
   parseISODate,
 } from '@/lib/notifications';
-import { useSettingsStore } from '@/stores/settingsStore';
+import { useAuthStore } from '@/stores/authStore';
+import { useNotificationStore } from '@/stores/notificationStore';
 import { Ionicons } from '@expo/vector-icons';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -29,7 +29,7 @@ const getNotificationIcon = (type: NotificationType) => {
     case 'side':
       return <FontAwesome6 name="baby" size={20} color="#d97706" />;
     case 'noBlanket':
-      return <FontAwesome6 name="bed" size={20} color="#a855f7" />;
+      return <FontAwesome6 name="bed" size={16} color="#a855f7" />;
     case 'system':
       return <MaterialIcons name="notifications" size={22} color="#3d8d7a" />;
     default:
@@ -39,45 +39,44 @@ const getNotificationIcon = (type: NotificationType) => {
 
 export default function HistoryScreen() {
   const { t } = useTranslation();
-  const [isLoading, setIsLoading] = useState(true);
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const [showNotificationDetail, setShowNotificationDetail] = useState(false);
-  const [showTestNotificationModal, setShowTestNotificationModal] = useState(false);
-  const {
-    userNotifications,
-    markNotificationAsRead,
-    markAllNotificationsAsRead,
-    clearNotifications,
-  } = useSettingsStore();
 
-  // Load initial notifications
+  const { user } = useAuthStore();
+  const { notifications, markAsRead, markAllAsRead, isLoading, error, subscribeToNotifications } =
+    useNotificationStore();
+
+  // Subscribe to notifications when component mounts
   useEffect(() => {
-    // Simulate loading time
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 800);
-    return () => clearTimeout(timer);
-  }, []);
+    if (user?.uid) {
+      const unsubscribe = subscribeToNotifications(user.uid);
+      return () => unsubscribe();
+    }
+  }, [user, subscribeToNotifications]);
+
   // Handle notification read and show detail modal
   const handleNotificationPress = useCallback(
     (notification: Notification) => {
       // Mark as read if needed
       if (!notification.read) {
-        markNotificationAsRead(notification.id);
+        markAsRead(notification.id);
       }
       // Show notification detail
       setSelectedNotification(notification);
       setShowNotificationDetail(true);
     },
-    [markNotificationAsRead]
+    [markAsRead]
   );
 
   // Group notifications by date
-  const groupedNotifications = groupNotificationsByDate(userNotifications);
+  const groupedNotifications = groupNotificationsByDate(notifications);
   const dateKeys = Object.keys(groupedNotifications).sort(
     (a, b) => new Date(b).getTime() - new Date(a).getTime()
   );
+
+  // Determine if we have any unread notifications
+  const hasUnreadNotifications = notifications.some((notification) => !notification.read);
 
   // Format dates for display
   const formatDate = (dateString: string) => {
@@ -127,9 +126,6 @@ export default function HistoryScreen() {
     </View>
   );
 
-  // Determine if we have any unread notifications
-  const hasUnreadNotifications = userNotifications.some((notification) => !notification.read);
-
   return (
     <SafeAreaView className="flex-1 bg-neutral-100">
       <StatusBar style="dark" />
@@ -139,16 +135,9 @@ export default function HistoryScreen() {
         <View className="flex-row">
           {hasUnreadNotifications && (
             <TouchableOpacity
-              onPress={() => markAllNotificationsAsRead()}
+              onPress={() => markAllAsRead()}
               className="mr-3 h-10 w-10 items-center justify-center">
               <MaterialIcons name="done-all" size={24} color="#888" />
-            </TouchableOpacity>
-          )}
-          {userNotifications.length > 0 && (
-            <TouchableOpacity
-              onPress={() => clearNotifications()}
-              className="mr-3 h-10 w-10 items-center justify-center">
-              <MaterialIcons name="delete-sweep" size={24} color="#888" />
             </TouchableOpacity>
           )}
           <TouchableOpacity
@@ -158,6 +147,7 @@ export default function HistoryScreen() {
           </TouchableOpacity>
         </View>
       </View>
+
       {/* Notification list */}
       <View className="flex-1 px-5">
         {isLoading ? (
@@ -165,7 +155,12 @@ export default function HistoryScreen() {
             <ActivityIndicator size="large" color="#3d8d7a" />
             <Text className="mt-4 text-gray-600">{t('history.loading')}</Text>
           </View>
-        ) : userNotifications.length === 0 ? (
+        ) : error ? (
+          <View className="flex-1 items-center justify-center">
+            <MaterialIcons name="error-outline" size={64} color="#ef4444" />
+            <Text className="mt-4 text-lg font-medium text-gray-600">{error}</Text>
+          </View>
+        ) : notifications.length === 0 ? (
           <View className="flex-1 items-center justify-center">
             <MaterialIcons name="notifications-none" size={64} color="#ccc" />
             <Text className="mt-4 text-lg font-medium text-gray-600">
@@ -193,28 +188,19 @@ export default function HistoryScreen() {
             showsVerticalScrollIndicator={false}
           />
         )}
-        <TouchableOpacity
-          onPress={() => setShowTestNotificationModal(true)}
-          className="mb-10 rounded-lg bg-primary-500 px-5 py-3 mx-28 ">
-          <Text className="text-base font-medium text-white text-center">Test Notifications</Text>
-        </TouchableOpacity>
       </View>
+
       {/* Notification Settings Modal */}
       <NotificationModal
         visible={showNotificationSettings}
         onClose={() => setShowNotificationSettings(false)}
       />
+
       {/* Notification Detail Modal */}
       <NotificationDetailModal
         visible={showNotificationDetail}
         onClose={() => setShowNotificationDetail(false)}
         notification={selectedNotification}
-      />
-
-      {/* Test Notification Modal (DEV ONLY) */}
-      <TestNotificationModal
-        visible={showTestNotificationModal}
-        onClose={() => setShowTestNotificationModal(false)}
       />
     </SafeAreaView>
   );

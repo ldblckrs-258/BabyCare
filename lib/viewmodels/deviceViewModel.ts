@@ -3,7 +3,6 @@ import { DeviceService } from '@/lib/models/deviceService';
 import { useAuthStore } from '@/stores/authStore';
 import { Connection, useConnectionStore } from '@/stores/connectionStore';
 import { Device, useDeviceStore } from '@/stores/deviceStore';
-import { useState } from 'react';
 
 /**
  * ViewModel for device operations following MVVM pattern

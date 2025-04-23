@@ -1,13 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import { Device } from './deviceStore';
 
 export interface Connection {
-  id: string;         // Unique connection ID
-  userId: string;     // Reference to the user
-  deviceId: string;   // Reference to the device
-  name: string;       // Friendly name set by the user
+  id: string; // Unique connection ID
+  userId: string; // Reference to the user
+  deviceId: string; // Reference to the device
+  name: string; // Friendly name set by the user
   createdAt: Date;
   updatedAt?: Date;
 }
@@ -16,7 +15,7 @@ interface ConnectionState {
   connections: Connection[];
   selectedConnectionId?: string;
   isConnected: boolean;
-  
+
   // Connection management actions
   addConnection: (connection: Connection) => void;
   removeConnection: (connectionId: string) => void;
@@ -27,7 +26,6 @@ interface ConnectionState {
   clearAllConnections: () => void;
 }
 
-
 export const useConnectionStore = create<ConnectionState>()(
   persist(
     (set, get) => ({
@@ -36,35 +34,36 @@ export const useConnectionStore = create<ConnectionState>()(
       selectedConnectionId: undefined,
       isConnected: false,
 
-      addConnection: (connection) => 
+      addConnection: (connection) =>
         set((state) => ({
           connections: [...state.connections, connection],
           isConnected: true,
-          selectedConnectionId: connection.id
+          selectedConnectionId: connection.id,
         })),
 
       removeConnection: (connectionId) =>
         set((state) => {
-          const updatedConnections = state.connections.filter(conn => conn.id !== connectionId);
-          return { 
+          const updatedConnections = state.connections.filter((conn) => conn.id !== connectionId);
+          return {
             connections: updatedConnections,
             isConnected: updatedConnections.length > 0,
-            selectedConnectionId: updatedConnections.length > 0 ? updatedConnections[0].id : undefined
+            selectedConnectionId:
+              updatedConnections.length > 0 ? updatedConnections[0].id : undefined,
           };
         }),
 
       updateConnection: (connectionId, updates) =>
         set((state) => ({
-          connections: state.connections.map(connection => 
-            connection.id === connectionId 
-              ? { ...connection, ...updates, updatedAt: new Date() } 
+          connections: state.connections.map((connection) =>
+            connection.id === connectionId
+              ? { ...connection, ...updates, updatedAt: new Date() }
               : connection
-          )
+          ),
         })),
-        
-      selectConnection: (connectionId) => 
+
+      selectConnection: (connectionId) =>
         set((state) => {
-          const connection = state.connections.find(c => c.id === connectionId);
+          const connection = state.connections.find((c) => c.id === connectionId);
           if (connection) {
             return { selectedConnectionId: connectionId };
           }
@@ -74,20 +73,24 @@ export const useConnectionStore = create<ConnectionState>()(
       setConnectionStatus: (isConnected, connectionId = undefined) =>
         set((state) => {
           if (connectionId) {
-            return { 
-              isConnected, 
-              selectedConnectionId: isConnected ? connectionId : undefined
+            return {
+              isConnected,
+              selectedConnectionId: isConnected ? connectionId : undefined,
             };
           }
-          return { isConnected, selectedConnectionId: isConnected ? state.selectedConnectionId : undefined };
+          return {
+            isConnected,
+            selectedConnectionId: isConnected ? state.selectedConnectionId : undefined,
+          };
         }),
-        
+
       getConnectionByDeviceId: (deviceId: string) => {
         const state = get();
-        return state.connections.find(connection => connection.deviceId === deviceId);
+        return state.connections.find((connection) => connection.deviceId === deviceId);
       },
 
-      clearAllConnections: () => set({ connections: [], selectedConnectionId: undefined, isConnected: false }),
+      clearAllConnections: () =>
+        set({ connections: [], selectedConnectionId: undefined, isConnected: false }),
     }),
     {
       name: 'babycare-connections',

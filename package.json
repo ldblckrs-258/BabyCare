@@ -16,11 +16,12 @@
     "run-web": "expo start --web"
   },
   "dependencies": {
-    "@firebase/auth": "^1.9.1",
     "@react-native-async-storage/async-storage": "^1.24.0",
     "@react-native-community/slider": "^4.5.6",
     "@react-native-firebase/app": "^21.12.0",
     "@react-native-firebase/auth": "^21.12.0",
+    "@react-native-firebase/firestore": "^21.12.0",
+    "@react-native-firebase/messaging": "^21.12.0",
     "@react-native-google-signin/google-signin": "^13.2.0",
     "@react-native-picker/picker": "^2.11.0",
     "@react-native/gradle-plugin": "^0.78.0",
@@ -44,7 +45,6 @@
     "expo-screen-orientation": "^8.0.4",
     "expo-status-bar": "~2.0.1",
     "expo-system-ui": "~4.0.8",
-    "firebase": "^11.4.0",
     "i18next": "^24.2.3",
     "nativewind": "latest",
     "react": "18.3.1",

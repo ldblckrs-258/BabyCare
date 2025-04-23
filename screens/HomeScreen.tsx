@@ -102,7 +102,9 @@ export default function HomeScreen() {
 
                     if (!connection) return null;
 
-                    return <DeviceCard data={data} onPress={handleSelectDevice} />;
+                    return (
+                      <DeviceCard key={data.device.id} data={data} onPress={handleSelectDevice} />
+                    );
                   })}
               </View>
             </>

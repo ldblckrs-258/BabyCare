@@ -1,7 +1,6 @@
 import { SlideModal } from './SlideModal';
 import { Switch } from '@/components/ui/switch';
 import { useTranslation } from '@/lib/hooks/useTranslation';
-import { simulateNotification } from '@/lib/notificationService';
 import { NotificationType } from '@/lib/notifications';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { Text, View } from 'react-native';
@@ -14,13 +13,6 @@ type NotificationModalProps = {
 export function NotificationModal({ visible, onClose }: NotificationModalProps) {
   const { notifications, updateNotificationSettings, addNotification } = useSettingsStore();
   const { t } = useTranslation();
-
-  const handleTestNotification = async (type: NotificationType) => {
-    // Simulate notification
-    const notification = await simulateNotification(type);
-    // Add to store (in case the notification service failed to add it)
-    addNotification(notification);
-  };
 
   return (
     <SlideModal visible={visible} onClose={onClose} title={t('settings.notifications.title')}>

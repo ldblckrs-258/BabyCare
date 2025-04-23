@@ -1,25 +1,22 @@
-import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
-import { initializeApp } from 'firebase/app';
-import { getReactNativePersistence, initializeAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getAuth } from '@react-native-firebase/auth';
+import { getFirestore } from '@react-native-firebase/firestore';
+import { getMessaging } from '@react-native-firebase/messaging';
+import { Platform } from 'react-native';
 
-const firebaseConfig = {
-  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
-};
+let auth: ReturnType<typeof getAuth>;
+let firestore: ReturnType<typeof getFirestore>;
+let messaging: ReturnType<typeof getMessaging> | null = null;
 
-const app = initializeApp(firebaseConfig);
+try {
+  // Initialize các Firebase services
+  auth = getAuth(); // Firebase Auth
+  firestore = getFirestore(); // Firebase Firestore
 
-// Initialize Auth with persistence
-const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(ReactNativeAsyncStorage),
-});
+  if (Platform.OS === 'android') {
+    messaging = getMessaging(); // Firebase Messaging
+  }
+} catch (error: any) {
+  console.error('Firebase init error:', error);
+}
 
-// Initialize Firestore
-const firestore = getFirestore(app);
-
-export { auth, app, firestore };
+export { auth, firestore, messaging };

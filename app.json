@@ -2,7 +2,7 @@
   "expo": {
     "name": "BabyCare",
     "slug": "babycare",
-    "version": "0.0.6",
+    "version": "0.0.7",
     "web": {
       "favicon": "./assets/babycare_logo.png"
     },
@@ -16,6 +16,14 @@
         {
           "cameraPermissionText": "$(PRODUCT_NAME) needs access to your camera to scan QR codes",
           "enableMicrophonePermission": false
+        }
+      ],
+      "@react-native-firebase/app",
+      "@react-native-firebase/auth",
+      [
+        "@react-native-firebase/messaging",
+        {
+          "messagingAndroidHeadlessMode": false
         }
       ]
     ],
@@ -46,11 +54,16 @@
       "newArchEnable": true,
       "package": "com.babycare.pbl5app",
       "permissions": [
-        "android.permission.CAMERA"
+        "android.permission.CAMERA",
+        "android.permission.INTERNET",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.VIBRATE",
+        "android.permission.WAKE_LOCK"
       ],
       "useNextNotificationsApi": true,
       "enableBackgroundNotification": true,
-      "priority": "max"
+      "priority": "max",
+      "googleServicesFile": "./google-services.json"
     },
     "extra": {
       "router": {

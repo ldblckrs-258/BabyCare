@@ -1,6 +1,5 @@
-import { doc, getDoc, setDoc, updateDoc, query, where, collection, onSnapshot, getDocs } from 'firebase/firestore';
-import { firestore } from '@/lib/firebase';
 import { Device } from '@/stores/deviceStore';
+import firestore from '@react-native-firebase/firestore';
 
 const DEFAULT_CRYING_THRESHOLD = 60; // secs
 const DEFAULT_POSITION_THRESHOLD = 30; // secs
@@ -14,13 +13,13 @@ export class DeviceService {
    */
   static async getDevice(deviceId: string): Promise<Device | null> {
     try {
-      const deviceRef = doc(firestore, 'devices', deviceId);
-      const deviceSnap = await getDoc(deviceRef);
-      
-      if (!deviceSnap.exists()) {
+      const deviceRef = firestore().collection('devices').doc(deviceId);
+      const deviceSnap = await deviceRef.get();
+
+      if (!deviceSnap.exists) {
         return null;
       }
-      
+
       const deviceData = deviceSnap.data() as Device;
       return {
         id: deviceData.id,
@@ -31,7 +30,7 @@ export class DeviceService {
         proneThreshold: deviceData.proneThreshold || DEFAULT_POSITION_THRESHOLD,
         noBlanketThreshold: deviceData.noBlanketThreshold || DEFAULT_POSITION_THRESHOLD,
         createdAt: deviceData.createdAt ? new Date(deviceData.createdAt) : new Date(),
-        updatedAt: deviceData.updatedAt ? new Date(deviceData.updatedAt) : undefined
+        updatedAt: deviceData.updatedAt ? new Date(deviceData.updatedAt) : undefined,
       };
     } catch (err) {
       console.error('Error fetching device:', err);
@@ -42,12 +41,15 @@ export class DeviceService {
   /**
    * Create a new device or update if it already exists
    */
-  static async createOrUpdateDevice(deviceId: string, deviceData?: Partial<Device>): Promise<Device> {
+  static async createOrUpdateDevice(
+    deviceId: string,
+    deviceData?: Partial<Device>
+  ): Promise<Device> {
     try {
-      const deviceRef = doc(firestore, 'devices', deviceId);
-      const deviceSnap = await getDoc(deviceRef);
-      
-      if (!deviceSnap.exists()) {
+      const deviceRef = firestore().collection('devices').doc(deviceId);
+      const deviceSnap = await deviceRef.get();
+
+      if (!deviceSnap.exists) {
         // Create new device
         const newDevice: Device = {
           id: deviceId,
@@ -57,10 +59,10 @@ export class DeviceService {
           sideThreshold: deviceData?.sideThreshold || DEFAULT_POSITION_THRESHOLD,
           proneThreshold: deviceData?.proneThreshold || DEFAULT_POSITION_THRESHOLD,
           noBlanketThreshold: deviceData?.noBlanketThreshold || DEFAULT_POSITION_THRESHOLD,
-          createdAt: new Date()
+          createdAt: new Date(),
         };
-        
-        await setDoc(deviceRef, newDevice);
+
+        await deviceRef.set(newDevice);
         return newDevice;
       } else {
         // Return existing device data
@@ -74,7 +76,7 @@ export class DeviceService {
           proneThreshold: existingData.proneThreshold || DEFAULT_POSITION_THRESHOLD,
           noBlanketThreshold: existingData.noBlanketThreshold || DEFAULT_POSITION_THRESHOLD,
           createdAt: existingData.createdAt ? new Date(existingData.createdAt) : new Date(),
-          updatedAt: existingData.updatedAt ? new Date(existingData.updatedAt) : undefined
+          updatedAt: existingData.updatedAt ? new Date(existingData.updatedAt) : undefined,
         };
       }
     } catch (err) {
@@ -88,10 +90,10 @@ export class DeviceService {
    */
   static async updateDevice(deviceId: string, updates: Partial<Device>): Promise<void> {
     try {
-      const deviceRef = doc(firestore, 'devices', deviceId);
-      await updateDoc(deviceRef, {
+      const deviceRef = firestore().collection('devices').doc(deviceId);
+      await deviceRef.update({
         ...updates,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       });
     } catch (err) {
       console.error('Error updating device:', err);
@@ -107,33 +109,31 @@ export class DeviceService {
     if (deviceIds.length === 0) {
       return () => {}; // No-op if no device IDs
     }
-    
-    const devicesQuery = query(
-      collection(firestore, 'devices'),
-      where('id', 'in', deviceIds)
-    );
-    
-    return onSnapshot(devicesQuery, (snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        const deviceData = change.doc.data() as Device;
-        
-        if (change.type === 'added' || change.type === 'modified') {
-          const device: Device = {
-            id: deviceData.id,
-            uri: deviceData.uri || '',
-            isOnline: deviceData.isOnline !== undefined ? deviceData.isOnline : true,
-            cryingThreshold: deviceData.cryingThreshold || DEFAULT_CRYING_THRESHOLD,
-            sideThreshold: deviceData.sideThreshold || DEFAULT_POSITION_THRESHOLD,
-            proneThreshold: deviceData.proneThreshold || DEFAULT_POSITION_THRESHOLD,
-            noBlanketThreshold: deviceData.noBlanketThreshold || DEFAULT_POSITION_THRESHOLD,
-            createdAt: deviceData.createdAt ? new Date(deviceData.createdAt) : new Date(),
-            updatedAt: deviceData.updatedAt ? new Date(deviceData.updatedAt) : undefined
-          };
-          
-          onUpdate(device);
-        }
+
+    return firestore()
+      .collection('devices')
+      .where('id', 'in', deviceIds)
+      .onSnapshot((snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+          const deviceData = change.doc.data() as Device;
+
+          if (change.type === 'added' || change.type === 'modified') {
+            const device: Device = {
+              id: deviceData.id,
+              uri: deviceData.uri || '',
+              isOnline: deviceData.isOnline !== undefined ? deviceData.isOnline : true,
+              cryingThreshold: deviceData.cryingThreshold || DEFAULT_CRYING_THRESHOLD,
+              sideThreshold: deviceData.sideThreshold || DEFAULT_POSITION_THRESHOLD,
+              proneThreshold: deviceData.proneThreshold || DEFAULT_POSITION_THRESHOLD,
+              noBlanketThreshold: deviceData.noBlanketThreshold || DEFAULT_POSITION_THRESHOLD,
+              createdAt: deviceData.createdAt ? new Date(deviceData.createdAt) : new Date(),
+              updatedAt: deviceData.updatedAt ? new Date(deviceData.updatedAt) : undefined,
+            };
+
+            onUpdate(device);
+          }
+        });
       });
-    });
   }
 }
 

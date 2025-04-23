@@ -15,7 +15,7 @@ import { useEffect, useState } from 'react';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const VERSION = '0.0.6';
+const VERSION = '0.0.7';
 const languages = {
   en: 'English',
   vi: 'Tiếng Việt',
