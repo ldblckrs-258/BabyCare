@@ -1,10 +1,11 @@
+import { useDeviceHook } from '@/lib/hooks';
 import { Notification, NotificationType, formatTime } from '@/lib/notifications';
 import { Ionicons } from '@expo/vector-icons';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { format } from 'date-fns';
 import { Image } from 'expo-image';
-import React from 'react';
+import { t } from 'i18next';
 import { Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -18,15 +19,15 @@ type NotificationDetailModalProps = {
 // Get icon for notification type
 const getNotificationIcon = (type: NotificationType) => {
   switch (type) {
-    case 'crying':
+    case 'Crying':
       return <Ionicons name="water" size={26} color="#5d97d3" />;
-    case 'prone':
+    case 'Prone':
       return <FontAwesome6 name="baby" size={26} color="#d26165" />;
-    case 'side':
+    case 'Side':
       return <FontAwesome6 name="baby" size={26} color="#d97706" />;
-    case 'noBlanket':
+    case 'NoBlanket':
       return <FontAwesome6 name="bed" size={20} color="#a855f7" />;
-    case 'system':
+    case 'System':
       return <MaterialIcons name="notifications" size={28} color="#3d8d7a" />;
     default:
       return <MaterialIcons name="notifications" size={28} color="#3d8d7a" />;
@@ -36,15 +37,15 @@ const getNotificationIcon = (type: NotificationType) => {
 // Get background color for notification type
 const getNotificationColor = (type: NotificationType) => {
   switch (type) {
-    case 'crying':
+    case 'Crying':
       return 'bg-blue-100';
-    case 'prone':
+    case 'Prone':
       return 'bg-red-100';
-    case 'side':
+    case 'Side':
       return 'bg-amber-100';
-    case 'noBlanket':
+    case 'NoBlanket':
       return 'bg-purple-100';
-    case 'system':
+    case 'System':
       return 'bg-green-100';
     default:
       return 'bg-green-100';
@@ -54,15 +55,15 @@ const getNotificationColor = (type: NotificationType) => {
 // Get text color for notification type
 const getNotificationTextColor = (type: NotificationType) => {
   switch (type) {
-    case 'crying':
+    case 'Crying':
       return 'text-blue-700';
-    case 'prone':
+    case 'Prone':
       return 'text-red-700';
-    case 'side':
+    case 'Side':
       return 'text-amber-700';
-    case 'noBlanket':
+    case 'NoBlanket':
       return 'text-purple-700';
-    case 'system':
+    case 'System':
       return 'text-green-700';
     default:
       return 'text-green-700';
@@ -82,13 +83,37 @@ export function NotificationDetailModal({
 }: NotificationDetailModalProps) {
   const insets = useSafeAreaInsets();
 
+  const { connections } = useDeviceHook();
+
+  const getDeviceName = (deviceId: string) => {
+    const device = connections.find((device) => device.deviceId === deviceId);
+    return device ? device.name : 'Unknown Device';
+  };
+
   if (!notification) return null;
+
+  const renderTitle = (notification: Notification) => {
+    switch (notification.type) {
+      case 'Crying':
+        return t('history.crying.title');
+      case 'Prone':
+        return t('history.prone.title');
+      case 'Side':
+        return t('history.side.title');
+      case 'NoBlanket':
+        return t('history.noBlanket.title');
+      case 'System':
+        return t('history.system.title');
+      default:
+        return t('history.unknown.title');
+    }
+  };
 
   return (
     <Modal animationType="slide" transparent visible={visible} onRequestClose={onClose}>
       <View className="flex-1 justify-end ">
         <View
-          className="h-4/5 rounded-t-3xl bg-white shadow-lg"
+          className="h-[70%] rounded-t-3xl bg-white shadow-lg"
           style={{ paddingBottom: Math.max(insets.bottom, 16) }}>
           {/* Header with close button */}
           <View className="mb-2 flex-row items-center justify-between border-b border-gray-100 p-6 pb-4">
@@ -103,15 +128,21 @@ export function NotificationDetailModal({
           {/* Notification Detail Content */}
           <ScrollView className="flex-1 px-6">
             {/* Title and Time */}
-            <View className="mb-6 mt-2">
+            <View className="mb-6">
               <Text className="text-xl font-bold text-gray-800">{notification.title}</Text>
-              {notification.deviceName && (
-                <Text className="mt-1 text-sm text-primary-600 font-medium">
-                  Device: {notification.deviceName}
+              {notification.deviceId && (
+                <Text className="mt-1 text-primary-600 font-medium">
+                  Device: {getDeviceName(notification.deviceId)}
                 </Text>
               )}
               <Text className="mt-1 text-sm text-gray-500">
-                {formatTimestamp(notification.timestamp)}
+                {new Date(notification.time).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
               </Text>
             </View>
             {/* Icon and Message */}
@@ -120,22 +151,19 @@ export function NotificationDetailModal({
                 <View className="mr-4 h-12 w-12 items-center justify-center rounded-full bg-white">
                   {getNotificationIcon(notification.type)}
                 </View>
-                <View className="flex-1">
-                  <Text className={`text-base ${getNotificationTextColor(notification.type)}`}>
-                    {notification.message}
-                  </Text>
+                <View className="flex-1 ">
+                  <Text className={`text-base font-semibold`}>{renderTitle(notification)}</Text>
 
                   {notification.duration !== undefined && (
                     <Text className="mt-1 text-sm text-gray-600">
-                      Duration: {notification.duration}
-                      {notification.duration === 1 ? 'minute' : 'minutes'}
+                      Duration: {Number(notification.duration).toFixed(0)} {t('home.seconds')}
                     </Text>
                   )}
                 </View>
               </View>
             </View>
             {/* Image Preview */}
-            {notification.imageUrl && (
+            {notification.imageUrl ? (
               <View className="mb-6">
                 <Text className="mb-2 text-base font-semibold text-gray-700">Captured Image</Text>
                 <View className="overflow-hidden rounded-xl">
@@ -147,11 +175,12 @@ export function NotificationDetailModal({
                     placeholder="Loading image..."
                   />
                 </View>
-                <View className="mt-2  bg-slate-200 w-full aspect-video flex items-center justify-center rounded">
-                  <Text className="text-center text-sm text-gray-500">
-                    Image captured at the time of the event
-                  </Text>
-                </View>
+              </View>
+            ) : (
+              <View className="mt-2  bg-slate-100 w-full aspect-video flex items-center justify-center rounded">
+                <Text className="text-center text-sm text-gray-500">
+                  Image captured at the time of the event
+                </Text>
               </View>
             )}
           </ScrollView>

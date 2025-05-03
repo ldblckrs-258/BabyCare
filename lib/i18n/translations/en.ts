@@ -307,6 +307,26 @@ export const en = {
       dailyReport: 'Daily Report',
       system: 'System Notification',
     },
+    crying: {
+      title: 'Crying alert',
+      description: 'Your baby is crying continuously for',
+    },
+    prone: {
+      title: 'Prone position alert',
+      description: 'Your baby is in a prone position for',
+    },
+    side: {
+      title: 'Side position alert',
+      description: 'Your baby is in a side position for',
+    },
+    noBlanket: {
+      title: 'No blanket alert',
+      description: 'Your baby is without a blanket for',
+    },
+    system: {
+      title: 'System notification',
+      description: 'Your device has been disconnected',
+    },
   },
   streaming: {
     title: 'Streaming Camera',

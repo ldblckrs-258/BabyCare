@@ -17,7 +17,7 @@ Notifications.setNotificationHandler({
 // Android channel config
 const getNotificationChannelSettings = (type: NotificationType) => {
   switch (type) {
-    case 'crying':
+    case 'Crying':
       return {
         channelId: 'crying',
         name: 'Cry Alerts',
@@ -26,8 +26,8 @@ const getNotificationChannelSettings = (type: NotificationType) => {
         lightColor: '#5d97d3',
         description: 'Alerts about your baby crying',
       };
-    case 'prone':
-    case 'side':
+    case 'Prone':
+    case 'Side':
       return {
         channelId: 'position_alert',
         name: 'Position Alerts',
@@ -36,7 +36,7 @@ const getNotificationChannelSettings = (type: NotificationType) => {
         lightColor: '#d26165',
         description: 'Alerts about unsafe sleeping positions',
       };
-    case 'noBlanket':
+    case 'NoBlanket':
       return {
         channelId: 'blanket_alert',
         name: 'Blanket Alerts',
@@ -45,7 +45,7 @@ const getNotificationChannelSettings = (type: NotificationType) => {
         lightColor: '#f59e0b',
         description: 'Alerts about blanket issues',
       };
-    case 'system':
+    case 'System':
     default:
       return {
         channelId: 'system',
@@ -80,7 +80,7 @@ export async function registerForPushNotificationsAsync() {
 
   // Create Android channels
   if (Platform.OS === 'android') {
-    const types: NotificationType[] = ['crying', 'prone', 'noBlanket', 'system'];
+    const types: NotificationType[] = ['Crying', 'Prone', 'NoBlanket', 'System'];
     for (const type of types) {
       const config = getNotificationChannelSettings(type);
       await Notifications.setNotificationChannelAsync(config.channelId, config);
@@ -117,7 +117,7 @@ export function setupNotificationHandlers() {
   // Firebase foreground message handler
   const messagingUnsubscribe = messaging().onMessage(async (remoteMessage) => {
     const { notification, data } = remoteMessage;
-
+    console.log('Foreground FCM message received:', remoteMessage);
     if (notification) {
       await Notifications.scheduleNotificationAsync({
         content: {

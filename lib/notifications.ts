@@ -1,7 +1,7 @@
 import { format } from 'date-fns';
 
 // Notification types
-export type NotificationType = 'crying' | 'prone' | 'side' | 'noBlanket' | 'system';
+export type NotificationType = 'Crying' | 'Prone' | 'Side' | 'NoBlanket' | 'System';
 
 // Notification interface
 export interface Notification {
@@ -9,14 +9,12 @@ export interface Notification {
   type: NotificationType;
   title: string;
   message: string;
-  timestamp: string; // ISO format
+  time: number; // timestamp in milliseconds
   read: boolean;
   imageUrl?: string; // Optional URL to the image captured during the event
   duration?: number; // Duration of the event in minutes
   deviceId?: string; // ID of the device that triggered the notification
-  deviceName?: string; // Name of the device that triggered the notification
 }
-
 
 // Helper function to parse ISO string to Date object when needed
 export const parseISODate = (isoString: string): Date => {
@@ -35,9 +33,9 @@ export const groupNotificationsByDate = (notifications: Notification[]) => {
 
   notifications.forEach((notification) => {
     // Parse the ISO string to get date components
-    const dateObj = parseISODate(notification.timestamp);
+    const dateObj = new Date(notification.time);
     const date = format(dateObj, 'yyyy-MM-dd');
-    
+
     if (!grouped[date]) {
       grouped[date] = [];
     }
@@ -47,8 +45,8 @@ export const groupNotificationsByDate = (notifications: Notification[]) => {
   // Sort each group by time (newest first)
   Object.keys(grouped).forEach((date) => {
     grouped[date].sort((a, b) => {
-      const dateA = parseISODate(a.timestamp);
-      const dateB = parseISODate(b.timestamp);
+      const dateA = new Date(a.time);
+      const dateB = new Date(b.time);
       return dateB.getTime() - dateA.getTime();
     });
   });

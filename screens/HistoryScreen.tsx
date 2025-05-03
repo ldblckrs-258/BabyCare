@@ -1,5 +1,6 @@
 import { NotificationDetailModal } from '@/components/modals/NotificationDetailModal';
 import { NotificationModal } from '@/components/modals/NotificationModal';
+import { useDeviceHook } from '@/lib/hooks';
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import {
   Notification,
@@ -22,15 +23,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 // Get icon for notification type
 const getNotificationIcon = (type: NotificationType) => {
   switch (type) {
-    case 'crying':
+    case 'Crying':
       return <Ionicons name="water" size={20} color="#5d97d3" />;
-    case 'prone':
+    case 'Prone':
       return <FontAwesome6 name="baby" size={20} color="#d26165" />;
-    case 'side':
+    case 'Side':
       return <FontAwesome6 name="baby" size={20} color="#d97706" />;
-    case 'noBlanket':
+    case 'NoBlanket':
       return <FontAwesome6 name="bed" size={16} color="#a855f7" />;
-    case 'system':
+    case 'System':
       return <MaterialIcons name="notifications" size={22} color="#3d8d7a" />;
     default:
       return <MaterialIcons name="notifications" size={22} color="#3d8d7a" />;
@@ -46,6 +47,7 @@ export default function HistoryScreen() {
   const { user } = useAuthStore();
   const { notifications, markAsRead, markAllAsRead, isLoading, error, subscribeToNotifications } =
     useNotificationStore();
+  const { connections } = useDeviceHook();
 
   // Subscribe to notifications when component mounts
   useEffect(() => {
@@ -91,6 +93,60 @@ export default function HistoryScreen() {
     }
   };
 
+  const renderTitle = (notification: Notification) => {
+    let title = `[${
+      connections.find((device) => device.deviceId === notification.deviceId)?.name || 'Unknown'
+    }]`;
+    switch (notification.type) {
+      case 'Crying':
+        title += ` ${t('history.crying.title')}`;
+        break;
+      case 'Prone':
+        title += ` ${t('history.prone.title')}`;
+        break;
+      case 'Side':
+        title += ` ${t('history.side.title')}`;
+        break;
+      case 'NoBlanket':
+        title += ` ${t('history.noBlanket.title')}`;
+        break;
+      case 'System':
+        title += ` ${t('history.system.title')}`;
+        break;
+      default:
+        title += ` ${t('history.unknown.title')}`;
+        break;
+    }
+    return title;
+  };
+
+  const renderDescription = (notification: Notification) => {
+    let description = '';
+    switch (notification.type) {
+      case 'Crying':
+        description = t('history.crying.description');
+        break;
+      case 'Prone':
+        description = t('history.prone.description');
+        break;
+      case 'Side':
+        description = t('history.side.description');
+        break;
+      case 'NoBlanket':
+        description = t('history.noBlanket.description');
+        break;
+      case 'System':
+        description = t('history.system.description');
+        break;
+      default:
+        description = t('history.unknown.description');
+        break;
+    }
+    description += ` ${Math.round(Number(notification.duration))} `;
+    description += t('home.seconds');
+    return description;
+  };
+
   // Render notification item
   const renderNotificationItem = ({ item }: { item: Notification }) => (
     <TouchableOpacity
@@ -102,12 +158,10 @@ export default function HistoryScreen() {
           {getNotificationIcon(item.type)}
         </View>
         <View className="flex-1">
-          <Text className="text-base font-semibold text-gray-800">{item.title}</Text>
-          <Text className="text-sm text-gray-600">
-            {item.message}
-            <Text className="mt-1 inline-block text-xs text-gray-400">
-              {formatTime(item.timestamp)}
-            </Text>
+          <Text className="text-base font-semibold text-gray-800">{renderTitle(item)}</Text>
+          <Text className="text-sm text-gray-600">{renderDescription(item)}</Text>
+          <Text className="inline-block text-xs text-gray-400">
+            {formatTime(item.time.toString())}
           </Text>
         </View>
         {!item.read && (

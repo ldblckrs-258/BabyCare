@@ -29,6 +29,9 @@ export const useAuthStore = create<AuthState>()(
     (set) => {
       let authUnsubscribe: (() => void) | null = null;
 
+      // Set initial state: user is null, loading is true
+      set({ user: null, loading: true, error: null });
+
       const setupAuthListener = () => {
         if (authUnsubscribe) {
           authUnsubscribe();
@@ -53,7 +56,7 @@ export const useAuthStore = create<AuthState>()(
 
       return {
         user: null,
-        loading: false,
+        loading: true,
         error: null,
 
         signUp: async (email: string, password: string, fullName?: string) => {

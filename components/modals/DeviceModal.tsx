@@ -17,11 +17,13 @@ export function DeviceModal({ visible, onClose }: DeviceModalProps) {
   const [scanMode, setScanMode] = useState(false);
 
   const handleQRCodeScanned = async ({ data }: { data: string }) => {
-    // Assuming the QR code contains a device ID
+    console.log('QR Code scanned:', data);
     if (data) {
       try {
         // Create a connection with the device
         await connectDevice(data);
+        // delay 1s
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         setScanMode(false);
       } catch (error) {
         console.error('Error connecting to device:', error);

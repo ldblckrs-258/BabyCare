@@ -6,7 +6,7 @@ import { Camera, useCameraDevice, useCodeScanner } from 'react-native-vision-cam
 
 type QRScannerViewProps = {
   onClose: () => void;
-  onQRCodeScanned: (result: { data: string }) => void;
+  onQRCodeScanned: (result: { data: string }) => Promise<void>; // Change to return Promise<void>
 };
 
 export function QRScannerView({ onClose, onQRCodeScanned }: QRScannerViewProps) {

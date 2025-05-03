@@ -198,6 +198,11 @@ export class DeviceViewModel {
    * Setup data listeners for the current user
    */
   setupDataListeners(userId: string): () => void {
+    // Prevent setup if userId is not provided (not logged in)
+    if (!userId) {
+      return () => {};
+    }
+
     let devicesUnsubscribe: (() => void) | undefined;
     let connectionsUnsubscribe: (() => void) | undefined;
 

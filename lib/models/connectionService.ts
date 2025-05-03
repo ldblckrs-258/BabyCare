@@ -23,6 +23,10 @@ export class ConnectionService {
    * Fetch all connections for a user
    */
   static async getUserConnections(userId: string): Promise<Connection[]> {
+    if (!userId) {
+      console.warn('ConnectionService.getUserConnections called without userId');
+      return Promise.resolve([]); // Return empty array if no userId
+    }
     try {
       const firestore = getFirestore();
       const connectionsQuery = query(
@@ -116,6 +120,10 @@ export class ConnectionService {
     onModified: (connection: Connection) => void,
     onRemoved: (connectionId: string) => void
   ): () => void {
+    if (!userId) {
+      console.warn('listenToUserConnections called without userId');
+      return () => {}; // Return a no-op unsubscribe function if no userId
+    }
     const firestore = getFirestore();
     const connectionsQuery = query(
       collection(firestore, 'connections'),

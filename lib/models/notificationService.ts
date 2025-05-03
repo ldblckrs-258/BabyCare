@@ -18,6 +18,10 @@ export class NotificationService {
   private static currentToken: string | null = null;
 
   static async initialize(userId: string) {
+    if (!userId) {
+      console.warn('NotificationService.initialize called without userId');
+      return; // Exit if no userId
+    }
     try {
       const token = await registerForPushNotificationsAsync();
       // Nếu token đã được đăng ký rồi thì không đăng ký lại nữa
