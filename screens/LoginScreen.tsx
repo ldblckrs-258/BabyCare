@@ -33,7 +33,7 @@ export function LoginScreen() {
     try {
       const success = await signIn(email, password);
       if (success) {
-        navigation.replace('Main');
+        navigation.navigate('Main');
       } else {
         setError(authError || 'Invalid email or password');
       }
@@ -46,7 +46,7 @@ export function LoginScreen() {
     try {
       const success = await signInWithGoogle();
       if (success) {
-        navigation.replace('Main');
+        navigation.navigate('Main');
       } else {
         setError(authError || 'Failed to sign in with Google');
       }

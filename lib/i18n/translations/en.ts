@@ -108,25 +108,9 @@ export const en = {
       title: 'Notifications',
       enable: 'Enable Notifications',
       enableDescription: "Enable notifications to receive alerts about your baby's status",
-      enableDailyReport: 'Enable Daily Report',
-      enableDailyReportDescription:
-        "Receive daily summary reports about your baby's sleep and crying patterns",
-      cryDetection: {
-        title: 'Cry Detection Threshold',
-        description: 'Alert when baby is crying continuously',
-      },
-      sleepPosition: {
-        title: 'Sleep Position',
-        description: 'Alert for unsafe sleeping positions',
-      },
-      deviceDisconnected: {
-        title: 'Device Disconnected',
-        description: 'Alert when device disconnects',
-      },
-      dailyReport: {
-        title: 'Daily Report',
-        description: 'Receive daily summary reports',
-      },
+      batteryOptimizationTitle: 'Turn off Battery Optimization',
+      batteryOptimizationDescription:
+        'To receive notifications reliably, please turn off battery optimization for the application.',
     },
     language: {
       title: 'Language',

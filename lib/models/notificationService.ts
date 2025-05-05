@@ -24,11 +24,10 @@ export class NotificationService {
     }
     try {
       const token = await registerForPushNotificationsAsync();
-      // Nếu token đã được đăng ký rồi thì không đăng ký lại nữa
       if (!token || token === this.currentToken) {
-        // Không log lại nếu đã đăng ký
         return;
       }
+      console.log('FCM Token:', token);
       this.currentToken = token;
       const firestore = getFirestore();
       const userRef = doc(firestore, 'users', userId);

@@ -103,9 +103,9 @@ export const vi = {
       title: 'Thông báo',
       enable: 'Bật thông báo',
       enableDescription: 'Bật thông báo để nhận cảnh báo về tình trạng của bé',
-      crySensitivity: 'Độ nhạy phát hiện khóc',
-      enableDailyReport: 'Báo cáo hàng ngày',
-      enableDailyReportDescription: 'Nhận báo cáo hàng ngày về tình trạng của bé',
+      batteryOptimizationTitle: 'Tắt tiết kiệm pin cho ứng dụng',
+      batteryOptimizationDescription:
+        'Để nhận thông báo ổn định, hãy tắt chế độ tiết kiệm pin cho ứng dụng trong phần cài đặt hệ thống.',
     },
     language: {
       title: 'Ngôn ngữ',

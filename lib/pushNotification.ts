@@ -1,62 +1,8 @@
 import { useNotificationStore } from '../stores/notificationStore';
-import { NotificationType } from '@/lib/notifications';
 import messaging from '@react-native-firebase/messaging';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
-
-// Configure how notifications are handled in foreground
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-  }),
-});
-
-// Android channel config
-const getNotificationChannelSettings = (type: NotificationType) => {
-  switch (type) {
-    case 'Crying':
-      return {
-        channelId: 'crying',
-        name: 'Cry Alerts',
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#5d97d3',
-        description: 'Alerts about your baby crying',
-      };
-    case 'Prone':
-    case 'Side':
-      return {
-        channelId: 'position_alert',
-        name: 'Position Alerts',
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#d26165',
-        description: 'Alerts about unsafe sleeping positions',
-      };
-    case 'NoBlanket':
-      return {
-        channelId: 'blanket_alert',
-        name: 'Blanket Alerts',
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#f59e0b',
-        description: 'Alerts about blanket issues',
-      };
-    case 'System':
-    default:
-      return {
-        channelId: 'system',
-        name: 'System Notifications',
-        importance: Notifications.AndroidImportance.HIGH,
-        vibrationPattern: [0, 250],
-        lightColor: '#3d8d7a',
-        description: 'System updates and alerts',
-      };
-  }
-};
 
 // Register device for push notifications
 export async function registerForPushNotificationsAsync() {
@@ -80,11 +26,13 @@ export async function registerForPushNotificationsAsync() {
 
   // Create Android channels
   if (Platform.OS === 'android') {
-    const types: NotificationType[] = ['Crying', 'Prone', 'NoBlanket', 'System'];
-    for (const type of types) {
-      const config = getNotificationChannelSettings(type);
-      await Notifications.setNotificationChannelAsync(config.channelId, config);
-    }
+    await Notifications.setNotificationChannelAsync('default', {
+      name: 'Alert Channel',
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 250, 250, 250],
+      sound: 'default',
+      lightColor: '#FF231F7C',
+    });
   }
 
   // Get FCM token

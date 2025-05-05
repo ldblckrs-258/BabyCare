@@ -9,18 +9,28 @@ import { useAuthStore } from '@/stores/authStore';
 import { useNotificationStore } from '@/stores/notificationStore';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import * as Notifications from 'expo-notifications';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import { Image, Text, View } from 'react-native';
+import { useEffect, useLayoutEffect } from 'react';
+import { Image, Platform, Text, View } from 'react-native';
 import { PaperProvider } from 'react-native-paper';
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
+  useLayoutEffect(() => {
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: true,
+      }),
+    });
+  }, []);
+
   const { user, loading } = useAuthStore();
   const { subscribeToNotifications } = useNotificationStore();
 
-  // Initialize notifications when user logs in
   useEffect(() => {
     if (user?.uid) {
       // Initialize notification service

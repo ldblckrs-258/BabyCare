@@ -1,13 +1,12 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n from '@/lib/i18n';
+import { Notification } from '@/lib/notifications';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import { Notification } from '@/lib/notifications';
 
 interface NotificationSettings {
   enableNotifications: boolean;
   deviceDisconnected: boolean;
-  dailyReport: boolean;
 }
 
 interface SettingsState {
@@ -25,7 +24,6 @@ interface SettingsState {
 const initialNotificationSettings: NotificationSettings = {
   enableNotifications: true,
   deviceDisconnected: true,
-  dailyReport: false,
 };
 
 export const useSettingsStore = create<SettingsState>()(
@@ -47,29 +45,27 @@ export const useSettingsStore = create<SettingsState>()(
             ...settings,
           },
         })),
-        
+
       addNotification: (notification) =>
         set((state) => ({
           userNotifications: [notification, ...state.userNotifications],
         })),
-        
+
       markNotificationAsRead: (notificationId) =>
         set((state) => ({
-          userNotifications: state.userNotifications.map((notification) => 
-            notification.id === notificationId 
-              ? { ...notification, read: true } 
-              : notification
+          userNotifications: state.userNotifications.map((notification) =>
+            notification.id === notificationId ? { ...notification, read: true } : notification
           ),
         })),
-        
+
       markAllNotificationsAsRead: () =>
         set((state) => ({
-          userNotifications: state.userNotifications.map((notification) => ({ 
-            ...notification, 
-            read: true 
+          userNotifications: state.userNotifications.map((notification) => ({
+            ...notification,
+            read: true,
           })),
         })),
-        
+
       clearNotifications: () => set({ userNotifications: [] }),
     }),
     {

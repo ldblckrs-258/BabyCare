@@ -28,3 +28,4 @@ android
 .cursorignore
 .docs/
 google-services.json
+service-account.json

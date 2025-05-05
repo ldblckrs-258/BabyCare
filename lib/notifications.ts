@@ -21,7 +21,6 @@ export const parseISODate = (isoString: string): Date => {
   const date = new Date(isoString);
   // Check if the date is valid
   if (isNaN(date.getTime())) {
-    console.warn('Invalid date string detected, using current date as fallback');
     return new Date();
   }
   return date;
