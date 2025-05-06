@@ -4,20 +4,26 @@ import { LoginScreen } from './screens/LoginScreen';
 import MainTabs from './screens/MainTabs';
 import { RegisterScreen } from './screens/RegisterScreen';
 import { WelcomeScreen } from './screens/WelcomeScreen';
-import { NotificationService } from '@/lib/models/notificationService';
+import { setupNotificationListeners } from '@/lib/notification/notificationHandlers';
+import { registerDeviceForPushNotifications } from '@/lib/notification/notificationService';
 import { useAuthStore } from '@/stores/authStore';
 import { useNotificationStore } from '@/stores/notificationStore';
+import { useUserStore } from '@/stores/userStore';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as Notifications from 'expo-notifications';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useLayoutEffect } from 'react';
-import { Image, Platform, Text, View } from 'react-native';
+import { Image, Text, View } from 'react-native';
 import { PaperProvider } from 'react-native-paper';
+import Toast from 'react-native-toast-message';
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
+  const { user, loading } = useAuthStore();
+  const userStore = useUserStore();
+
   useLayoutEffect(() => {
     Notifications.setNotificationHandler({
       handleNotification: async () => ({
@@ -26,25 +32,28 @@ export default function App() {
         shouldSetBadge: true,
       }),
     });
+
+    registerDeviceForPushNotifications().then((token) => {
+      if (token) {
+        console.log('Push token registered:', token);
+      }
+    });
+
+    const removeListeners = setupNotificationListeners();
+
+    return () => {
+      removeListeners();
+    };
   }, []);
 
-  const { user, loading } = useAuthStore();
-  const { subscribeToNotifications } = useNotificationStore();
-
+  // Initialize user preferences when user is logged in
   useEffect(() => {
-    if (user?.uid) {
-      // Initialize notification service
-      NotificationService.initialize(user.uid);
-      NotificationService.listenForTokenRefresh(user.uid);
-      // Subscribe to notifications in store
-      const unsubscribe = subscribeToNotifications(user.uid);
-
-      return () => {
-        unsubscribe();
-        NotificationService.cleanup();
-      };
+    if (user && !userStore.preferences) {
+      userStore.initUserPreferences(user.uid);
+    } else if (!user && userStore.preferences) {
+      userStore.clearPreferences();
     }
-  }, [user]);
+  }, [user, userStore.preferences]);
 
   if (loading) {
     // Show splash/loading screen while checking auth state
@@ -70,26 +79,29 @@ export default function App() {
   }
 
   return (
-    <PaperProvider>
-      <NavigationContainer>
-        <Stack.Navigator
-          screenOptions={{
-            headerShown: false,
-          }}>
-          {user ? (
-            // User is signed in
-            <Stack.Screen name="Main" component={MainTabs} />
-          ) : (
-            // No user is signed in
-            <>
-              <Stack.Screen name="Welcome" component={WelcomeScreen} />
-              <Stack.Screen name="Login" component={LoginScreen} />
-              <Stack.Screen name="Register" component={RegisterScreen} />
-            </>
-          )}
-        </Stack.Navigator>
-        <StatusBar style="auto" />
-      </NavigationContainer>
-    </PaperProvider>
+    <>
+      <PaperProvider>
+        <NavigationContainer>
+          <Stack.Navigator
+            screenOptions={{
+              headerShown: false,
+            }}>
+            {user ? (
+              // User is signed in
+              <Stack.Screen name="Main" component={MainTabs} />
+            ) : (
+              // No user is signed in
+              <>
+                <Stack.Screen name="Welcome" component={WelcomeScreen} />
+                <Stack.Screen name="Login" component={LoginScreen} />
+                <Stack.Screen name="Register" component={RegisterScreen} />
+              </>
+            )}
+          </Stack.Navigator>
+          <StatusBar style="auto" />
+        </NavigationContainer>
+      </PaperProvider>
+      <Toast />
+    </>
   );
 }

@@ -1,7 +1,6 @@
 import { SlideModal } from './SlideModal';
 import { Switch } from '@/components/ui/switch';
 import { useTranslation } from '@/lib/hooks/useTranslation';
-import { useSettingsStore } from '@/stores/settingsStore';
 import { Entypo } from '@expo/vector-icons';
 import * as Notifications from 'expo-notifications';
 import { useEffect, useState } from 'react';
@@ -13,7 +12,6 @@ type NotificationModalProps = {
 };
 
 export function NotificationModal({ visible, onClose }: NotificationModalProps) {
-  const { notifications, updateNotificationSettings } = useSettingsStore();
   const { t } = useTranslation();
   const [permissionGranted, setPermissionGranted] = useState<boolean>(false);
   const [checking, setChecking] = useState<boolean>(false);

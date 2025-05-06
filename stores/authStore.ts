@@ -1,4 +1,3 @@
-import { NotificationService } from '@/lib/models/notificationService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
@@ -96,7 +95,7 @@ export const useAuthStore = create<AuthState>()(
           try {
             set({ loading: true, error: null });
             await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-            const userInfo = await GoogleSignin.signIn();
+            await GoogleSignin.signIn();
             const { idToken } = await GoogleSignin.getTokens();
 
             if (!idToken) {
@@ -131,10 +130,7 @@ export const useAuthStore = create<AuthState>()(
           try {
             set({ loading: true, error: null });
 
-            const currentUser = auth().currentUser;
-            if (currentUser) {
-              await NotificationService.cleanup(currentUser.uid);
-            }
+            auth().currentUser;
 
             try {
               await GoogleSignin.signOut();
