@@ -3,7 +3,6 @@ import { ThresholdModal } from './ThresholdModal';
 import { DeviceWithConnection, useDeviceHook } from '@/lib/hooks/useDeviceHook';
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { useNavigation } from '@react-navigation/native';
 import { useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { Menu } from 'react-native-paper';
@@ -15,7 +14,6 @@ type DeviceItemProps = {
 export function DeviceItem({ data }: DeviceItemProps) {
   const { t } = useTranslation();
   const { disconnectDevice } = useDeviceHook();
-  const navigation = useNavigation();
   const [menuVisible, setMenuVisible] = useState(false);
   const [renameModalVisible, setRenameModalVisible] = useState(false);
   const [thresholdModalVisible, setThresholdModalVisible] = useState(false);

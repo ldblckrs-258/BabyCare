@@ -7,7 +7,7 @@ export interface Connection {
   userId: string; // Reference to the user
   deviceId: string; // Reference to the device
   name: string; // Friendly name set by the user
-  createdAt: Date;
+  createdAt?: Date;
   updatedAt?: Date;
 }
 
@@ -35,11 +35,18 @@ export const useConnectionStore = create<ConnectionState>()(
       isConnected: false,
 
       addConnection: (connection) =>
-        set((state) => ({
-          connections: [...state.connections, connection],
-          isConnected: true,
-          selectedConnectionId: connection.id,
-        })),
+        set((state) => {
+          // Kiểm tra xem connection đã tồn tại chưa
+          const existingConnection = state.connections.find((conn) => conn.id === connection.id);
+          if (existingConnection) {
+            return state;
+          }
+          return {
+            connections: [...state.connections, connection],
+            isConnected: true,
+            selectedConnectionId: connection.id,
+          };
+        }),
 
       removeConnection: (connectionId) =>
         set((state) => {

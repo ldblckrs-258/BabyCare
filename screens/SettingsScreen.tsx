@@ -9,13 +9,13 @@ import { useTranslation } from '@/lib/hooks/useTranslation';
 import { RootStackParamList } from '@/types/navigation';
 import EntypoIcons from '@expo/vector-icons/Entypo';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
+import { useRoute } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const VERSION = '0.0.7';
+const VERSION = '0.0.8';
 const languages = {
   en: 'English',
   vi: 'Tiếng Việt',

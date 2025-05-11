@@ -1,4 +1,5 @@
-import { Connection } from '@/stores/connectionStore';
+import { Connection, useConnectionStore } from '@/stores/connectionStore';
+import { useDeviceStore } from '@/stores/deviceStore';
 import {
   collection,
   deleteDoc,
@@ -41,8 +42,6 @@ export class ConnectionService {
           userId: data.userId,
           deviceId: data.deviceId,
           name: data.name,
-          createdAt: data.createdAt ? new Date(data.createdAt) : new Date(),
-          updatedAt: data.updatedAt ? new Date(data.updatedAt) : undefined,
         } as Connection;
       });
     } catch (err) {
@@ -59,8 +58,13 @@ export class ConnectionService {
     deviceId: string,
     name?: string
   ): Promise<Connection> {
+    const firestore = getFirestore();
+    const deviceRef = doc(firestore, 'devices', deviceId);
+    const deviceSnap = await getDoc(deviceRef);
+    if (!deviceSnap.exists) {
+      throw new Error('Thiết bị không tồn tại trên hệ thống.');
+    }
     try {
-      const firestore = getFirestore();
       const connectionId = uuidv4();
       const newConnection: Connection = {
         id: connectionId,
@@ -88,7 +92,6 @@ export class ConnectionService {
       const connectionRef = doc(firestore, 'connections', connectionId);
       await updateDoc(connectionRef, {
         ...updates,
-        updatedAt: new Date(),
       });
     } catch (err) {
       console.error('Error updating connection:', err);
@@ -104,6 +107,16 @@ export class ConnectionService {
       const firestore = getFirestore();
       const connectionRef = doc(firestore, 'connections', connectionId);
       await deleteDoc(connectionRef);
+
+      const connectionStore = useConnectionStore.getState();
+      const connection = connectionStore.connections.find(
+        (connection) => connection.id === connectionId
+      );
+
+      if (connection) {
+        const deviceStore = useDeviceStore.getState();
+        deviceStore.removeDevice(connection.deviceId);
+      }
     } catch (err) {
       console.error('Error deleting connection:', err);
       throw err;
@@ -129,28 +142,46 @@ export class ConnectionService {
       collection(firestore, 'connections'),
       where('userId', '==', userId)
     );
-    return onSnapshot(connectionsQuery, (snapshot) => {
-      // Handle initial load and updates
-      snapshot.docChanges().forEach((change) => {
-        const connectionData = change.doc.data() as Connection;
-        if (change.type === 'added' || change.type === 'modified') {
-          const connection: Connection = {
-            id: connectionData.id,
-            userId: connectionData.userId,
-            deviceId: connectionData.deviceId,
-            name: connectionData.name,
-            createdAt: connectionData.createdAt ? new Date(connectionData.createdAt) : new Date(),
-            updatedAt: connectionData.updatedAt ? new Date(connectionData.updatedAt) : undefined,
-          };
-          if (change.type === 'added') {
-            onAdded(connection);
-          } else {
-            onModified(connection);
-          }
-        } else if (change.type === 'removed') {
-          onRemoved(connectionData.id);
+    return onSnapshot(
+      connectionsQuery,
+      (snapshot) => {
+        // Kiểm tra snapshot null trước khi sử dụng docChanges
+        if (!snapshot) {
+          console.warn('ConnectionService: received null snapshot in listenToUserConnections');
+          return;
         }
-      });
-    });
+
+        // Handle initial load and updates
+        snapshot.docChanges().forEach((change) => {
+          const connectionData = change.doc.data() as Connection;
+          if (change.type === 'added' || change.type === 'modified') {
+            const connection: Connection = {
+              id: connectionData.id,
+              userId: connectionData.userId,
+              deviceId: connectionData.deviceId,
+              name: connectionData.name,
+            };
+            if (change.type === 'added') {
+              onAdded(connection);
+            } else {
+              onModified(connection);
+            }
+          } else if (change.type === 'removed') {
+            onRemoved(connectionData.id);
+          }
+        });
+      },
+      (error) => {
+        // Xử lý lỗi trong onSnapshot
+        if ((error as any).code === 'firestore/permission-denied') {
+          console.warn(
+            'ConnectionService: Permission denied in listenToUserConnections. User likely logged out.'
+          );
+          // Trả về silence - không thông báo lỗi này vì đây là lỗi thường gặp khi logout
+          return;
+        }
+        console.error('ConnectionService listener error:', error);
+      }
+    );
   }
 }

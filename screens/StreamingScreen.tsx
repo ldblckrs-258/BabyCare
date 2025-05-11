@@ -5,8 +5,8 @@ import { DeviceWithConnection, useDeviceHook } from '@/lib/hooks';
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { Card } from 'react-native-paper';
@@ -135,6 +135,7 @@ export default function StreamingScreen() {
           deviceId={selectedDevice.device.id}
           deviceName={selectedDevice.connection.name}
           isConnected={selectedDevice.device.isOnline}
+          uri={selectedDevice.device.uri || 'https://a756-1-53-82-81.ngrok-free.app/playlist.m3u8'}
         />
       )}
     </View>

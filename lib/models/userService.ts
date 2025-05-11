@@ -1,16 +1,11 @@
 import { UserPreferences } from '@/stores/userStore';
-import {
-  collection,
-  doc,
-  getDoc,
-  getFirestore,
-  setDoc,
-  updateDoc,
-} from '@react-native-firebase/firestore';
+import { doc, getDoc, getFirestore, setDoc, updateDoc } from '@react-native-firebase/firestore';
 
 /**
  * Service class for User-related Firebase operations
  * Manages user preferences like FCM tokens and language settings
+ *
+ * Lưu ý: Service này không sử dụng onSnapshot nên không cần cập nhật xử lý snapshot null
  */
 export class UserService {
   /**

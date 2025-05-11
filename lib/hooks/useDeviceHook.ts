@@ -1,8 +1,8 @@
-import { Device, useDeviceStore } from '@/stores/deviceStore';
-import { Connection, useConnectionStore } from '@/stores/connectionStore';
-import { useEffect, useState, useRef } from 'react';
-import { useAuthStore } from '@/stores/authStore';
 import { DeviceViewModel } from '@/lib/viewmodels/deviceViewModel';
+import { useAuthStore } from '@/stores/authStore';
+import { Connection, useConnectionStore } from '@/stores/connectionStore';
+import { Device, useDeviceStore } from '@/stores/deviceStore';
+import { useEffect, useRef, useState } from 'react';
 
 export type DeviceWithConnection = {
   device: Device;
@@ -36,34 +36,48 @@ export const useDeviceHook = (): DeviceHookReturn => {
   const authStore = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Access Zustand stores directly for realtime updates
   // This ensures components using this hook will re-render when store data changes
   const deviceStore = useDeviceStore();
   const connectionStore = useConnectionStore();
-  
+
   // Create the view model instance using useRef to ensure it persists between renders
   const viewModelRef = useRef<DeviceViewModel | null>(null);
   if (!viewModelRef.current) {
     viewModelRef.current = new DeviceViewModel(setLoading, setError);
   }
   const viewModel = viewModelRef.current;
-  
+
   // Load data from Firestore and set up listeners when auth state changes
   useEffect(() => {
-    if (!authStore.user) return;
-    
-    setLoading(true);
-    
-    // Set up data listeners for the current user
-    const unsubscribe = viewModel.setupDataListeners(authStore.user.uid);
-    
-    setLoading(false);
-    
+    let unsubscribe: (() => void) | undefined;
+
+    // Only setup listeners if user is logged in
+    if (authStore.user) {
+      setLoading(true);
+
+      // Set up data listeners for the current user
+      unsubscribe = viewModel.setupDataListeners(authStore.user.uid);
+
+      setLoading(false);
+    } else {
+      // Khi user không còn đăng nhập (logout), gọi viewModel.clearAll() để xóa dữ liệu local
+      viewModel.clearAll();
+    }
+
     // Clean up listeners when the component unmounts or auth state changes
-    return unsubscribe;
+    return () => {
+      if (unsubscribe) {
+        try {
+          unsubscribe();
+        } catch (err) {
+          console.error('Error unsubscribing from listeners:', err);
+        }
+      }
+    };
   }, [authStore.user]);
-    // Calculate connectedDevices in real-time based on current connections and devices
+  // Calculate connectedDevices in real-time based on current connections and devices
   const connectedDevices = connectionStore.connections
     .map((connection) => {
       const device = deviceStore.getDeviceById(connection.deviceId);
@@ -87,16 +101,20 @@ export const useDeviceHook = (): DeviceHookReturn => {
     loading,
     error,
     getDevice: (deviceId: string) => deviceStore.getDeviceById(deviceId),
-    getConnection: (connectionId: string) => connectionStore.connections.find(conn => conn.id === connectionId),
-    getConnectionByDeviceId: (deviceId: string) => connectionStore.getConnectionByDeviceId(deviceId),
+    getConnection: (connectionId: string) =>
+      connectionStore.connections.find((conn) => conn.id === connectionId),
+    getConnectionByDeviceId: (deviceId: string) =>
+      connectionStore.getConnectionByDeviceId(deviceId),
     connectDevice: (deviceId: string, name?: string) => viewModel.connectDevice(deviceId, name),
     disconnectDevice: (connectionId: string) => viewModel.disconnectDevice(connectionId),
-    renameConnection: (connectionId: string, name: string) => viewModel.renameConnection(connectionId, name),
-    updateDeviceThresholds: (deviceId: string, updates: Partial<Device>) => viewModel.updateDeviceThresholds(deviceId, updates),
+    renameConnection: (connectionId: string, name: string) =>
+      viewModel.renameConnection(connectionId, name),
+    updateDeviceThresholds: (deviceId: string, updates: Partial<Device>) =>
+      viewModel.updateDeviceThresholds(deviceId, updates),
     selectConnection: (connectionId: string) => connectionStore.selectConnection(connectionId),
     clearAll: () => {
       deviceStore.clearAllDevices();
       connectionStore.clearAllConnections();
-    }
+    },
   };
 };

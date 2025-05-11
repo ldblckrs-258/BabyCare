@@ -25,6 +25,7 @@ type StreamingModalProps = {
   deviceId?: string;
   deviceName?: string;
   isConnected?: boolean;
+  uri?: string;
 };
 
 export function StreamingModal({
@@ -33,6 +34,7 @@ export function StreamingModal({
   deviceId,
   deviceName = 'Unknown Device',
   isConnected = false,
+  uri,
 }: StreamingModalProps) {
   const { t } = useTranslation();
   const video = useRef<Video>(null);
@@ -44,9 +46,7 @@ export function StreamingModal({
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const [controlsVisible, setControlsVisible] = useState(true);
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  // This would be your actual stream URL from your device
-  const streamUrl =
-    'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4'; // Placeholder stream URL
+  const [canStream, setCanStream] = useState(false);
 
   // Handle back button press in fullscreen mode
   useEffect(() => {
@@ -62,18 +62,41 @@ export function StreamingModal({
     return () => backHandler.remove();
   }, [isFullscreen]);
 
+  // Check if URI is valid for HLS streaming
+  const isValidHlsUri = (uri?: string): boolean => {
+    if (!uri) return false;
+    return uri.trim().length > 0 && (uri.includes('.m3u8') || uri.startsWith('http'));
+  };
+
   useEffect(() => {
     if (visible) {
       setIsLoading(true);
       setError(null);
-      // Simulate connecting to the stream
+
+      // Check if URI is valid for streaming
+      const validUri = isValidHlsUri(uri);
+      setCanStream(validUri && isConnected);
+
+      if (!validUri) {
+        setError(t('streaming.invalidUri'));
+        setIsLoading(false);
+        return;
+      }
+
+      if (!isConnected) {
+        setError(t('settings.devices.notConnected'));
+        setIsLoading(false);
+        return;
+      }
+
+      // Attempt to connect to the stream
       const timeout = setTimeout(() => {
         setIsLoading(false);
       }, 2000);
 
       return () => clearTimeout(timeout);
     }
-  }, [visible]);
+  }, [visible, uri, isConnected]);
 
   // Auto-hide controls after a few seconds in fullscreen mode
   useEffect(() => {
@@ -99,6 +122,7 @@ export function StreamingModal({
   const handleVideoError = (error: string) => {
     console.error('Video playback error:', error);
     setError(t('streaming.errorMessage.connectionFailed'));
+    setCanStream(false);
     setIsLoading(false);
   };
 
@@ -217,7 +241,17 @@ export function StreamingModal({
               onPress={() => {
                 setIsLoading(true);
                 setError(null);
-                setTimeout(() => setIsLoading(false), 2000);
+                setTimeout(() => {
+                  const validUri = isValidHlsUri(uri);
+                  setCanStream(validUri && isConnected);
+
+                  if (!validUri) {
+                    setError(t('streaming.invalidUri'));
+                  } else if (!isConnected) {
+                    setError(t('settings.devices.notConnected'));
+                  }
+                  setIsLoading(false);
+                }, 2000);
               }}>
               <Text className="text-white">{t('streaming.retry')}</Text>
             </TouchableOpacity>
@@ -225,23 +259,27 @@ export function StreamingModal({
         ) : (
           <Video
             ref={video}
-            source={{ uri: streamUrl }}
+            source={{ uri: uri || '' }}
             rate={1.0}
             volume={1.0}
             isMuted={false}
             resizeMode={ResizeMode.CONTAIN}
-            shouldPlay={true}
+            shouldPlay={canStream}
             isLooping={true}
             useNativeControls={false}
             style={{ width: '100%', height: '100%' }}
             onFullscreenUpdate={handleFullscreenUpdate}
             onPlaybackStatusUpdate={(status) => setStatus(() => status)}
             onError={handleVideoError}
+            onLoad={() => {
+              setCanStream(true);
+              setError(null);
+            }}
           />
         )}
 
         {/* Custom video controls overlay - only show when not in fullscreen mode */}
-        {isConnected && !isLoading && !error && !isFullscreen && (
+        {canStream && !isLoading && !error && !isFullscreen && (
           <View className="absolute bottom-0 left-0 right-0 flex-row justify-between items-center px-2 bg-black/40">
             <View className="flex-row items-center">
               <TouchableOpacity
@@ -308,7 +346,7 @@ export function StreamingModal({
               <View className="flex-row justify-between mb-2">
                 <Text className="text-gray-600">{t('streaming.status.title')}:</Text>
                 <Text
-                  className={`font-medium ${isConnected ? 'text-primary-500' : 'text-secondary-500'}`}>
+                  className={`font-medium ${canStream ? 'text-primary-500' : error ? 'text-red-500' : 'text-secondary-500'}`}>
                   {isConnected
                     ? isLoading
                       ? t('streaming.status.connecting')
@@ -321,13 +359,7 @@ export function StreamingModal({
               <View className="flex-row justify-between mb-2">
                 <Text className="text-gray-600">{t('streaming.quality.title')}:</Text>
                 <Text className="font-medium text-gray-800">
-                  {isConnected && !isLoading && !error ? t('streaming.quality.hd') : '—'}
-                </Text>
-              </View>
-              <View className="flex-row justify-between">
-                <Text className="text-gray-600">{t('streaming.connection.title')}:</Text>
-                <Text className="font-medium text-gray-800">
-                  {isConnected && !isLoading && !error ? t('streaming.connection.wifi') : '—'}
+                  {canStream && !isLoading && !error ? t('streaming.quality.hd') : '—'}
                 </Text>
               </View>
             </View>

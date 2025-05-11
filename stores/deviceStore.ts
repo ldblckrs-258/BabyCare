@@ -41,6 +41,7 @@ interface DeviceState {
   addDevice: (device: Device) => void;
   getDeviceById: (deviceId: string) => Device | undefined;
   updateDevice: (deviceId: string, updates: Partial<Device>) => void;
+  removeDevice: (deviceId: string) => void;
   clearAllDevices: () => void;
 
   // Event and notification actions
@@ -80,6 +81,11 @@ export const useDeviceStore = create<DeviceState>()(
           devices: state.devices.map((device) =>
             device.id === deviceId ? { ...device, ...updates, updatedAt: new Date() } : device
           ),
+        })),
+
+      removeDevice: (deviceId: string) =>
+        set((state) => ({
+          devices: state.devices.filter((device) => device.id !== deviceId),
         })),
 
       clearAllDevices: () => set({ devices: [] }),

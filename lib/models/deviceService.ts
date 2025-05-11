@@ -32,15 +32,13 @@ export class DeviceService {
       }
       const deviceData = deviceSnap.data() as Device;
       return {
-        id: deviceData.id,
+        id: deviceSnap.id,
         uri: deviceData.uri || '',
         isOnline: deviceData.isOnline !== undefined ? deviceData.isOnline : true,
         cryingThreshold: deviceData.cryingThreshold,
         sideThreshold: deviceData.sideThreshold,
         proneThreshold: deviceData.proneThreshold,
         noBlanketThreshold: deviceData.noBlanketThreshold,
-        createdAt: deviceData.createdAt ? new Date(deviceData.createdAt) : new Date(),
-        updatedAt: deviceData.updatedAt ? new Date(deviceData.updatedAt) : undefined,
       };
     } catch (err) {
       console.error('Error fetching device:', err);
@@ -69,7 +67,6 @@ export class DeviceService {
           sideThreshold: DEFAULT_POSITION_THRESHOLD,
           proneThreshold: DEFAULT_POSITION_THRESHOLD,
           noBlanketThreshold: DEFAULT_POSITION_THRESHOLD,
-          createdAt: new Date(),
         };
         await setDoc(deviceRef, newDevice);
         return newDevice;
@@ -84,8 +81,6 @@ export class DeviceService {
           sideThreshold: existingData.sideThreshold,
           proneThreshold: existingData.proneThreshold,
           noBlanketThreshold: existingData.noBlanketThreshold,
-          createdAt: existingData.createdAt ? new Date(existingData.createdAt) : new Date(),
-          updatedAt: existingData.updatedAt ? new Date(existingData.updatedAt) : undefined,
         };
       }
     } catch (err) {
@@ -103,7 +98,6 @@ export class DeviceService {
       const deviceRef = doc(firestore, 'devices', deviceId);
       await updateDoc(deviceRef, {
         ...updates,
-        updatedAt: new Date(),
       });
     } catch (err) {
       console.error('Error updating device:', err);
@@ -121,25 +115,42 @@ export class DeviceService {
     }
     const firestore = getFirestore();
     const devicesCol = collection(firestore, 'devices');
-    const q = query(devicesCol, where('id', 'in', deviceIds));
-    return onSnapshot(q, (snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        const deviceData = change.doc.data() as Device;
-        if (change.type === 'added' || change.type === 'modified') {
-          const device: Device = {
-            id: deviceData.id,
-            uri: deviceData.uri || '',
-            isOnline: deviceData.isOnline !== undefined ? deviceData.isOnline : true,
-            cryingThreshold: deviceData.cryingThreshold,
-            sideThreshold: deviceData.sideThreshold,
-            proneThreshold: deviceData.proneThreshold,
-            noBlanketThreshold: deviceData.noBlanketThreshold,
-            createdAt: deviceData.createdAt ? new Date(deviceData.createdAt) : new Date(),
-            updatedAt: deviceData.updatedAt ? new Date(deviceData.updatedAt) : undefined,
-          };
-          onUpdate(device);
+    const q = query(devicesCol, where('__name__', 'in', deviceIds));
+    return onSnapshot(
+      q,
+      (snapshot) => {
+        if (!snapshot) {
+          console.warn('DeviceService: received null snapshot in listenToDevices');
+          return;
         }
-      });
-    });
+
+        snapshot.docChanges().forEach((change) => {
+          const deviceData = change.doc.data() as Device;
+          if (change.type === 'added' || change.type === 'modified') {
+            const device: Device = {
+              id: change.doc.id,
+              uri: deviceData.uri || '',
+              isOnline: deviceData.isOnline !== undefined ? deviceData.isOnline : true,
+              cryingThreshold: deviceData.cryingThreshold,
+              sideThreshold: deviceData.sideThreshold,
+              proneThreshold: deviceData.proneThreshold,
+              noBlanketThreshold: deviceData.noBlanketThreshold,
+            };
+            onUpdate(device);
+          }
+        });
+      },
+      (error) => {
+        // Xử lý lỗi trong onSnapshot
+        if ((error as any).code === 'firestore/permission-denied') {
+          console.warn(
+            'DeviceService: Permission denied in listenToDevices. User likely logged out.'
+          );
+          // Trả về silence - không thông báo lỗi này vì đây là lỗi thường gặp khi logout
+          return;
+        }
+        console.error('DeviceService listener error:', error);
+      }
+    );
   }
 }

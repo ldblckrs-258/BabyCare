@@ -2,7 +2,7 @@ export default {
   expo: {
     name: 'BabyCare',
     slug: 'babycare',
-    version: '0.0.7',
+    version: '0.0.8',
     web: {
       favicon: './assets/logo.png',
     },
@@ -24,6 +24,13 @@ export default {
         '@react-native-firebase/messaging',
         {
           messagingAndroidHeadlessMode: false,
+        },
+      ],
+      [
+        'expo-notifications',
+        {
+          sounds: ['./assets/sounds/notification.mp3'],
+          enableBackgroundRemoteNotifications: true,
         },
       ],
     ],

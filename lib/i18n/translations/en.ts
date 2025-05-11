@@ -103,6 +103,9 @@ export const en = {
       notConnected: 'Not Connected',
       connected: 'Connected',
       helpText: 'Make sure your BabyCare device is turned on and connected to the internet.',
+      errors: {
+        noDeviceMatch: 'No device found with this QR code or device connected',
+      },
     },
     notifications: {
       title: 'Notifications',
@@ -319,6 +322,7 @@ export const en = {
     streamInfo: 'Stream Information',
     connectingToStream: 'Connecting to stream...',
     retry: 'Retry',
+    invalidUri: 'Stream is not available now, please restart the device',
     status: {
       title: 'Status',
       connecting: 'Connecting...',

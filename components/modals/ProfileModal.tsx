@@ -105,11 +105,6 @@ export function ProfileModal({ visible, onClose }: ProfileModalProps) {
       await logout();
       // Close the modal
       onClose();
-      // Navigate to Login screen
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Login' }],
-      });
     } catch (error) {
       Alert.alert('Error', 'Failed to sign out');
     } finally {

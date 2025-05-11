@@ -7,15 +7,14 @@ import { useAuthStore } from '@/stores/authStore';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useMemo, useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
+import { RefreshControl, ScrollView, Text, View } from 'react-native';
 import { ActivityIndicator } from 'react-native-paper';
-import Toast from 'react-native-toast-message';
 
 export default function HomeScreen() {
   const { t } = useTranslation();
   const { user } = useAuthStore();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { connectedDevices, loading, error, getConnectionByDeviceId, selectConnection } =
+  const { connectedDevices, loading, error, getConnectionByDeviceId, selectConnection, devices } =
     useDeviceHook();
 
   // State for the UI
@@ -26,14 +25,6 @@ export default function HomeScreen() {
     () => user?.displayName?.split(' ').slice(-1)[0] || 'User',
     [user?.displayName]
   );
-
-  const testToast = () => {
-    Toast.show({
-      type: 'success',
-      text1: 'You have a new notification',
-      text2: 'Some details about the notification',
-    });
-  };
 
   // Refresh handler
   const onRefresh = async () => {
@@ -120,11 +111,6 @@ export default function HomeScreen() {
           )}
         </View>
       )}
-
-      {/* Button */}
-      <Pressable onPress={testToast} className="bg-primary-600 rounded-xl p-4 mb-4 mx-2">
-        <Text className="text-white text-center text-lg font-semibold">Test Toast</Text>
-      </Pressable>
     </ScrollView>
   );
 }

@@ -1,10 +1,177 @@
 import { UserService } from '@/lib/models/userService';
 import { useAuthStore } from '@/stores/authStore';
+import { useConnectionStore } from '@/stores/connectionStore';
 import { useUserStore } from '@/stores/userStore';
 import messaging from '@react-native-firebase/messaging';
+import { Audio } from 'expo-av';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
-import { Platform } from 'react-native';
+import { Platform, Vibration } from 'react-native';
+
+// Định nghĩa mẫu rung mạnh hơn cho thông báo
+export const STRONG_VIBRATION_PATTERN = [0, 300, 200, 300, 200, 300];
+
+// Sound constants - Sử dụng tên file để tham chiếu trong Android notification channel
+export const NOTIFICATION_SOUND = 'notification.mp3';
+
+// Các loại cảnh báo theo notification guide
+export enum AlertType {
+  SIDE = 'Side',
+  PRONE = 'Prone',
+  CRYING = 'Crying',
+  BLANKET = 'Blanket',
+  NOBLANKET = 'NoBlanket',
+  DEFAULT = 'info',
+}
+
+// Map AlertType to toast types
+export function getToastTypeFromAlert(alertType?: string): string {
+  if (!alertType) return 'info';
+
+  const alertTypeLower = alertType.toLowerCase();
+
+  switch (alertTypeLower) {
+    case 'side':
+    case 'prone':
+    case 'crying':
+    case 'noblanket':
+    case 'blanket':
+      return alertTypeLower;
+    default:
+      return 'info';
+  }
+}
+
+// Shared function to generate notification content based on alertType, language, and connectionName
+export function generateNotificationContent(
+  alertType: string = AlertType.DEFAULT,
+  language: string = 'en',
+  connectionName: string = 'Baby',
+  duration: number = 0
+): { title: string; body: string } {
+  let title, body;
+
+  if (language === 'vi') {
+    title = `[${connectionName}] Cảnh báo `;
+    body = `Bé đang `;
+
+    switch (alertType) {
+      case AlertType.SIDE:
+        title += 'nằm nghiêng';
+        body += 'nằm nghiêng';
+        break;
+      case AlertType.PRONE:
+        title += 'nằm sấp';
+        body += 'nằm sấp';
+        break;
+      case AlertType.CRYING:
+        title += 'khóc';
+        body += 'khóc';
+        break;
+      case AlertType.NOBLANKET:
+        title += 'không đắp chăn';
+        body += 'không đắp chăn';
+        break;
+      case AlertType.BLANKET:
+        title += 'đắp chăn';
+        body += 'đắp chăn';
+        break;
+      default:
+        title += 'mới';
+        body += 'có hoạt động mới';
+    }
+
+    if (duration > 0) {
+      body += `, đã liên tục trong ${duration} giây`;
+    }
+  } else {
+    // Default to English
+    title = `[${connectionName}] `;
+    body = `Baby is `;
+
+    switch (alertType) {
+      case AlertType.SIDE:
+        title += 'Side position alert';
+        body += 'lying on side';
+        break;
+      case AlertType.PRONE:
+        title += 'Prone position alert';
+        body += 'lying face down';
+        break;
+      case AlertType.CRYING:
+        title += 'Crying alert';
+        body += 'crying';
+        break;
+      case AlertType.NOBLANKET:
+        title += 'No blanket alert';
+        body += 'without a blanket';
+        break;
+      case AlertType.BLANKET:
+        title += 'Blanket alert';
+        body += 'covered with a blanket';
+        break;
+      default:
+        title += 'New alert';
+        body += 'having new activity';
+    }
+
+    if (duration > 0) {
+      body += `, continuously for ${duration} seconds`;
+    }
+  }
+
+  return { title, body };
+}
+
+// Helper function to get connection name from deviceId
+export function getConnectionNameFromDeviceId(deviceId?: string): string {
+  if (!deviceId) return 'Baby';
+
+  const connectionStore = useConnectionStore.getState();
+  const connection = connectionStore.getConnectionByDeviceId(deviceId);
+  return connection?.name || 'Baby';
+}
+
+// Cấu hình cho background message handler
+export function setupBackgroundHandler() {
+  // Đăng ký handler cho background messages
+  messaging().setBackgroundMessageHandler(async (remoteMessage) => {
+    console.log('Background message received:', remoteMessage);
+
+    const { data } = remoteMessage;
+    const alertType = (data?.type as string) || AlertType.DEFAULT;
+    const deviceId = data?.deviceId as string;
+    const duration = data?.duration ? Number(data.duration) : 0;
+
+    const userStore = useUserStore.getState();
+    const language = userStore.preferences?.language || 'en';
+    const connectionName = getConnectionNameFromDeviceId(deviceId);
+
+    // Use shared notification content generator
+    const { title, body } = generateNotificationContent(
+      alertType,
+      language,
+      connectionName,
+      duration
+    );
+
+    // Đảm bảo thông báo này có âm thanh và rung thông qua kênh thông báo
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: title,
+        body: body,
+        sound: NOTIFICATION_SOUND,
+        vibrate: STRONG_VIBRATION_PATTERN,
+      },
+
+      trigger: {
+        channelId: 'default',
+      },
+    });
+
+    return Promise.resolve();
+  });
+}
 
 export async function registerDeviceForPushNotifications(): Promise<string | undefined> {
   if (!Device.isDevice) {
@@ -26,31 +193,79 @@ export async function registerDeviceForPushNotifications(): Promise<string | und
   }
 
   if (Platform.OS === 'android') {
+    // Cấu hình kênh thông báo chính với âm thanh và rung mạnh
     await Notifications.setNotificationChannelAsync('default', {
       name: 'Alert Channel',
       importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
-      sound: 'default',
+      vibrationPattern: STRONG_VIBRATION_PATTERN,
+      sound: NOTIFICATION_SOUND,
+      enableVibrate: true,
+      enableLights: true,
       lightColor: '#FF231F7C',
+      lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+      showBadge: true,
     });
   }
 
   try {
+    // Đăng ký FCM token
     const token = await messaging().getToken();
 
-    // Save the token to the user's preferences in Firestore
+    // Yêu cầu quyền thông báo từ iOS
+    if (Platform.OS === 'ios') {
+      await messaging().requestPermission();
+      // Đặt badge icon về 0 khi đăng ký
+      await Notifications.setBadgeCountAsync(0);
+    }
+
+    // Lưu token vào store thay vì gọi trực tiếp đến Firestore
     const currentUser = useAuthStore.getState().user;
     if (currentUser && token) {
-      // Store token in user document
-      await UserService.updateFcmToken(currentUser.uid, token);
-
-      // Update local state
+      // Cập nhật trong userStore
       const userStore = useUserStore.getState();
-      userStore.addFcmToken(token);
+      await userStore.addFcmToken(token);
     }
 
     return token;
   } catch (error) {
     console.error('Error getting FCM token:', error);
+  }
+}
+
+// Helper function to play a notification sound
+export async function playNotificationSound(): Promise<void> {
+  try {
+    const soundObject = new Audio.Sound();
+
+    await soundObject.loadAsync(require('../../assets/sounds/notification.mp3'));
+
+    await soundObject.playAsync();
+
+    // Kích hoạt rung mạnh cho thiết bị
+    Vibration.vibrate(STRONG_VIBRATION_PATTERN);
+
+    // Tự động giải phóng sound object sau khi phát
+    setTimeout(() => {
+      soundObject.unloadAsync().catch(console.error);
+    }, 2000);
+  } catch (error) {
+    console.error('Error playing notification sound:', error);
+  }
+}
+
+// Helper function để tạo và hiển thị thông báo cục bộ với loại cảnh báo
+export async function showLocalNotification(title: string, body: string): Promise<void> {
+  try {
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title,
+        body,
+        sound: NOTIFICATION_SOUND,
+        vibrate: STRONG_VIBRATION_PATTERN,
+      },
+      trigger: null, // Hiển thị ngay lập tức
+    });
+  } catch (error) {
+    console.error('Error showing local notification:', error);
   }
 }

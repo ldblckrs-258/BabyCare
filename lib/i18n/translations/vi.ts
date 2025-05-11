@@ -32,7 +32,7 @@ export const vi = {
     prone: 'Nằm sấp',
     side: 'Nằm nghiêng',
     blanket: 'Đắp chăn',
-    noBlanket: 'Không đắp chăn',
+    noBlanket: 'Không chăn',
     continuouslyFor: 'Liên tục trong',
     seconds: 'giây',
   },
@@ -98,6 +98,10 @@ export const vi = {
       status: 'Trạng thái',
       notConnected: 'Chưa kết nối',
       connected: 'Đã kết nối',
+      helpText: 'Đảm bảo thiết bị BabyCare của bạn đã được bật và đã kết nối với internet.',
+      errors: {
+        noDeviceMatch: 'Không tìm thấy thiết bị với mã QR này hoặc thiết bị đã kết nối',
+      },
     },
     notifications: {
       title: 'Thông báo',
@@ -293,6 +297,7 @@ export const vi = {
     tapToView: 'Nhấn để xem',
     streamInfo: 'Thông tin stream',
     connectingToStream: 'Đang kết nối stream...',
+    invalidUri: 'Stream không khả dụng, vui lòng khởi động lại thiết bị',
     retry: 'Thử lại',
     status: {
       title: 'Trạng thái',

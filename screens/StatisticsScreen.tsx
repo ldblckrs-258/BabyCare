@@ -8,7 +8,6 @@ import {
 } from '@/components/statistics';
 import { useDeviceHook } from '@/lib/hooks/useDeviceHook';
 import { useTranslation } from '@/lib/hooks/useTranslation';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useEffect, useMemo, useState } from 'react';
 import { SafeAreaView, ScrollView, Text, View } from 'react-native';
 
@@ -20,7 +19,7 @@ export default function StatisticsScreen() {
   // Set initial device when connections are loaded
   useEffect(() => {
     if (connections.length > 0 && !selectedDeviceId) {
-      setSelectedDeviceId(connections[0].deviceId);
+      setSelectedDeviceId(connections[0]?.deviceId);
     }
   }, [connections, selectedDeviceId]);
 
@@ -112,7 +111,9 @@ export default function StatisticsScreen() {
       <View className="px-5 py-4 flex-row items-center justify-between">
         <Text className="text-2xl font-bold text-primary-600">{t('statistics.title')}</Text>
         {/* Device Selector Dropdown */}
-        <DeviceSelector selectedDeviceId={selectedDeviceId} onSelectDevice={handleSelectDevice} />
+        {connections.length > 0 && devices.length > 0 && (
+          <DeviceSelector selectedDeviceId={selectedDeviceId} onSelectDevice={handleSelectDevice} />
+        )}
       </View>
 
       <ScrollView className="flex-1 px-2">

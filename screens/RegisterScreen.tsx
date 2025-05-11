@@ -48,9 +48,7 @@ export function RegisterScreen() {
 
     try {
       const success = await signUp(email, password, fullName);
-      if (success) {
-        navigation.navigate('Main');
-      } else {
+      if (!success) {
         setError(authError || t('register.error'));
       }
     } catch (err) {

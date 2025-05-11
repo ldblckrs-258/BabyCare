@@ -32,9 +32,7 @@ export function LoginScreen() {
     }
     try {
       const success = await signIn(email, password);
-      if (success) {
-        navigation.navigate('Main');
-      } else {
+      if (!success) {
         setError(authError || 'Invalid email or password');
       }
     } catch (err) {
@@ -45,9 +43,7 @@ export function LoginScreen() {
   const handleGoogleSignIn = async () => {
     try {
       const success = await signInWithGoogle();
-      if (success) {
-        navigation.navigate('Main');
-      } else {
+      if (!success) {
         setError(authError || 'Failed to sign in with Google');
       }
     } catch (err) {
