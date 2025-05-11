@@ -1,6 +1,6 @@
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import { Entypo, FontAwesome6 } from '@expo/vector-icons';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Text, View } from 'react-native';
 
 type CryingChartProps = {
@@ -10,6 +10,22 @@ type CryingChartProps = {
 export default function CryingChart({ data }: CryingChartProps) {
   const { t } = useTranslation();
 
+  // Calculate max value for dynamic scale
+  const maxValue = useMemo(() => {
+    const max = Math.max(...data, 10); // Min 15 minutes for readable scale
+    // Round up to nearest 10
+    return Math.ceil(max / 10) * 10;
+  }, [data]);
+
+  // Generate Y-axis labels dynamically based on max value
+  const yAxisLabels = useMemo(() => {
+    const step = maxValue / 3;
+    return [maxValue, Math.round(maxValue - step), Math.round(maxValue - 2 * step), 0];
+  }, [maxValue]);
+
+  // Time labels for 3-hour periods in a 24-hour day
+  const timeLabels = ['00:00', '06:00', '12:00', '18:00', '23:59'];
+
   return (
     <View className="flex-1 rounded-xl bg-white p-3 shadow">
       <View className="flex-row items-center justify-between pb-2">
@@ -17,16 +33,16 @@ export default function CryingChart({ data }: CryingChartProps) {
           <FontAwesome6 name="baby" size={20} color="#5d97d3" />
           <Text className="text-base font-semibold text-gray-800">{t('statistics.crying')}</Text>
         </View>
-        <Entypo name="chevron-right" size={20} color="#E0E0E0" />
       </View>
 
       <View className="mt-2 h-32 flex-row">
         {/* Y-axis labels */}
         <View className="justify-between pr-2 items-end pb-4 -mt-2">
-          <Text className="text-xs text-gray-400">60</Text>
-          <Text className="text-xs text-gray-400">40</Text>
-          <Text className="text-xs text-gray-400">20</Text>
-          <Text className="text-xs text-gray-400">0</Text>
+          {yAxisLabels.map((label, index) => (
+            <Text key={index} className="text-xs text-gray-400">
+              {label}
+            </Text>
+          ))}
         </View>
 
         {/* Chart Bars */}
@@ -38,16 +54,17 @@ export default function CryingChart({ data }: CryingChartProps) {
                   <View className="w-full bg-gray-100" style={{ height: 100 }} />
                   <View
                     className="absolute bottom-0 w-full bg-tertiary-400"
-                    style={{ height: value * (100 / 60) }}
+                    style={{ height: (value / maxValue) * 100 }}
                   />
                 </View>
               </View>
             ))}
           </View>
           <View className="flex-row justify-between mt-1">
-            <Text className="text-xs text-gray-400">00:00</Text>
-            <Text className="text-xs text-gray-400">12:00</Text>
-            <Text className="text-xs text-gray-400">21:00</Text>
+            {/* Only show first, middle and last time labels to avoid crowding */}
+            <Text className="text-xs text-gray-400">{timeLabels[0]}</Text>
+            <Text className="text-xs text-gray-400">{timeLabels[2]}</Text>
+            <Text className="text-xs text-gray-400">{timeLabels[4]}</Text>
           </View>
         </View>
       </View>

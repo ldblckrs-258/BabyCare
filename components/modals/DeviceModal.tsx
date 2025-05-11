@@ -3,7 +3,7 @@ import { DeviceModalContent } from './device/DeviceModalContent';
 import { QRScannerView } from './device/QRScannerView';
 import { useDeviceHook } from '@/lib/hooks';
 import { useTranslation } from '@/lib/hooks/useTranslation';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Modal } from 'react-native';
 
 type DeviceModalProps = {
@@ -13,13 +13,8 @@ type DeviceModalProps = {
 
 export function DeviceModal({ visible, onClose }: DeviceModalProps) {
   const { t } = useTranslation();
-  const { connectDevice, devices, connections } = useDeviceHook();
+  const { connectDevice } = useDeviceHook();
   const [scanMode, setScanMode] = useState(false);
-
-  useEffect(() => {
-    console.log('devices', devices);
-    console.log('connections', connections);
-  }, [devices, connections]);
 
   const handleQRCodeScanned = async ({ data }: { data: string }) => {
     if (data) {

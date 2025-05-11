@@ -1,12 +1,15 @@
 import { PasswordInput } from '../inputs/PasswordInput';
 import { SlideModal } from './SlideModal';
 import { useTranslation } from '@/lib/hooks/useTranslation';
+// import * as ImagePicker from 'expo-image-picker';
+import { FirestoreService } from '@/lib/models/firestoreService';
 import { useAuthStore } from '@/stores/authStore';
+import { useConnectionStore } from '@/stores/connectionStore';
+import { useDeviceStore } from '@/stores/deviceStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { RootStackParamList } from '@/types/navigation';
 import { MaterialIcons } from '@expo/vector-icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
-// import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useState } from 'react';
@@ -101,8 +104,24 @@ export function ProfileModal({ visible, onClose }: ProfileModalProps) {
   const handleSignOut = async () => {
     try {
       setIsLoading(true);
+
+      // Get all stores to clean up
+      const connectionStore = useConnectionStore.getState();
+      const deviceStore = useDeviceStore.getState();
+
+      // Get FirestoreService instance
+      const firestoreService = FirestoreService.getInstance();
+
+      // Clear all cached data
+      firestoreService.clearCache();
+
+      // Clear all stores
+      connectionStore.clearAllConnections();
+      deviceStore.clearAllDevices();
+
       // Logout from auth store
       await logout();
+
       // Close the modal
       onClose();
     } catch (error) {

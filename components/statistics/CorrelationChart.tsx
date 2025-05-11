@@ -1,6 +1,6 @@
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import { Entypo, MaterialIcons } from '@expo/vector-icons';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Text, View } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
 
@@ -12,6 +12,34 @@ type CorrelationChartProps = {
 export default function CorrelationChart({ badPositionData, cryingData }: CorrelationChartProps) {
   const { t } = useTranslation();
 
+  // Calculate max value for dynamic scale
+  const maxValue = useMemo(() => {
+    const badPositionMax = Math.max(...badPositionData.map((item) => item.value), 0);
+    const cryingMax = Math.max(...cryingData.map((item) => item.value), 0);
+    const max = Math.max(badPositionMax, cryingMax, 30); // Min 30 minutes for readable scale
+
+    // Round up to nearest 30
+    return Math.ceil(max / 30) * 30;
+  }, [badPositionData, cryingData]);
+
+  // Generate Y-axis labels dynamically based on max value
+  const yAxisLabels = useMemo(() => {
+    return [maxValue, (maxValue * 2) / 3, (maxValue * 1) / 3, 0].map((val) => Math.round(val));
+  }, [maxValue]);
+
+  // Generate X-axis labels dynamically based on data
+  const xAxisLabels = useMemo(() => {
+    // Extract and format date labels from the data
+    if (badPositionData.length === 0) return [''];
+
+    // For weekly chart, show first, middle, and last dates
+    const dates = badPositionData.map((item) => item.label);
+
+    if (dates.length <= 3) return dates;
+
+    return [dates[0], dates[Math.floor(dates.length / 2)], dates[dates.length - 1]];
+  }, [badPositionData]);
+
   return (
     <View className="mb-4 w-full rounded-xl bg-white p-3 shadow mt-4">
       <View className="flex-row items-center justify-between pb-4">
@@ -19,16 +47,16 @@ export default function CorrelationChart({ badPositionData, cryingData }: Correl
           <MaterialIcons name="equalizer" size={20} color="#3D8D7A" />
           <Text className="text-base font-semibold text-gray-800">{t('statistics.correlate')}</Text>
         </View>
-        <Entypo name="chevron-right" size={20} color="#E0E0E0" />
       </View>
 
       {/* Y-axis labels */}
       <View className="flex-row">
         <View className="justify-between pr-2 h-52 py-2">
-          <Text className="text-xs text-gray-400">90 {t('statistics.min')}</Text>
-          <Text className="text-xs text-gray-400">60 {t('statistics.min')}</Text>
-          <Text className="text-xs text-gray-400">30 {t('statistics.min')}</Text>
-          <Text className="text-xs text-gray-400">0 {t('statistics.min')}</Text>
+          {yAxisLabels.map((label, index) => (
+            <Text key={index} className="text-xs text-gray-400">
+              {label} {t('statistics.min')}
+            </Text>
+          ))}
         </View>
 
         {/* Line Chart Component */}
@@ -46,7 +74,7 @@ export default function CorrelationChart({ badPositionData, cryingData }: Correl
               data2={cryingData}
               height={160}
               spacing={24}
-              maxValue={90}
+              maxValue={maxValue}
               color="#d26165"
               color2="#5d97d3"
               thickness={2}
@@ -63,11 +91,11 @@ export default function CorrelationChart({ badPositionData, cryingData }: Correl
             />
           </View>
           <View className="flex-row justify-between pl-6 pr-4 bg-white py-2 -mt-6">
-            <Text className="text-xs text-gray-400">01/03</Text>
-            <Text className="text-xs text-gray-400">08/03</Text>
-            <Text className="text-xs text-gray-400">15/03</Text>
-            <Text className="text-xs text-gray-400">22/03</Text>
-            <Text className="text-xs text-gray-400">29/03</Text>
+            {xAxisLabels.map((label, index) => (
+              <Text key={index} className="text-xs text-gray-400">
+                {label}
+              </Text>
+            ))}
           </View>
         </View>
       </View>

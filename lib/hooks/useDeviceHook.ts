@@ -1,3 +1,4 @@
+import { FirestoreService } from '@/lib/models/firestoreService';
 import { DeviceViewModel } from '@/lib/viewmodels/deviceViewModel';
 import { useAuthStore } from '@/stores/authStore';
 import { Connection, useConnectionStore } from '@/stores/connectionStore';
@@ -42,6 +43,9 @@ export const useDeviceHook = (): DeviceHookReturn => {
   const deviceStore = useDeviceStore();
   const connectionStore = useConnectionStore();
 
+  // Ensure FirestoreService is initialized
+  const firestoreServiceRef = useRef(FirestoreService.getInstance());
+
   // Create the view model instance using useRef to ensure it persists between renders
   const viewModelRef = useRef<DeviceViewModel | null>(null);
   if (!viewModelRef.current) {
@@ -77,6 +81,21 @@ export const useDeviceHook = (): DeviceHookReturn => {
       }
     };
   }, [authStore.user]);
+
+  // Clear cache when component unmounts
+  useEffect(() => {
+    return () => {
+      // Clear cache specific to this hook when unmounting
+      const userId = authStore.user?.uid;
+      if (userId) {
+        // Only clear cache for this user's data
+        firestoreServiceRef.current.clearCache(
+          `query:connections:userId=${JSON.stringify(userId)}`
+        );
+      }
+    };
+  }, []);
+
   // Calculate connectedDevices in real-time based on current connections and devices
   const connectedDevices = connectionStore.connections
     .map((connection) => {
@@ -115,6 +134,8 @@ export const useDeviceHook = (): DeviceHookReturn => {
     clearAll: () => {
       deviceStore.clearAllDevices();
       connectionStore.clearAllConnections();
+      // Also clear FirestoreService cache
+      firestoreServiceRef.current.clearCache();
     },
   };
 };

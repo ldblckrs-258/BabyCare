@@ -1,5 +1,6 @@
 import { DeviceWithConnection } from '@/lib/hooks';
 import { useTranslation } from '@/lib/hooks/useTranslation';
+import { DeviceEventService } from '@/lib/models/deviceEventService';
 import { Ionicons } from '@expo/vector-icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Entypo from '@expo/vector-icons/Entypo';
@@ -15,55 +16,38 @@ interface DeviceCardProps {
 
 type POSITION_STATUS = 'supine' | 'prone' | 'side';
 
-// Function to generate randomized mockup status data
-const generateRandomMockupStatus = () => {
-  const now = new Date();
-
-  // Generate random timestamps within the last 2 minutes
-  const getRandomTimestamp = () => {
-    const randomSeconds = Math.floor(Math.random() * 120); // 0 to 120 seconds ago
-    const timestamp = new Date(now.getTime() - randomSeconds * 1000);
-    return timestamp.toISOString();
+interface DeviceStatus {
+  crying: {
+    isDetected: boolean;
+    timeStamp: string;
   };
-
-  // Random boolean with weighted probability (70% true, 30% false for crying)
-  const randomCrying = Math.random() < 0.3;
-
-  // Random position with weighted probabilities
-  // supine: 60%, prone: 20%, side: 20%
-  const positionRandom = Math.random();
-  let positionStatus: POSITION_STATUS;
-  if (positionRandom < 0.6) {
-    positionStatus = 'supine';
-  } else if (positionRandom < 0.8) {
-    positionStatus = 'prone';
-  } else {
-    positionStatus = 'side';
-  }
-
-  // Random blanket detection (50% chance)
-  const blanketDetected = Math.random() < 0.5;
-
-  return {
-    crying: {
-      isDetected: randomCrying,
-      timeStamp: getRandomTimestamp(),
-    },
-    position: {
-      status: positionStatus,
-      timeStamp: getRandomTimestamp(),
-    },
-    blanket: {
-      isDetected: blanketDetected,
-      timeStamp: getRandomTimestamp(),
-    },
+  position: {
+    status: POSITION_STATUS;
+    timeStamp: string;
   };
-};
+  blanket: {
+    isDetected: boolean;
+    timeStamp: string;
+  };
+}
 
 const DeviceCard = ({ data, onPress }: DeviceCardProps) => {
   const { t } = useTranslation();
-  // Generate unique random status for each card instance
-  const [mockupStatus] = useState(generateRandomMockupStatus());
+  const [deviceStatus, setDeviceStatus] = useState<DeviceStatus>({
+    crying: {
+      isDetected: false,
+      timeStamp: new Date().toISOString(),
+    },
+    position: {
+      status: 'supine',
+      timeStamp: new Date().toISOString(),
+    },
+    blanket: {
+      isDetected: true,
+      timeStamp: new Date().toISOString(),
+    },
+  });
+  const [loading, setLoading] = useState(true);
   const [cryingSeconds, setCryingSeconds] = useState(0);
   const [positionSeconds, setPositionSeconds] = useState(0);
   const [blanketSeconds, setBlanketSeconds] = useState(0);
@@ -78,6 +62,40 @@ const DeviceCard = ({ data, onPress }: DeviceCardProps) => {
       return `${minutes}m${remainingSeconds}s`;
     }
   };
+
+  // Fetch device events and set up real-time listener
+  useEffect(() => {
+    const deviceId = data.device.id;
+    if (!deviceId) return;
+
+    setLoading(true);
+
+    // Initial fetch
+    const fetchInitialStatus = async () => {
+      try {
+        const status = await DeviceEventService.getDeviceStatus(deviceId);
+        setDeviceStatus(status);
+      } catch (error) {
+        console.error('Error fetching initial device status:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInitialStatus();
+
+    // Set up real-time listener
+    const unsubscribe = DeviceEventService.listenToDeviceEvents(deviceId, (newStatus) => {
+      setDeviceStatus(newStatus);
+    });
+
+    // Clean up listener on unmount
+    return () => {
+      unsubscribe();
+    };
+  }, [data.device.id]);
+
+  // Update timers based on device status
   useEffect(() => {
     // Initialize timers and calculate initial elapsed seconds
     const calculateElapsedSeconds = (timestamp: string) => {
@@ -86,9 +104,9 @@ const DeviceCard = ({ data, onPress }: DeviceCardProps) => {
       return Math.floor((now.getTime() - timestampDate.getTime()) / 1000);
     };
 
-    setCryingSeconds(calculateElapsedSeconds(mockupStatus.crying.timeStamp));
-    setPositionSeconds(calculateElapsedSeconds(mockupStatus.position.timeStamp));
-    setBlanketSeconds(calculateElapsedSeconds(mockupStatus.blanket.timeStamp));
+    setCryingSeconds(calculateElapsedSeconds(deviceStatus.crying.timeStamp));
+    setPositionSeconds(calculateElapsedSeconds(deviceStatus.position.timeStamp));
+    setBlanketSeconds(calculateElapsedSeconds(deviceStatus.blanket.timeStamp));
 
     // Set up interval to update seconds every second
     const timerInterval = setInterval(() => {
@@ -99,7 +117,7 @@ const DeviceCard = ({ data, onPress }: DeviceCardProps) => {
 
     // Clean up interval on component unmount
     return () => clearInterval(timerInterval);
-  }, []);
+  }, [deviceStatus]);
 
   return (
     <Card
@@ -133,15 +151,15 @@ const DeviceCard = ({ data, onPress }: DeviceCardProps) => {
         {data.device.isOnline && (
           <View className="mt-2 flex-row items-center justify-between gap-2">
             <View
-              className={`flex-1 py-2 px-3 h-full rounded flex-col items-center ${mockupStatus.crying.isDetected ? 'bg-tertiary-100' : ''}`}>
+              className={`flex-1 py-2 px-3 h-full rounded flex-col items-center ${deviceStatus.crying.isDetected ? 'bg-tertiary-100' : ''}`}>
               <View className="flex-row items-center gap-1 justify-center">
                 <Ionicons
                   name="water"
                   size={16}
-                  color={mockupStatus.crying.isDetected ? '#5d97d3' : '#9ca3af'}
+                  color={deviceStatus.crying.isDetected ? '#5d97d3' : '#9ca3af'}
                 />
                 <Text className="text-sm text-gray-600 font-semibold">
-                  {mockupStatus.crying.isDetected ? t('home.crying') : t('home.notCrying')}
+                  {deviceStatus.crying.isDetected ? t('home.crying') : t('home.notCrying')}
                 </Text>
               </View>
               <Text className="mt-1 text-xs text-gray-400 text-center">
@@ -149,23 +167,23 @@ const DeviceCard = ({ data, onPress }: DeviceCardProps) => {
               </Text>
             </View>
             <View
-              className={`flex-1 py-2 px-4 h-full rounded flex-col items-center ${mockupStatus.position.status === 'prone' ? 'bg-secondary-100' : ''} ${mockupStatus.position.status === 'side' ? 'bg-amber-100' : ''}`}>
+              className={`flex-1 py-2 px-4 h-full rounded flex-col items-center ${deviceStatus.position.status === 'prone' ? 'bg-secondary-100' : ''} ${deviceStatus.position.status === 'side' ? 'bg-amber-100' : ''}`}>
               <View className="flex-row items-center gap-2 justify-center">
                 <FontAwesome6
                   name="baby"
                   size={16}
                   color={
-                    mockupStatus.position.status === 'prone'
+                    deviceStatus.position.status === 'prone'
                       ? '#d26165'
-                      : mockupStatus.position.status === 'side'
+                      : deviceStatus.position.status === 'side'
                         ? '#d97706'
                         : '#9ca3af'
                   }
                 />
                 <Text className="text-sm text-gray-600 font-semibold">
-                  {mockupStatus.position.status === 'prone'
+                  {deviceStatus.position.status === 'prone'
                     ? t('home.prone')
-                    : mockupStatus.position.status === 'side'
+                    : deviceStatus.position.status === 'side'
                       ? t('home.side')
                       : t('home.supine')}
                 </Text>
@@ -175,15 +193,15 @@ const DeviceCard = ({ data, onPress }: DeviceCardProps) => {
               </Text>
             </View>
             <View
-              className={`flex-1 py-2 px-3 h-full rounded flex-col items-center ${mockupStatus.blanket.isDetected ? '' : 'bg-purple-100'}`}>
+              className={`flex-1 py-2 px-3 h-full rounded flex-col items-center ${deviceStatus.blanket.isDetected ? '' : 'bg-purple-100'}`}>
               <View className="flex-row items-center gap-2 justify-center">
                 <FontAwesome6
                   name="bed"
                   size={16}
-                  color={mockupStatus.blanket.isDetected ? '#9ca3af' : '#a855f7'}
+                  color={deviceStatus.blanket.isDetected ? '#9ca3af' : '#a855f7'}
                 />
                 <Text className="text-sm text-gray-600 font-semibold">
-                  {mockupStatus.blanket.isDetected ? t('home.blanket') : t('home.noBlanket')}
+                  {deviceStatus.blanket.isDetected ? t('home.blanket') : t('home.noBlanket')}
                 </Text>
               </View>
               <Text className="mt-1 text-xs text-gray-400 text-center">
