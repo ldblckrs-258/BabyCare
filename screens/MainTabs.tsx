@@ -1,12 +1,15 @@
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Text, TouchableOpacity, View } from 'react-native';
-
 import HistoryScreen from './HistoryScreen';
 import HomeScreen from './HomeScreen';
 import SettingsScreen from './SettingsScreen';
 import StatisticsScreen from './StatisticsScreen';
 import StreamingScreen from './StreamingScreen';
+import { useTranslation } from '@/lib/hooks/useTranslation';
+import { useNotificationStore } from '@/stores/notificationStore';
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Text, TouchableOpacity, View } from 'react-native';
 
 const Tab = createBottomTabNavigator();
 
@@ -14,23 +17,18 @@ const TABS = [
   {
     name: 'Streaming',
     component: StreamingScreen,
-    label: 'Streaming',
-    icon: (color: string, size: number) => (
-      <MaterialIcons name="live-tv" size={size} color={color} />
-    ),
+    icon: (color: string, size: number) => <Ionicons name="tv" size={size} color={color} />,
   },
   {
     name: 'History',
     component: HistoryScreen,
-    label: 'History',
     icon: (color: string, size: number) => (
-      <MaterialIcons name="view-list" size={size} color={color} />
+      <FontAwesome6 name="list-ul" size={size} color={color} />
     ),
   },
   {
     name: 'Home',
     component: HomeScreen,
-    label: 'Home',
     icon: (color: string, size: number) => (
       <MaterialIcons name="home-filled" size={size} color={color} />
     ),
@@ -38,7 +36,6 @@ const TABS = [
   {
     name: 'Statistics',
     component: StatisticsScreen,
-    label: 'Statistics',
     icon: (color: string, size: number) => (
       <MaterialIcons name="insert-chart" size={size} color={color} />
     ),
@@ -46,12 +43,12 @@ const TABS = [
   {
     name: 'Settings',
     component: SettingsScreen,
-    label: 'Settings',
     icon: (color: string, size: number) => (
       <MaterialIcons name="settings" size={size} color={color} />
     ),
   },
 ];
+
 export default function MainTabs() {
   return (
     <Tab.Navigator
@@ -76,8 +73,10 @@ function CustomTabBar({
   descriptors: any;
   navigation: any;
 }) {
+  const { t } = useTranslation();
+  const { getIsAllRead } = useNotificationStore();
   return (
-    <View className="relative w-full bg-neutral-100 px-3 pb-3">
+    <View className="relative w-full bg-neutral-100 px-2 pb-2">
       <View className="flex-row rounded-xl bg-white p-2 shadow-xl">
         {state.routes.map((route: any, index: number) => {
           const { options } = descriptors[route.key];
@@ -105,7 +104,7 @@ function CustomTabBar({
                   accessibilityLabel={options.tabBarAccessibilityLabel}
                   testID={options.tabBarTestID}
                   onPress={onPress}
-                  className={`absolute bottom-6 size-[68px] items-center justify-center rounded-full ${isFocused ? 'bg-primary-400' : 'bg-gray-400'}`}
+                  className={`absolute bottom-6 size-[62px] items-center justify-center rounded-full ${isFocused ? 'bg-primary-400' : 'bg-gray-400'}`}
                   style={{
                     shadowColor: isFocused ? '#254a43' : '#000',
                     shadowOffset: { width: 0, height: 2 },
@@ -113,7 +112,7 @@ function CustomTabBar({
                     shadowRadius: 3.84,
                     elevation: 5,
                   }}>
-                  {TABS[index].icon('white', 36)}
+                  {TABS[index].icon('white', 32)}
                 </TouchableOpacity>
               </View>
             );
@@ -126,11 +125,14 @@ function CustomTabBar({
                 accessibilityLabel={options.tabBarAccessibilityLabel}
                 testID={options.tabBarTestID}
                 onPress={onPress}
-                className={`flex-1 items-center p-2 `}>
-                {TABS[index].icon(isFocused ? '#3d8d7a' : 'gray', 26)}
-                <Text className={`text-sm ${isFocused ? 'text-primary-500' : 'text-gray-500'}`}>
-                  {route.name}
+                className={`flex-1 items-center py-1 px-2`}>
+                {TABS[index].icon(isFocused ? '#3d8d7a' : 'gray', 24)}
+                <Text className={`text-[12px] ${isFocused ? 'text-primary-500' : 'text-gray-500'}`}>
+                  {t(`tabs.${route.name.toLowerCase()}`)}
                 </Text>
+                {route.name === 'History' && !getIsAllRead() && (
+                  <View className="absolute top-1 right-5 bg-rose-500 size-3 rounded-full opacity-70"></View>
+                )}
               </TouchableOpacity>
             );
         })}

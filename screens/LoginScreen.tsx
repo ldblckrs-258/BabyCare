@@ -1,3 +1,7 @@
+import { PasswordInput } from '../components/inputs/PasswordInput';
+import { useAuthStore } from '../stores/authStore';
+import type { RootStackParamList } from '../types/navigation';
+import { useTranslation } from '@/lib/hooks/useTranslation';
 import Fa6 from '@expo/vector-icons/FontAwesome6';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -16,45 +20,40 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useAuthStore } from '../stores/authStore';
-import type { RootStackParamList } from '../types/navigation';
-
 export function LoginScreen() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [keepSignedIn, setKeepSignedIn] = useState(false);
   const [error, setError] = useState('');
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { signIn, signInWithGoogle, loading, error: authError } = useAuthStore();
-
+  const { signIn, signInWithGoogle, error: authError } = useAuthStore();
+  const [emailLoginLoading, setEmailLoginLoading] = useState(false);
+  const [googleLoginLoading, setGoogleLoginLoading] = useState(false);
   const handleLogin = async () => {
     if (!email || !password) {
-      setError('Please enter email and password');
+      setError('auth.errors.invalidEmailOrPassword');
       return;
     }
+    setEmailLoginLoading(true);
     try {
-      const success = await signIn(email, password, keepSignedIn);
-      if (success) {
-        navigation.replace('Main');
-      } else {
-        setError(authError || 'Invalid email or password');
+      const success = await signIn(email, password);
+      if (!success) {
+        setError(authError || 'auth.errors.invalidEmailOrPassword');
       }
-    } catch (err) {
-      setError(authError || 'An error occurred while logging in');
+    } finally {
+      setEmailLoginLoading(false);
     }
   };
 
   const handleGoogleSignIn = async () => {
+    setGoogleLoginLoading(true);
     try {
       const success = await signInWithGoogle();
-      if (success) {
-        navigation.replace('Main');
-      } else {
-        setError(authError || 'Failed to sign in with Google');
+      if (!success) {
+        setError(authError || 'auth.errors.signInFailed');
       }
-    } catch (err) {
-      setError(authError || 'An error occurred while logging in with Google');
+    } finally {
+      setGoogleLoginLoading(false);
     }
   };
 
@@ -79,28 +78,32 @@ export function LoginScreen() {
             </View>
 
             {/* Login Form */}
-            <View className="flex flex-col gap-6">
-              <Text className="mb-16 text-center text-3xl font-bold text-gray-900">Login</Text>
-
+            <View className="flex flex-col gap-6 flex-1 justify-center pb-24">
+              <Text className="mb-14 text-center text-3xl font-bold text-gray-900">Login</Text>
               {/* Google Sign In */}
               <TouchableOpacity
                 onPress={handleGoogleSignIn}
-                className="flex-row items-center justify-center space-x-2 rounded-lg bg-white p-4">
-                <Image
-                  source={require('../assets/google-icon.png')}
-                  className="h-6 w-6"
-                  resizeMode="contain"
-                />
-                <Text className="text-base font-semibold text-gray-700">Login with Google</Text>
+                disabled={googleLoginLoading}
+                className="flex-row items-center justify-center space-x-2 rounded-lg bg-white p-4 gap-2">
+                {googleLoginLoading ? (
+                  <ActivityIndicator color="#999" />
+                ) : (
+                  <>
+                    <Image
+                      source={require('../assets/google-icon.png')}
+                      className="h-6 w-6"
+                      resizeMode="contain"
+                    />
+                    <Text className="text-base font-semibold text-gray-700">Login with Google</Text>
+                  </>
+                )}
               </TouchableOpacity>
-
               {/* Divider */}
               <View className="flex-row items-center">
                 <View className="flex-1 border-t border-gray-300" />
                 <Text className="mx-4 text-gray-500">or login with</Text>
                 <View className="flex-1 border-t border-gray-300" />
               </View>
-
               {/* Email Input */}
               <View>
                 <Text className="mb-2 text-sm font-medium text-gray-700">Email</Text>
@@ -114,9 +117,9 @@ export function LoginScreen() {
                   }}
                   keyboardType="email-address"
                   autoCapitalize="none"
+                  returnKeyType="next"
                 />
               </View>
-
               {/* Password Input */}
               <View>
                 <View className="mb-2 flex-row justify-between">
@@ -125,56 +128,27 @@ export function LoginScreen() {
                     <Text className="text-sm font-medium text-blue-600">Forgot password?</Text>
                   </TouchableOpacity>
                 </View>
-                <View className="relative">
-                  <TextInput
-                    className="rounded-lg border border-gray-300 bg-white px-4 py-3"
-                    placeholder="••••••••"
-                    value={password}
-                    onChangeText={(text) => {
-                      setPassword(text);
-                      setError('');
-                    }}
-                    secureTextEntry={!showPassword}
-                  />
-                  <TouchableOpacity
-                    className="absolute right-3 top-3.5"
-                    onPress={() => setShowPassword(!showPassword)}>
-                    {showPassword ? (
-                      <Fa6 name="eye" size={16} color="#bbb" />
-                    ) : (
-                      <Fa6 name="eye-slash" size={16} color="#bbb" />
-                    )}
-                  </TouchableOpacity>
-                </View>
+                <PasswordInput
+                  value={password}
+                  onChangeText={(text) => {
+                    setPassword(text);
+                    setError('');
+                  }}
+                />
               </View>
-
               {/* Error Message */}
-              {error ? <Text className="text-center text-sm text-red-500">{error}</Text> : null}
-
-              {/* Keep Signed In */}
-              <View className="flex-row items-center">
-                <Pressable
-                  onPress={() => setKeepSignedIn(!keepSignedIn)}
-                  className={`mr-2 h-5 w-5 items-center justify-center rounded border ${
-                    keepSignedIn ? 'border-primary-500 bg-primary-500' : 'border-gray-300'
-                  }`}>
-                  {keepSignedIn && <Fa6 name="check" size={12} color="#fff" />}
-                </Pressable>
-                <Text className="text-sm text-gray-600">Keep logged in</Text>
-              </View>
-
+              {error ? <Text className="text-center text-sm text-red-500">{t(error)}</Text> : null}
               {/* Login Button */}
               <TouchableOpacity
                 onPress={handleLogin}
-                disabled={loading}
-                className="rounded-lg bg-primary-500 px-4 py-3">
-                {loading ? (
+                disabled={emailLoginLoading || googleLoginLoading}
+                className="rounded-lg bg-primary-500 px-4 h-14 flex items-center justify-center">
+                {emailLoginLoading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
                   <Text className="text-center text-lg font-semibold text-white">Login</Text>
                 )}
               </TouchableOpacity>
-
               {/* Sign Up Link */}
               <View className="flex-row justify-center">
                 <Text className="text-gray-600">Don't have an account? </Text>

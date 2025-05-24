@@ -1,44 +1,42 @@
+import type { RootStackParamList } from '../types/navigation';
+import { useTranslation } from '@/lib/hooks/useTranslation';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useRef, useState } from 'react';
 import { Dimensions, FlatList, Image, StatusBar, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import type { RootStackParamList } from '../types/navigation';
-
 const { width } = Dimensions.get('window');
-
-const slides = [
-  {
-    id: '1',
-    image: require('../assets/welcome/1.png'),
-    title: ['Welcome to', 'BabyCare'],
-    subtitle:
-      "Caring for your little one has never been easier or more reassuring. BabyCare is your ultimate companion in monitoring and protecting your child comprehensively, even when you're not right beside them.",
-    color: '#F3FAF7',
-  },
-  {
-    id: '2',
-    image: require('../assets/welcome/2.png'),
-    title: ['Safe Sleep Position', 'Monitoring'],
-    subtitle:
-      "Worry no more about your baby's sleeping position. Our AI system continuously monitors and immediately alerts you to potentially dangerous sleeping postures and keep your child safe.",
-    color: '#F9E7E8',
-  },
-  {
-    id: '3',
-    image: require('../assets/welcome/3.png'),
-    title: ['Intelligent', 'Cry Detection'],
-    subtitle:
-      "Our advanced AI technology analyzes your baby's cries, helping you quickly understand their needs and condition. Receive instant notifications whenever your child requires attention, no matter where you are.",
-    color: '#E6EDF8',
-  },
-];
 
 export function WelcomeScreen() {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const flatListRef = useRef<FlatList>(null);
+  const { t } = useTranslation();
+
+  const slides = [
+    {
+      id: '1',
+      image: require('../assets/welcome/1.png'),
+      title: t('welcome.slides.first.title', { returnObjects: true }),
+      subtitle: t('welcome.slides.first.subtitle'),
+      color: '#F3FAF7',
+    },
+    {
+      id: '2',
+      image: require('../assets/welcome/2.png'),
+      title: t('welcome.slides.second.title', { returnObjects: true }),
+      subtitle: t('welcome.slides.second.subtitle'),
+      color: '#F9E7E8',
+    },
+    {
+      id: '3',
+      image: require('../assets/welcome/3.png'),
+      title: t('welcome.slides.third.title', { returnObjects: true }),
+      subtitle: t('welcome.slides.third.subtitle'),
+      color: '#E6EDF8',
+    },
+  ];
 
   const Footer = () => {
     return (
@@ -57,13 +55,13 @@ export function WelcomeScreen() {
           </View>
 
           <View className="w-full flex-1 flex-col items-center justify-center">
-            <Text className="text-4xl font-bold text-black">
+            <Text className="text-3xl font-bold text-black">
               {slides[currentSlideIndex].title[0]}
             </Text>
-            <Text className="text-4xl font-bold text-primary-500">
+            <Text className="text-3xl font-bold text-primary-500">
               {slides[currentSlideIndex].title[1]}
             </Text>
-            <Text className="pt-4 text-center text-xl text-gray-600">
+            <Text className="pt-4 text-center text-lg leading-6 text-gray-600">
               {slides[currentSlideIndex].subtitle}
             </Text>
           </View>
@@ -74,14 +72,14 @@ export function WelcomeScreen() {
               <View className="flex flex-col items-center gap-4">
                 <TouchableOpacity
                   onPress={() => navigation.navigate('Register')}
-                  className="w-[180px] rounded-full bg-tertiary-600 py-3">
-                  <Text className="w-[180px] text-center text-xl font-semibold text-white">
-                    Sign up
+                  className="w-[160px] rounded-full bg-tertiary-600 py-2.5">
+                  <Text className="w-[160px] text-center text-lg font-semibold text-white">
+                    {t('common.signUp')}
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-                  <Text className="w-[180px] text-center text-xl font-medium text-gray-400">
-                    Login now
+                  <Text className="w-[160px] text-center text-lg font-medium text-gray-400">
+                    {t('common.loginNow')}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -89,12 +87,14 @@ export function WelcomeScreen() {
               <View className="flex flex-col items-center gap-4">
                 <TouchableOpacity
                   onPress={goNextSlide}
-                  className="w-[180px] rounded-full bg-primary-500 py-3">
-                  <Text className="text-center text-xl font-semibold text-white">Continue</Text>
+                  className="w-[160px] rounded-full bg-primary-500 py-2.5">
+                  <Text className="text-center text-lg font-semibold text-white">
+                    {t('common.continue')}
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-                  <Text className="w-[180px] text-center text-xl font-medium text-gray-400">
-                    Skip
+                  <Text className="w-[160px] text-center text-lg font-medium text-gray-400">
+                    {t('common.skip')}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -124,7 +124,7 @@ export function WelcomeScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <StatusBar backgroundColor={slides[currentSlideIndex].color} />
+      <StatusBar translucent backgroundColor="transparent" />
       <FlatList
         ref={flatListRef}
         data={slides}
@@ -135,11 +135,7 @@ export function WelcomeScreen() {
         renderItem={({ item }) => (
           <View style={{ width }} className="w-full flex-1">
             <View className="w-full flex-1 items-center justify-center">
-              <Image
-                source={item.image}
-                className="h-full w-full" // Changed from absolute h-screen w-screen to h-full w-full
-                resizeMode="cover" // Changed from contain to cover
-              />
+              <Image source={item.image} className="h-full w-full" resizeMode="cover" />
             </View>
           </View>
         )}

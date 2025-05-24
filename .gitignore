@@ -25,3 +25,7 @@ android
 .vscode/
 .cursor/
 .env
+.cursorignore
+.docs/
+google-services.json
+service-account.json
