@@ -22,6 +22,7 @@ interface AuthState {
   logout: () => Promise<void>;
   updateProfile: (data: { displayName?: string; photoURL?: string }) => Promise<void>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+  sendPasswordResetEmail: (email: string) => Promise<boolean>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -189,6 +190,18 @@ export const useAuthStore = create<AuthState>()(
           } catch (error) {
             set({ error: (error as Error).message, loading: false });
             throw error;
+          }
+        },
+
+        sendPasswordResetEmail: async (email: string) => {
+          try {
+            set({ loading: true, error: null });
+            await auth().sendPasswordResetEmail(email);
+            set({ loading: false });
+            return true;
+          } catch (error) {
+            set({ error: (error as Error).message, loading: false });
+            return false;
           }
         },
       };

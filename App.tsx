@@ -1,5 +1,6 @@
 import './global.css';
 import './lib/i18n';
+import { ForgotPasswordScreen } from './screens/ForgotPasswordScreen';
 import { LoginScreen } from './screens/LoginScreen';
 import MainTabs from './screens/MainTabs';
 import { RegisterScreen } from './screens/RegisterScreen';
@@ -99,6 +100,7 @@ export default function App() {
               <Stack.Screen name="Welcome" component={WelcomeScreen} />
               <Stack.Screen name="Login" component={LoginScreen} />
               <Stack.Screen name="Register" component={RegisterScreen} />
+              <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
             </>
           )}
         </Stack.Navigator>

@@ -79,7 +79,9 @@ export function LoginScreen() {
 
             {/* Login Form */}
             <View className="flex flex-col gap-6 flex-1 justify-center pb-24">
-              <Text className="mb-14 text-center text-3xl font-bold text-gray-900">Login</Text>
+              <Text className="mb-14 text-center text-3xl font-bold text-gray-900">
+                {t('auth.login')}
+              </Text>
               {/* Google Sign In */}
               <TouchableOpacity
                 onPress={handleGoogleSignIn}
@@ -94,19 +96,21 @@ export function LoginScreen() {
                       className="h-6 w-6"
                       resizeMode="contain"
                     />
-                    <Text className="text-base font-semibold text-gray-700">Login with Google</Text>
+                    <Text className="text-base font-semibold text-gray-700">
+                      {t('auth.loginWithGoogle')}
+                    </Text>
                   </>
                 )}
               </TouchableOpacity>
               {/* Divider */}
               <View className="flex-row items-center">
                 <View className="flex-1 border-t border-gray-300" />
-                <Text className="mx-4 text-gray-500">or login with</Text>
+                <Text className="mx-4 text-gray-500">{t('auth.orLoginWith')}</Text>
                 <View className="flex-1 border-t border-gray-300" />
               </View>
               {/* Email Input */}
               <View>
-                <Text className="mb-2 text-sm font-medium text-gray-700">Email</Text>
+                <Text className="mb-2 text-sm font-medium text-gray-700">{t('auth.email')}</Text>
                 <TextInput
                   className="rounded-lg border border-gray-300 bg-white px-4 py-3"
                   placeholder="johndoe@gmail.com"
@@ -123,9 +127,11 @@ export function LoginScreen() {
               {/* Password Input */}
               <View>
                 <View className="mb-2 flex-row justify-between">
-                  <Text className="text-sm font-medium text-gray-700">Password</Text>
-                  <TouchableOpacity onPress={() => console.log('Forgot password')}>
-                    <Text className="text-sm font-medium text-blue-600">Forgot password?</Text>
+                  <Text className="text-sm font-medium text-gray-700">{t('auth.password')}</Text>
+                  <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
+                    <Text className="text-sm font-medium text-blue-600">
+                      {t('auth.forgotPassword')}
+                    </Text>
                   </TouchableOpacity>
                 </View>
                 <PasswordInput
@@ -146,14 +152,16 @@ export function LoginScreen() {
                 {emailLoginLoading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <Text className="text-center text-lg font-semibold text-white">Login</Text>
+                  <Text className="text-center text-lg font-semibold text-white">
+                    {t('auth.login')}
+                  </Text>
                 )}
               </TouchableOpacity>
               {/* Sign Up Link */}
               <View className="flex-row justify-center">
-                <Text className="text-gray-600">Don't have an account? </Text>
+                <Text className="text-gray-600">{t('auth.dontHaveAccount')} </Text>
                 <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-                  <Text className="font-semibold text-primary-600">Sign up now</Text>
+                  <Text className="font-semibold text-primary-600">{t('auth.signUpNow')}</Text>
                 </TouchableOpacity>
               </View>
             </View>

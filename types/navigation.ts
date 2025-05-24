@@ -2,6 +2,7 @@ export type RootStackParamList = {
   Welcome: undefined;
   Login: undefined;
   Register: undefined;
+  ForgotPassword: undefined;
   Main: undefined;
   Auth: undefined;
   Streaming:
