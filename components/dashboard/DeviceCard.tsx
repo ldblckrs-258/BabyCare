@@ -52,14 +52,24 @@ const DeviceCard = ({ data, onPress }: DeviceCardProps) => {
   const [positionSeconds, setPositionSeconds] = useState(0);
   const [blanketSeconds, setBlanketSeconds] = useState(0);
 
-  // Format seconds to display as "5s" (1-59s) or "1m23s" (60s+)
   const formatSeconds = (seconds: number): string => {
     if (seconds < 60) {
       return `${seconds}s`;
-    } else {
+    } else if (seconds < 3600) {
       const minutes = Math.floor(seconds / 60);
       const remainingSeconds = seconds % 60;
       return `${minutes}m${remainingSeconds}s`;
+    } else if (seconds < 86400) {
+      // Less than 24 hours
+      const hours = Math.floor(seconds / 3600);
+      const remainingMinutes = Math.floor((seconds % 3600) / 60);
+      return `${hours}h${remainingMinutes}m`;
+    } else {
+      // More than 24 hours
+      const days = Math.floor(seconds / 86400);
+      const remainingHours = Math.floor((seconds % 86400) / 3600);
+      const remainingMinutes = Math.floor((seconds % 3600) / 60);
+      return `${days}d${remainingHours}h${remainingMinutes}m`;
     }
   };
 

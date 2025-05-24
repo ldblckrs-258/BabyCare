@@ -18,6 +18,7 @@ export const en = {
     noDevices: 'No devices connected',
     connectFirst: 'Go to settings to connect your device first',
     deviceSettings: 'Device Settings',
+    loading: 'Loading...',
   },
   home: {
     title: {
@@ -81,6 +82,11 @@ export const en = {
     privacyPolicy: 'Privacy Policy',
     login: 'Login',
     register: 'Register',
+    errors: {
+      signInFailed: 'Sign in failed',
+      signInCancelled: 'Sign in cancelled',
+      invalidEmailOrPassword: 'Invalid email or password',
+    },
   },
   settings: {
     title: 'Settings',
@@ -89,13 +95,20 @@ export const en = {
       email: 'Email',
       displayName: 'Display Name',
       displayNamePlaceholder: 'Enter your display name',
+      displayNameMessage: 'Change your display name',
       changePassword: 'Change Password',
-      currentPassword: 'Current Password',
-      newPassword: 'New Password',
-      confirmPassword: 'Confirm New Password',
-      changePasswordButton: 'Change Password',
+      currentPassword: 'Current password',
+      newPassword: 'New password',
+      confirmPassword: 'Confirm new password',
       saveButton: 'Save Changes',
       signOut: 'Sign Out',
+      errors: {
+        displayNameLength: 'Display name must be at least 3 characters',
+        passwordIncorrect: 'Password is incorrect',
+        passwordChangeFailed: 'Password change failed',
+        passwordTooShort: 'Password must be at least 6 characters',
+        passwordMismatch: 'Passwords do not match',
+      },
     },
     devices: {
       title: 'Devices',
@@ -194,8 +207,8 @@ export const en = {
     },
     shortThreshold: {
       cry: 'Cry',
-      side: 'Side',
-      prone: 'Prone',
+      side: 'side',
+      prone: 'prone',
       noBlanket: 'No Blanket',
     },
     disconnect: {
@@ -314,6 +327,10 @@ export const en = {
       title: 'System notification',
       description: 'Your device has been disconnected',
     },
+    unknown: {
+      title: 'BabyCare notification',
+      description: 'Your baby was changed position or started crying',
+    },
   },
   streaming: {
     title: 'Streaming Camera',
@@ -341,6 +358,7 @@ export const en = {
     },
     errorMessage: {
       connectionFailed: 'Could not connect to the stream',
+      streamNotFound: 'Device streaming is not available now, please restart the device',
     },
   },
   statistics: {

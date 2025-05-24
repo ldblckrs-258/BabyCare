@@ -9,7 +9,8 @@ import {
 import { useDeviceHook } from '@/lib/hooks/useDeviceHook';
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import { DeviceEventService, StatisticsData } from '@/lib/models/deviceEventService';
-import { useEffect, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, SafeAreaView, ScrollView, Text, View } from 'react-native';
 
 export default function StatisticsScreen() {
@@ -40,6 +41,11 @@ export default function StatisticsScreen() {
     },
   });
 
+  // Reference to unsubscribe function
+  const unsubscribeRef = useRef<(() => void) | null>(null);
+  // Reference to interval for auto refresh
+  const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
   // Set initial device when connections are loaded
   useEffect(() => {
     if (connections.length > 0 && !selectedDeviceId) {
@@ -47,24 +53,101 @@ export default function StatisticsScreen() {
     }
   }, [connections, selectedDeviceId]);
 
-  // Fetch statistics data when device is selected
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!selectedDeviceId) return;
+  // Fetch statistics data and setup listener
+  const fetchAndSubscribe = useCallback(async (deviceId: string, forceFresh: boolean = false) => {
+    if (!deviceId) return;
 
-      setIsLoading(true);
+    setIsLoading(true);
+    try {
+      // Initial fetch with force refresh option
+      const data = await DeviceEventService.getStatisticsData(deviceId, forceFresh);
+      setStatistics(data);
+
+      // Setup real-time listener
+      if (unsubscribeRef.current) {
+        unsubscribeRef.current();
+      }
+
+      // Use the listenToDeviceEvents method to get real-time updates
+      unsubscribeRef.current = DeviceEventService.listenToDeviceEvents(deviceId, async () => {
+        // When events change, refetch the statistics
+        const updatedData = await DeviceEventService.getStatisticsData(deviceId, true);
+        setStatistics(updatedData);
+      });
+    } catch (error) {
+      console.error('Error setting up statistics listener:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Setup auto refresh interval
+  const setupRefreshInterval = useCallback((deviceId: string) => {
+    // Clear any existing interval first
+    if (refreshIntervalRef.current) {
+      clearInterval(refreshIntervalRef.current);
+      refreshIntervalRef.current = null;
+    }
+
+    // Create new interval to refresh data every 30 seconds
+    refreshIntervalRef.current = setInterval(async () => {
+      if (!deviceId) return;
+
       try {
-        const data = await DeviceEventService.getStatisticsData(selectedDeviceId);
-        setStatistics(data);
+        // Silently refresh without showing loading state
+        const updatedData = await DeviceEventService.getStatisticsData(deviceId, true);
+        setStatistics(updatedData);
       } catch (error) {
-        console.error('Error fetching statistics:', error);
-      } finally {
-        setIsLoading(false);
+        console.error('Error auto-refreshing statistics:', error);
+      }
+    }, 30 * 1000); // 30 seconds
+  }, []);
+
+  // When selected device changes
+  useEffect(() => {
+    if (selectedDeviceId) {
+      fetchAndSubscribe(selectedDeviceId);
+      setupRefreshInterval(selectedDeviceId);
+    }
+
+    // Cleanup listener and interval when component unmounts or device changes
+    return () => {
+      if (unsubscribeRef.current) {
+        unsubscribeRef.current();
+        unsubscribeRef.current = null;
+      }
+
+      if (refreshIntervalRef.current) {
+        clearInterval(refreshIntervalRef.current);
+        refreshIntervalRef.current = null;
       }
     };
+  }, [selectedDeviceId, fetchAndSubscribe, setupRefreshInterval]);
 
-    fetchData();
-  }, [selectedDeviceId]);
+  // Reload statistics when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      if (selectedDeviceId) {
+        // Force refresh data when the screen comes into focus
+        fetchAndSubscribe(selectedDeviceId, true);
+        // Re-establish auto refresh
+        setupRefreshInterval(selectedDeviceId);
+      }
+
+      // Return cleanup function for when screen goes out of focus
+      return () => {
+        if (unsubscribeRef.current) {
+          unsubscribeRef.current();
+          unsubscribeRef.current = null;
+        }
+
+        if (refreshIntervalRef.current) {
+          clearInterval(refreshIntervalRef.current);
+          refreshIntervalRef.current = null;
+        }
+      };
+    }, [selectedDeviceId, fetchAndSubscribe, setupRefreshInterval])
+  );
 
   // Handle device selection
   const handleSelectDevice = (device: { id: string; name: string; connectionId: string }) => {
@@ -83,7 +166,7 @@ export default function StatisticsScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-neutral-50 pt-12">
+    <SafeAreaView className="flex-1 bg-neutral-100 pt-10">
       {/* Header */}
       <View className="px-5 py-4 flex-row items-center justify-between">
         <Text className="text-2xl font-bold text-primary-600">{t('statistics.title')}</Text>
@@ -99,7 +182,7 @@ export default function StatisticsScreen() {
           <Text className="mt-4 text-gray-500">{t('common.loading')}</Text>
         </View>
       ) : (
-        <ScrollView className="flex-1 px-2">
+        <ScrollView className="flex-1 px-4">
           {/* Today Overview Section */}
           <TodayOverview
             badPositionData={statistics.todayOverview.badPositionData}

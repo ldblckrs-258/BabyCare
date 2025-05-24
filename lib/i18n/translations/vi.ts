@@ -18,6 +18,7 @@ export const vi = {
     noDevices: 'Không có thiết bị nào',
     connectFirst: 'Mở phần cài đặt để kết nối thiết bị đầu tiên',
     deviceSettings: 'Thiết lập thiết bị',
+    loading: 'Đang tải...',
   },
   home: {
     title: {
@@ -77,6 +78,11 @@ export const vi = {
     privacyPolicy: 'Chính sách bảo mật',
     login: 'Đăng nhập',
     register: 'Đăng ký',
+    errors: {
+      signInFailed: 'Đăng nhập thất bại',
+      signInCancelled: 'Đăng nhập đã bị hủy',
+      invalidEmailOrPassword: 'Email hoặc mật khẩu không hợp lệ',
+    },
   },
   settings: {
     title: 'Cài đặt',
@@ -85,13 +91,20 @@ export const vi = {
       email: 'Email',
       displayName: 'Tên hiển thị',
       displayNamePlaceholder: 'Nhập tên hiển thị của bạn',
+      displayNameMessage: 'Đổi tên hiển thị của bạn',
       changePassword: 'Đổi mật khẩu',
       currentPassword: 'Mật khẩu hiện tại',
       newPassword: 'Mật khẩu mới',
       confirmPassword: 'Xác nhận mật khẩu mới',
-      changePasswordButton: 'Đổi mật khẩu',
       signOut: 'Đăng xuất',
       saveButton: 'Lưu thay đổi',
+      errors: {
+        displayNameLength: 'Tên hiển thị phải có ít nhất 3 ký tự',
+        passwordIncorrect: 'Mật khẩu không chính xác',
+        passwordChangeFailed: 'Đổi mật khẩu thất bại',
+        passwordTooShort: 'Mật khẩu phải có ít nhất 6 ký tự',
+        passwordMismatch: 'Mật khẩu không khớp',
+      },
     },
     devices: {
       title: 'Thiết bị',
@@ -275,20 +288,44 @@ export const vi = {
     settings: 'Cài đặt',
   },
   history: {
-    allEvents: 'Tất cả sự kiện',
+    allEvents: 'Tất cả thông báo',
     today: 'Hôm nay',
     yesterday: 'Hôm qua',
     loading: 'Đang tải thông báo...',
     loadingMore: 'Đang tải thêm...',
-    noNotifications: 'Chưa có thông báo',
+    noNotifications: 'Không có thông báo',
     notificationsWillAppearHere: 'Khi bạn nhận được thông báo, chúng sẽ xuất hiện ở đây',
     markAllAsRead: 'Đánh dấu tất cả là đã đọc',
     deleteAll: 'Xóa tất cả',
     notificationTypes: {
       cryAlert: 'Cảnh báo khóc',
-      positionAlert: 'Cảnh báo tư thế ngủ',
+      positionAlert: 'Cảnh báo tư thế',
       dailyReport: 'Báo cáo hàng ngày',
       system: 'Thông báo hệ thống',
+    },
+    crying: {
+      title: 'Cảnh báo khóc',
+      description: 'Bé đang khóc liên tục trong',
+    },
+    prone: {
+      title: 'Cảnh báo tư thế nằm sấp',
+      description: 'Bé đang nằm sấp trong',
+    },
+    side: {
+      title: 'Cảnh báo tư thế nằm nghiêng',
+      description: 'Bé đang nằm nghiêng trong',
+    },
+    noBlanket: {
+      title: 'Cảnh báo không đắp chăn',
+      description: 'Bé không được đắp chăn trong',
+    },
+    system: {
+      title: 'Thông báo hệ thống',
+      description: 'Thiết bị đã bị ngắt kết nối',
+    },
+    unknown: {
+      title: 'Thông báo BabyCare',
+      description: 'Bé đã thay đổi tư thế hoặc bắt đầu khóc',
     },
   },
   streaming: {
@@ -317,6 +354,7 @@ export const vi = {
     },
     errorMessage: {
       connectionFailed: 'Không thể kết nối đến stream',
+      streamNotFound: 'Streaming không khả dụng, vui lòng khởi động lại thiết bị',
     },
   },
   statistics: {

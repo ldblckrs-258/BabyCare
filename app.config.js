@@ -2,7 +2,7 @@ export default {
   expo: {
     name: 'BabyCare',
     slug: 'babycare',
-    version: '0.0.8',
+    version: '1.0.0',
     web: {
       favicon: './assets/logo.png',
     },
@@ -24,6 +24,7 @@ export default {
         '@react-native-firebase/messaging',
         {
           messagingAndroidHeadlessMode: false,
+          messagingAndroidNotificationChannelId: 'babycare-alerts',
         },
       ],
       [
@@ -31,6 +32,12 @@ export default {
         {
           sounds: ['./assets/sounds/notification.mp3'],
           enableBackgroundRemoteNotifications: true,
+          androidMode: 'default',
+          androidCollapsedTitle: '{{title}}',
+          androidImportance: 'max',
+          androidChannelId: 'babycare-alerts',
+          androidChannelName: 'BabyCare Alerts',
+          androidShowWhen: true,
         },
       ],
     ],
@@ -69,6 +76,21 @@ export default {
       enableBackgroundNotification: true,
       priority: 'max',
       googleServicesFile: process.env.GOOGLE_SERVICES_JSON || './google-services.json',
+      notification: {
+        icon: './assets/logo.png',
+        color: '#FF231F7C',
+        androidCollapsedTitle: '{{title}}',
+        androidImportance: 'max',
+        channels: [
+          {
+            name: 'BabyCare Alerts',
+            id: 'babycare-alerts',
+            sound: true,
+            vibrate: true,
+            importance: 'max',
+          },
+        ],
+      },
     },
     extra: {
       router: {

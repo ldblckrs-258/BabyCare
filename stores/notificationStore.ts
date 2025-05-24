@@ -22,6 +22,8 @@ interface NotificationState {
   markAsRead: (id: string) => void;
   markAllAsRead: () => void;
   subscribeToNotifications: (userId: string) => () => void;
+  deleteAll: () => void;
+  getIsAllRead: () => boolean;
 }
 
 export const useNotificationStore = create<NotificationState>((set, get) => ({
@@ -29,7 +31,10 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
   unreadCount: 0,
   isLoading: true,
   error: null,
-
+  isAllRead: false,
+  getIsAllRead: () => {
+    return get().notifications.every((n) => n.read);
+  },
   markAsRead: async (id: string) => {
     try {
       const firestore = getFirestore();
@@ -67,6 +72,23 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
       }));
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
+    }
+  },
+
+  deleteAll: async () => {
+    try {
+      const firestore = getFirestore();
+      const batch = writeBatch(firestore);
+      get().notifications.forEach((n) => {
+        if (n.deviceId) {
+          const ref = doc(firestore, 'devices', n.deviceId, 'notifications', n.id);
+          batch.delete(ref);
+        }
+      });
+      await batch.commit();
+      set({ notifications: [] });
+    } catch (error) {
+      console.error('Error deleting all notifications:', error);
     }
   },
 

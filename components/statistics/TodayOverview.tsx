@@ -1,6 +1,5 @@
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import { MaterialIcons } from '@expo/vector-icons';
-import React from 'react';
 import { Text, View } from 'react-native';
 
 type OverviewProps = {
@@ -22,14 +21,14 @@ export default function TodayOverview({ badPositionData, cryingData }: OverviewP
   const { t } = useTranslation();
 
   return (
-    <View className="mb-4 rounded-xl bg-white p-3 shadow">
+    <View className="mb-4 rounded-xl bg-white p-3 py-6 shadow">
       <View className="flex-row items-center gap-2 pb-2">
         <MaterialIcons name="dashboard" size={20} color="#3D8D7A" />
         <Text className="text-base font-semibold text-gray-800">
           {t('statistics.todayOverview')}
         </Text>
       </View>
-      <View className="flex flex-row justify-between pt-2 gap-6">
+      <View className="flex flex-col justify-between pt-2 gap-6">
         {/* Bad Position Overview */}
         <View className="flex-1">
           <View className="flex-row items-center pb-2">
@@ -40,12 +39,12 @@ export default function TodayOverview({ badPositionData, cryingData }: OverviewP
             </View>
           </View>
 
-          <View className="w-full flex-row flex-wrap gap-2">
+          <View className="w-full flex-row flex-wrap gap-2 pl-4">
             <View className="flex-1">
               <Text className="text-base font-medium text-gray-900">
                 {badPositionData.totalCount}
               </Text>
-              <Text className="text-xs text-gray-500">{t('statistics.totalTime')}</Text>
+              <Text className="text-xs text-gray-500">{t('statistics.totalTimes')}</Text>
             </View>
             <View className="flex-1">
               <Text className="text-base font-medium text-gray-900">
@@ -54,7 +53,7 @@ export default function TodayOverview({ badPositionData, cryingData }: OverviewP
               <Text className="text-xs text-gray-500">{t('statistics.totalMinutes')}</Text>
             </View>
           </View>
-          <View className="w-full flex-row flex-wrap gap-2 pt-4">
+          <View className="w-full flex-row flex-wrap gap-2 pt-4 pl-4">
             <View className="flex-1">
               <Text className="text-base font-medium text-gray-900">
                 {badPositionData.longestPeriod}
@@ -80,7 +79,7 @@ export default function TodayOverview({ badPositionData, cryingData }: OverviewP
             </View>
           </View>
 
-          <View className="w-full flex-row flex-wrap gap-2">
+          <View className="w-full flex-row flex-wrap gap-2 pl-4">
             <View className="flex-1">
               <Text className="text-base font-medium text-gray-900">{cryingData.totalCount}</Text>
               <Text className="text-xs text-gray-500">{t('statistics.totalTimes')}</Text>
@@ -90,7 +89,7 @@ export default function TodayOverview({ badPositionData, cryingData }: OverviewP
               <Text className="text-xs text-gray-500">{t('statistics.totalMinutes')}</Text>
             </View>
           </View>
-          <View className="w-full flex-row flex-wrap gap-2 pt-3">
+          <View className="w-full flex-row flex-wrap gap-2 pt-3 pl-4">
             <View className="flex-1">
               <Text className="text-base font-medium text-gray-900">
                 {cryingData.longestPeriod}

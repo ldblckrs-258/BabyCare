@@ -121,7 +121,14 @@ export function StreamingModal({
 
   const handleVideoError = (error: string) => {
     console.error('Video playback error:', error);
-    setError(t('streaming.errorMessage.connectionFailed'));
+
+    // Check for specific HTTP 404 error
+    if (error.includes('404') || error.includes('InvalidResponseCodeException')) {
+      setError(t('streaming.errorMessage.streamNotFound'));
+    } else {
+      setError(t('streaming.errorMessage.connectionFailed'));
+    }
+
     setCanStream(false);
     setIsLoading(false);
   };
@@ -234,8 +241,8 @@ export function StreamingModal({
               width: '100%',
               height: '100%',
             }}>
-            <FontAwesome6 name="exclamation-circle" size={40} color="#d26165" />
-            <Text className="text-white text-base mt-2">{error}</Text>
+            <MaterialIcons name="error" size={40} color="#d26165" />
+            <Text className="text-white text-base mt-2 text-center px-10">{error}</Text>
             <TouchableOpacity
               className="mt-4 bg-primary-500 py-2 px-4 rounded-full"
               onPress={() => {

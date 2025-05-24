@@ -15,7 +15,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 export default function StreamingScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const navigation = useNavigation();
   const route = useRoute<RouteProp<RootStackParamList, 'Streaming'>>();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedDevice, setSelectedDevice] = useState<DeviceWithConnection | null>(null);

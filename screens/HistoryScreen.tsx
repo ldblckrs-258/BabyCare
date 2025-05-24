@@ -23,15 +23,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 // Get icon for notification type
 const getNotificationIcon = (type: NotificationType) => {
   switch (type) {
-    case 'Crying':
+    case 'crying':
       return <Ionicons name="water" size={20} color="#5d97d3" />;
-    case 'Prone':
+    case 'prone':
       return <FontAwesome6 name="baby" size={20} color="#d26165" />;
-    case 'Side':
+    case 'side':
       return <FontAwesome6 name="baby" size={20} color="#d97706" />;
-    case 'NoBlanket':
+    case 'noblanket':
       return <FontAwesome6 name="bed" size={16} color="#a855f7" />;
-    case 'System':
+    case 'system':
       return <MaterialIcons name="notifications" size={22} color="#3d8d7a" />;
     default:
       return <MaterialIcons name="notifications" size={22} color="#3d8d7a" />;
@@ -45,8 +45,15 @@ export default function HistoryScreen() {
   const [showNotificationDetail, setShowNotificationDetail] = useState(false);
 
   const { user } = useAuthStore();
-  const { notifications, markAsRead, markAllAsRead, isLoading, error, subscribeToNotifications } =
-    useNotificationStore();
+  const {
+    notifications,
+    markAsRead,
+    markAllAsRead,
+    isLoading,
+    error,
+    subscribeToNotifications,
+    deleteAll,
+  } = useNotificationStore();
   const { connections } = useDeviceHook();
 
   // Subscribe to notifications when component mounts
@@ -98,19 +105,19 @@ export default function HistoryScreen() {
       connections.find((device) => device.deviceId === notification.deviceId)?.name || 'Unknown'
     }]`;
     switch (notification.type) {
-      case 'Crying':
+      case 'crying':
         title += ` ${t('history.crying.title')}`;
         break;
-      case 'Prone':
+      case 'prone':
         title += ` ${t('history.prone.title')}`;
         break;
-      case 'Side':
+      case 'side':
         title += ` ${t('history.side.title')}`;
         break;
-      case 'NoBlanket':
+      case 'noblanket':
         title += ` ${t('history.noBlanket.title')}`;
         break;
-      case 'System':
+      case 'system':
         title += ` ${t('history.system.title')}`;
         break;
       default:
@@ -123,19 +130,19 @@ export default function HistoryScreen() {
   const renderDescription = (notification: Notification) => {
     let description = '';
     switch (notification.type) {
-      case 'Crying':
+      case 'crying':
         description = t('history.crying.description');
         break;
-      case 'Prone':
+      case 'prone':
         description = t('history.prone.description');
         break;
-      case 'Side':
+      case 'side':
         description = t('history.side.description');
         break;
-      case 'NoBlanket':
+      case 'noblanket':
         description = t('history.noBlanket.description');
         break;
-      case 'System':
+      case 'system':
         description = t('history.system.description');
         break;
       default:
@@ -160,9 +167,7 @@ export default function HistoryScreen() {
         <View className="flex-1">
           <Text className="text-base font-semibold text-gray-800">{renderTitle(item)}</Text>
           <Text className="text-sm text-gray-600">{renderDescription(item)}</Text>
-          <Text className="inline-block text-xs text-gray-400">
-            {formatTime(item.time.toString())}
-          </Text>
+          <Text className="inline-block text-xs text-gray-400">{formatTime(item.time)}</Text>
         </View>
         {!item.read && (
           <View className="absolute right-3 top-3 h-3 w-3 rounded-full bg-primary-500" />
@@ -187,6 +192,13 @@ export default function HistoryScreen() {
       <View className="flex-row items-center justify-between px-5 py-4">
         <Text className="text-2xl font-bold text-primary-600">{t('history.allEvents')}</Text>
         <View className="flex-row">
+          {notifications.length > 0 && (
+            <TouchableOpacity
+              onPress={() => deleteAll()}
+              className="mr-3 h-10 w-10 items-center justify-center">
+              <MaterialIcons name="delete" size={24} color="#888" />
+            </TouchableOpacity>
+          )}
           {hasUnreadNotifications && (
             <TouchableOpacity
               onPress={() => markAllAsRead()}

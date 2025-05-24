@@ -1,12 +1,10 @@
 import { useDeviceHook } from '@/lib/hooks';
-import { Notification, NotificationType, formatTime } from '@/lib/notifications';
+import { Notification, NotificationType } from '@/lib/notifications';
 import { Ionicons } from '@expo/vector-icons';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { format } from 'date-fns';
-import { Image } from 'expo-image';
 import { t } from 'i18next';
-import { Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Types for props
@@ -19,15 +17,15 @@ type NotificationDetailModalProps = {
 // Get icon for notification type
 const getNotificationIcon = (type: NotificationType) => {
   switch (type) {
-    case 'Crying':
+    case 'crying':
       return <Ionicons name="water" size={26} color="#5d97d3" />;
-    case 'Prone':
+    case 'prone':
       return <FontAwesome6 name="baby" size={26} color="#d26165" />;
-    case 'Side':
+    case 'side':
       return <FontAwesome6 name="baby" size={26} color="#d97706" />;
-    case 'NoBlanket':
+    case 'noblanket':
       return <FontAwesome6 name="bed" size={20} color="#a855f7" />;
-    case 'System':
+    case 'system':
       return <MaterialIcons name="notifications" size={28} color="#3d8d7a" />;
     default:
       return <MaterialIcons name="notifications" size={28} color="#3d8d7a" />;
@@ -37,43 +35,19 @@ const getNotificationIcon = (type: NotificationType) => {
 // Get background color for notification type
 const getNotificationColor = (type: NotificationType) => {
   switch (type) {
-    case 'Crying':
+    case 'crying':
       return 'bg-blue-100';
-    case 'Prone':
+    case 'prone':
       return 'bg-red-100';
-    case 'Side':
+    case 'side':
       return 'bg-amber-100';
-    case 'NoBlanket':
+    case 'noblanket':
       return 'bg-purple-100';
-    case 'System':
+    case 'system':
       return 'bg-green-100';
     default:
       return 'bg-green-100';
   }
-};
-
-// Get text color for notification type
-const getNotificationTextColor = (type: NotificationType) => {
-  switch (type) {
-    case 'Crying':
-      return 'text-blue-700';
-    case 'Prone':
-      return 'text-red-700';
-    case 'Side':
-      return 'text-amber-700';
-    case 'NoBlanket':
-      return 'text-purple-700';
-    case 'System':
-      return 'text-green-700';
-    default:
-      return 'text-green-700';
-  }
-};
-
-// Format timestamp to display date and time
-const formatTimestamp = (timestamp: string) => {
-  const date = new Date(timestamp);
-  return format(date, 'EEEE, MMMM d, yyyy • h:mm a');
 };
 
 export function NotificationDetailModal({
@@ -94,15 +68,15 @@ export function NotificationDetailModal({
 
   const renderTitle = (notification: Notification) => {
     switch (notification.type) {
-      case 'Crying':
+      case 'crying':
         return t('history.crying.title');
-      case 'Prone':
+      case 'prone':
         return t('history.prone.title');
-      case 'Side':
+      case 'side':
         return t('history.side.title');
-      case 'NoBlanket':
+      case 'noblanket':
         return t('history.noBlanket.title');
-      case 'System':
+      case 'system':
         return t('history.system.title');
       default:
         return t('history.unknown.title');
@@ -113,7 +87,7 @@ export function NotificationDetailModal({
     <Modal animationType="slide" transparent visible={visible} onRequestClose={onClose}>
       <View className="flex-1 justify-end ">
         <View
-          className="h-[70%] rounded-t-3xl bg-white shadow-lg"
+          className={` ${notification.type === 'crying' ? 'h-[50%]' : 'h-[80%]'} rounded-t-3xl bg-white shadow-lg`}
           style={{ paddingBottom: Math.max(insets.bottom, 16) }}>
           {/* Header with close button */}
           <View className="mb-2 flex-row items-center justify-between border-b border-gray-100 p-6 pb-4">
@@ -136,7 +110,10 @@ export function NotificationDetailModal({
                 </Text>
               )}
               <Text className="mt-1 text-sm text-gray-500">
-                {new Date(notification.time).toLocaleDateString('en-US', {
+                {(typeof notification.time === 'object' && 'toDate' in notification.time
+                  ? notification.time.toDate()
+                  : new Date(notification.time)
+                ).toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric',
@@ -167,22 +144,16 @@ export function NotificationDetailModal({
               <View className="mb-6">
                 <Text className="mb-2 text-base font-semibold text-gray-700">Captured Image</Text>
                 <View className="overflow-hidden rounded-xl">
-                  <Image
-                    source={{ uri: notification.imageUrl }}
-                    className="h-56 w-full"
-                    contentFit="cover"
-                    transition={300}
-                    placeholder="Loading image..."
-                  />
+                  <Image source={{ uri: notification.imageUrl }} className="h-56 w-full" />
                 </View>
               </View>
-            ) : (
+            ) : notification.type === 'prone' || notification.type === 'side' ? (
               <View className="mt-2  bg-slate-100 w-full aspect-video flex items-center justify-center rounded">
                 <Text className="text-center text-sm text-gray-500">
                   Image captured at the time of the event
                 </Text>
               </View>
-            )}
+            ) : null}
           </ScrollView>
 
           {/* Action Button */}

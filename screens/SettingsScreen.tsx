@@ -15,7 +15,7 @@ import { useEffect, useState } from 'react';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const VERSION = '0.0.8';
+const VERSION = '1.0.0';
 const languages = {
   en: 'English',
   vi: 'Tiếng Việt',
@@ -25,6 +25,7 @@ export default function SettingsScreen() {
   const { t } = useTranslation();
   const { user } = useAuthStore();
   const { language, setLanguage } = useSettingsStore();
+
   // Modal visibility states
   const [deviceModalVisible, setDeviceModalVisible] = useState(false);
   const [notificationModalVisible, setNotificationModalVisible] = useState(false);

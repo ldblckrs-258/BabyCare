@@ -1,4 +1,3 @@
-import { UserService } from '@/lib/models/userService';
 import { useAuthStore } from '@/stores/authStore';
 import { useConnectionStore } from '@/stores/connectionStore';
 import { useUserStore } from '@/stores/userStore';
@@ -14,13 +13,16 @@ export const STRONG_VIBRATION_PATTERN = [0, 300, 200, 300, 200, 300];
 // Sound constants - Sử dụng tên file để tham chiếu trong Android notification channel
 export const NOTIFICATION_SOUND = 'notification.mp3';
 
+// Tên kênh thông báo mặc định
+export const DEFAULT_CHANNEL_ID = 'babycare-alerts';
+
 // Các loại cảnh báo theo notification guide
 export enum AlertType {
-  SIDE = 'Side',
-  PRONE = 'Prone',
-  CRYING = 'Crying',
-  BLANKET = 'Blanket',
-  NOBLANKET = 'NoBlanket',
+  SIDE = 'side',
+  PRONE = 'prone',
+  CRYING = 'crying',
+  BLANKET = 'blanket',
+  NOBLANKET = 'noblanket',
   DEFAULT = 'info',
 }
 
@@ -132,16 +134,48 @@ export function getConnectionNameFromDeviceId(deviceId?: string): string {
   return connection?.name || 'Baby';
 }
 
+// Tạo kênh thông báo chung cho Android
+export async function createNotificationChannel() {
+  if (Platform.OS === 'android') {
+    try {
+      // Cấu hình kênh thông báo chính với âm thanh và rung mạnh
+      await Notifications.setNotificationChannelAsync(DEFAULT_CHANNEL_ID, {
+        name: 'BabyCare Alerts',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: STRONG_VIBRATION_PATTERN,
+        sound: NOTIFICATION_SOUND,
+        enableVibrate: true,
+        enableLights: true,
+        lightColor: '#FF231F7C',
+        lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+        showBadge: true,
+      });
+
+      // Configure Firebase messaging for Android
+      messaging().onMessage(async (remoteMessage) => {
+        // Handling is done in notificationHandlers.ts
+      });
+    } catch (error) {
+      console.error('Error creating notification channel:', error);
+    }
+  }
+}
+
 // Cấu hình cho background message handler
 export function setupBackgroundHandler() {
+  // Đảm bảo kênh thông báo được tạo
+  createNotificationChannel();
+
   // Đăng ký handler cho background messages
   messaging().setBackgroundMessageHandler(async (remoteMessage) => {
-    console.log('Background message received:', remoteMessage);
-
-    const { data } = remoteMessage;
+    const { data, notification } = remoteMessage;
     const alertType = (data?.type as string) || AlertType.DEFAULT;
     const deviceId = data?.deviceId as string;
     const duration = data?.duration ? Number(data.duration) : 0;
+
+    if (alertType === AlertType.DEFAULT && !notification?.title) {
+      return;
+    }
 
     const userStore = useUserStore.getState();
     const language = userStore.preferences?.language || 'en';
@@ -158,20 +192,24 @@ export function setupBackgroundHandler() {
     // Đảm bảo thông báo này có âm thanh và rung thông qua kênh thông báo
     await Notifications.scheduleNotificationAsync({
       content: {
-        title: title,
-        body: body,
-        sound: NOTIFICATION_SOUND,
+        title: notification?.title || title,
+        body: notification?.body || body,
+        sound: true,
         vibrate: STRONG_VIBRATION_PATTERN,
+        priority: 'max',
+        badge: 1,
       },
-
       trigger: {
-        channelId: 'default',
+        channelId: DEFAULT_CHANNEL_ID,
       },
     });
 
     return Promise.resolve();
   });
 }
+
+// Store FCM token if user not logged in
+let cachedFcmToken: string | null = null;
 
 export async function registerDeviceForPushNotifications(): Promise<string | undefined> {
   if (!Device.isDevice) {
@@ -192,24 +230,15 @@ export async function registerDeviceForPushNotifications(): Promise<string | und
     return;
   }
 
-  if (Platform.OS === 'android') {
-    // Cấu hình kênh thông báo chính với âm thanh và rung mạnh
-    await Notifications.setNotificationChannelAsync('default', {
-      name: 'Alert Channel',
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: STRONG_VIBRATION_PATTERN,
-      sound: NOTIFICATION_SOUND,
-      enableVibrate: true,
-      enableLights: true,
-      lightColor: '#FF231F7C',
-      lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
-      showBadge: true,
-    });
-  }
+  // Đảm bảo kênh thông báo được tạo
+  await createNotificationChannel();
 
   try {
     // Đăng ký FCM token
     const token = await messaging().getToken();
+
+    // Cache the token
+    cachedFcmToken = token;
 
     // Yêu cầu quyền thông báo từ iOS
     if (Platform.OS === 'ios') {
@@ -218,7 +247,6 @@ export async function registerDeviceForPushNotifications(): Promise<string | und
       await Notifications.setBadgeCountAsync(0);
     }
 
-    // Lưu token vào store thay vì gọi trực tiếp đến Firestore
     const currentUser = useAuthStore.getState().user;
     if (currentUser && token) {
       // Cập nhật trong userStore
@@ -229,6 +257,15 @@ export async function registerDeviceForPushNotifications(): Promise<string | und
     return token;
   } catch (error) {
     console.error('Error getting FCM token:', error);
+  }
+}
+
+// Expose function to save cached token if it exists
+export async function saveCachedFcmTokenIfExists(): Promise<void> {
+  const currentUser = useAuthStore.getState().user;
+  if (currentUser && cachedFcmToken) {
+    const userStore = useUserStore.getState();
+    await userStore.addFcmToken(cachedFcmToken);
   }
 }
 
@@ -260,10 +297,12 @@ export async function showLocalNotification(title: string, body: string): Promis
       content: {
         title,
         body,
-        sound: NOTIFICATION_SOUND,
+        sound: true,
         vibrate: STRONG_VIBRATION_PATTERN,
       },
-      trigger: null, // Hiển thị ngay lập tức
+      trigger: {
+        channelId: DEFAULT_CHANNEL_ID,
+      },
     });
   } catch (error) {
     console.error('Error showing local notification:', error);

@@ -10,9 +10,12 @@ export class FirestoreService {
   private static instance: FirestoreService;
   private firestore: any; // Using any type since the proper Firestore type isn't exported
   private cache: Map<string, any> = new Map();
+  private cacheCleanupInterval: NodeJS.Timeout | null = null;
 
   private constructor() {
     this.firestore = getFirestore();
+    // Start cache cleanup timer - run every 10 minutes
+    this.startCacheCleanup();
   }
 
   /**
@@ -85,5 +88,64 @@ export class FirestoreService {
       .join('&');
 
     return `query:${collection}:${sortedParams}`;
+  }
+
+  /**
+   * Start a timer to clean up expired cache entries
+   */
+  private startCacheCleanup() {
+    if (this.cacheCleanupInterval) {
+      clearInterval(this.cacheCleanupInterval);
+    }
+
+    this.cacheCleanupInterval = setInterval(
+      () => {
+        this.cleanupExpiredCache();
+      },
+      10 * 60 * 1000
+    ); // Every 10 minutes
+  }
+
+  /**
+   * Clean up expired cache entries to reduce memory usage
+   */
+  private cleanupExpiredCache() {
+    const now = Date.now();
+    let itemsRemoved = 0;
+
+    // Process cache entries
+    for (const [key, value] of this.cache.entries()) {
+      // Check for cached items with expiration time
+      if (value && typeof value === 'object' && value.expiration && value.expiration < now) {
+        this.cache.delete(key);
+        itemsRemoved++;
+      }
+    }
+
+    // Limit cache size to 1000 entries to prevent memory issues
+    if (this.cache.size > 1000) {
+      // Get all keys as array
+      const keys = Array.from(this.cache.keys());
+      // Sort keys by most recently added
+      const keysToRemove = keys.slice(0, this.cache.size - 1000);
+      // Remove oldest entries
+      keysToRemove.forEach((key) => this.cache.delete(key));
+      itemsRemoved += keysToRemove.length;
+    }
+
+    if (itemsRemoved > 0) {
+      console.log(`FirestoreService: Cleaned up ${itemsRemoved} expired cache entries`);
+    }
+  }
+
+  /**
+   * Destroy the instance and clean up resources
+   */
+  public destroy() {
+    if (this.cacheCleanupInterval) {
+      clearInterval(this.cacheCleanupInterval);
+      this.cacheCleanupInterval = null;
+    }
+    this.clearCache();
   }
 }

@@ -1,3 +1,4 @@
+import { saveCachedFcmTokenIfExists } from '@/lib/notification/notificationService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
@@ -51,7 +52,7 @@ export const useAuthStore = create<AuthState>()(
         }
       };
 
-      const appStateSubscription = AppState.addEventListener('change', handleAppStateChange);
+      AppState.addEventListener('change', handleAppStateChange);
 
       return {
         user: null,
@@ -72,6 +73,9 @@ export const useAuthStore = create<AuthState>()(
             }
 
             set({ user, loading: false });
+
+            saveCachedFcmTokenIfExists();
+
             return true;
           } catch (error) {
             set({ error: (error as Error).message, loading: false });
@@ -84,9 +88,13 @@ export const useAuthStore = create<AuthState>()(
             set({ loading: true, error: null });
             const { user } = await auth().signInWithEmailAndPassword(email, password);
             set({ user, loading: false });
+
+            // Save any cached FCM token after signin
+            saveCachedFcmTokenIfExists();
+
             return true;
           } catch (error) {
-            set({ error: (error as Error).message, loading: false });
+            set({ error: 'auth.errors.invalidEmailOrPassword', loading: false });
             return false;
           }
         },
@@ -99,25 +107,26 @@ export const useAuthStore = create<AuthState>()(
             const { idToken } = await GoogleSignin.getTokens();
 
             if (!idToken) {
-              throw new Error('No idToken returned from Google Sign-In');
+              set({ error: 'auth.errors.signInFailed', loading: false });
+              return false;
             }
 
             const googleCredential = auth.GoogleAuthProvider.credential(idToken);
             const userCredential = await auth().signInWithCredential(googleCredential);
 
             set({ user: userCredential.user, loading: false });
+
+            // Save any cached FCM token after Google signin
+            saveCachedFcmTokenIfExists();
+
             return true;
           } catch (error: unknown) {
-            console.error('Google Sign-In Error:', error);
-            let errorMessage = 'Failed to sign in with Google';
-
+            let errorMessage = 'auth.errors.signInFailed';
             if (error && typeof error === 'object' && 'code' in error) {
               if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-                errorMessage = 'Sign in cancelled';
-              } else if (error.code === statusCodes.IN_PROGRESS) {
-                errorMessage = 'Sign in already in progress';
-              } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-                errorMessage = 'Play services not available or outdated';
+                errorMessage = 'auth.errors.signInCancelled';
+              } else {
+                errorMessage = 'auth.errors.signInFailed';
               }
             }
 
@@ -150,10 +159,11 @@ export const useAuthStore = create<AuthState>()(
         updateProfile: async (data) => {
           try {
             set({ loading: true, error: null });
-            const currentUser = auth().currentUser;
+            let currentUser = auth().currentUser;
             if (!currentUser) throw new Error('No user logged in');
 
             await currentUser.updateProfile(data);
+            currentUser = auth().currentUser;
             set({ user: currentUser, loading: false });
           } catch (error) {
             set({ error: (error as Error).message, loading: false });
@@ -165,14 +175,15 @@ export const useAuthStore = create<AuthState>()(
           try {
             set({ loading: true, error: null });
             const currentUser = auth().currentUser;
-            if (!currentUser) throw new Error('No user logged in');
-            if (!currentUser.email) throw new Error('No email associated with account');
+            if (!currentUser) throw new Error('NO_USER_FOUND');
+            if (!currentUser.email) throw new Error('NO_EMAIL_FOUND');
 
             const credential = auth.EmailAuthProvider.credential(
               currentUser.email,
               currentPassword
             );
-            await currentUser.reauthenticateWithCredential(credential);
+            const reauth = await currentUser.reauthenticateWithCredential(credential);
+            if (!reauth) throw new Error('PASSWORD_INCORRECT');
             await currentUser.updatePassword(newPassword);
             set({ loading: false });
           } catch (error) {

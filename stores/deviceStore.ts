@@ -18,7 +18,7 @@ export interface Device {
 export interface DeviceEvent {
   id: string;
   deviceId: string;
-  type: 'Side' | 'Prone' | 'Blanket' | 'NoBlanket' | 'Crying' | 'Supine' | 'NoCrying';
+  type: 'side' | 'prone' | 'blanket' | 'noblanket' | 'crying' | 'supine' | 'nocrying';
   time: Date;
 }
 
@@ -26,7 +26,7 @@ export interface DeviceEvent {
 export interface DeviceNotification {
   id: string;
   deviceId: string;
-  type: 'Side' | 'Prone' | 'Blanket' | 'NoBlanket' | 'Crying';
+  type: 'side' | 'prone' | 'blanket' | 'noblanket' | 'crying';
   duration: number;
   time: Date;
   imageUrl?: string;

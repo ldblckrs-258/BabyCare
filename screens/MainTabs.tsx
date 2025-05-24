@@ -4,6 +4,7 @@ import SettingsScreen from './SettingsScreen';
 import StatisticsScreen from './StatisticsScreen';
 import StreamingScreen from './StreamingScreen';
 import { useTranslation } from '@/lib/hooks/useTranslation';
+import { useNotificationStore } from '@/stores/notificationStore';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -73,7 +74,7 @@ function CustomTabBar({
   navigation: any;
 }) {
   const { t } = useTranslation();
-
+  const { getIsAllRead } = useNotificationStore();
   return (
     <View className="relative w-full bg-neutral-100 px-2 pb-2">
       <View className="flex-row rounded-xl bg-white p-2 shadow-xl">
@@ -129,6 +130,9 @@ function CustomTabBar({
                 <Text className={`text-[12px] ${isFocused ? 'text-primary-500' : 'text-gray-500'}`}>
                   {t(`tabs.${route.name.toLowerCase()}`)}
                 </Text>
+                {route.name === 'History' && !getIsAllRead() && (
+                  <View className="absolute top-1 right-5 bg-rose-500 size-3 rounded-full opacity-70"></View>
+                )}
               </TouchableOpacity>
             );
         })}

@@ -6,7 +6,9 @@ import { RegisterScreen } from './screens/RegisterScreen';
 import { WelcomeScreen } from './screens/WelcomeScreen';
 import { setupNotificationListeners } from '@/lib/notification/notificationHandlers';
 import {
+  DEFAULT_CHANNEL_ID,
   STRONG_VIBRATION_PATTERN,
+  createNotificationChannel,
   registerDeviceForPushNotifications,
   setupBackgroundHandler,
 } from '@/lib/notification/notificationService';
@@ -29,6 +31,7 @@ export default function App() {
   const userStore = useUserStore();
 
   useLayoutEffect(() => {
+    // Set up notification handler
     Notifications.setNotificationHandler({
       handleNotification: async () => ({
         shouldShowAlert: true,
@@ -36,21 +39,27 @@ export default function App() {
         shouldSetBadge: true,
         priority: Notifications.AndroidNotificationPriority.MAX,
         vibrationPattern: STRONG_VIBRATION_PATTERN,
+        channelId: DEFAULT_CHANNEL_ID,
       }),
     });
 
-    setupBackgroundHandler();
-
-    registerDeviceForPushNotifications().then((token) => {
-      if (token) {
-        console.log('Push token registered:', token);
-      }
+    // Create the notification channel first
+    createNotificationChannel().then(() => {
+      // Then setup background handler
+      setupBackgroundHandler();
     });
+
+    // Always register for FCM token on startup, regardless of login state
+    // It will be cached and saved to Firestore when the user logs in
+    registerDeviceForPushNotifications();
 
     const removeListeners = setupNotificationListeners();
 
     const appStateSubscription = AppState.addEventListener('change', (nextAppState) => {
       if (nextAppState === 'active') {
+        // Re-create notification channel when app comes to foreground
+        createNotificationChannel();
+
         Notifications.getBadgeCountAsync().then((count) => {
           if (count > 0) {
             Notifications.setBadgeCountAsync(0);
@@ -73,29 +82,6 @@ export default function App() {
       userStore.clearPreferences();
     }
   }, [user, userStore.preferences]);
-
-  if (loading) {
-    // Show splash/loading screen while checking auth state
-    return (
-      <PaperProvider>
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: '#fff',
-          }}>
-          <StatusBar style="auto" />
-          <Image
-            source={require('./assets/logo.png')}
-            style={{ width: 120, height: 120, marginBottom: 24 }}
-          />
-          <Text style={{ fontSize: 20, color: '#3d8d7a', fontWeight: 'bold' }}>BabyCare</Text>
-          <Text style={{ marginTop: 16, color: '#888' }}>Loading...</Text>
-        </View>
-      </PaperProvider>
-    );
-  }
 
   return (
     <PaperProvider>

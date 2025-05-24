@@ -1,7 +1,7 @@
 import { format } from 'date-fns';
 
 // Notification types
-export type NotificationType = 'Crying' | 'Prone' | 'Side' | 'NoBlanket' | 'System';
+export type NotificationType = 'crying' | 'prone' | 'side' | 'noblanket' | 'system';
 
 // Notification interface
 export interface Notification {
@@ -9,12 +9,42 @@ export interface Notification {
   type: NotificationType;
   title: string;
   message: string;
-  time: number; // timestamp in milliseconds
+  time: number | string | { toDate: () => Date }; // timestamp can be various formats
   read: boolean;
   imageUrl?: string; // Optional URL to the image captured during the event
   duration?: number; // Duration of the event in minutes
   deviceId?: string; // ID of the device that triggered the notification
 }
+
+// Helper function to safely convert any timestamp format to Date
+export const safeTimestampToDate = (timestamp: any): Date => {
+  try {
+    // Handle Firebase Timestamp objects
+    if (timestamp && typeof timestamp.toDate === 'function') {
+      return timestamp.toDate();
+    }
+
+    // Handle numeric timestamps (milliseconds since epoch)
+    if (typeof timestamp === 'number') {
+      return new Date(timestamp);
+    }
+
+    // Handle ISO string dates
+    if (typeof timestamp === 'string') {
+      const date = new Date(timestamp);
+      if (!isNaN(date.getTime())) {
+        return date;
+      }
+    }
+
+    // Fallback to current date if invalid
+    console.warn('Invalid timestamp format:', timestamp);
+    return new Date();
+  } catch (error) {
+    console.error('Error converting timestamp to date:', error);
+    return new Date();
+  }
+};
 
 // Helper function to parse ISO string to Date object when needed
 export const parseISODate = (isoString: string): Date => {
@@ -31,22 +61,31 @@ export const groupNotificationsByDate = (notifications: Notification[]) => {
   const grouped: Record<string, Notification[]> = {};
 
   notifications.forEach((notification) => {
-    // Parse the ISO string to get date components
-    const dateObj = new Date(notification.time);
-    const date = format(dateObj, 'yyyy-MM-dd');
+    try {
+      // Convert timestamp to Date safely
+      const dateObj = safeTimestampToDate(notification.time);
+      const date = format(dateObj, 'yyyy-MM-dd');
 
-    if (!grouped[date]) {
-      grouped[date] = [];
+      if (!grouped[date]) {
+        grouped[date] = [];
+      }
+      grouped[date].push(notification);
+    } catch (error) {
+      console.error('Error grouping notification:', error, notification);
     }
-    grouped[date].push(notification);
   });
 
   // Sort each group by time (newest first)
   Object.keys(grouped).forEach((date) => {
     grouped[date].sort((a, b) => {
-      const dateA = new Date(a.time);
-      const dateB = new Date(b.time);
-      return dateB.getTime() - dateA.getTime();
+      try {
+        const dateA = safeTimestampToDate(a.time);
+        const dateB = safeTimestampToDate(b.time);
+        return dateB.getTime() - dateA.getTime();
+      } catch (error) {
+        console.error('Error sorting notifications:', error);
+        return 0;
+      }
     });
   });
 
@@ -54,8 +93,12 @@ export const groupNotificationsByDate = (notifications: Notification[]) => {
 };
 
 // Helper to format time as HH:MM AM/PM
-export const formatTime = (isoString: string) => {
-  // Parse the ISO string to a Date object
-  const date = parseISODate(isoString);
-  return format(date, 'h:mm a');
+export const formatTime = (timeValue: any) => {
+  try {
+    const date = safeTimestampToDate(timeValue);
+    return format(date, 'h:mm a');
+  } catch (error) {
+    console.error('Error formatting time:', error);
+    return 'Invalid time';
+  }
 };

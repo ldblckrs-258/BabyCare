@@ -8,7 +8,6 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useState } from 'react';
 import {
   ActivityIndicator,
-  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -30,7 +29,7 @@ export function RegisterScreen() {
   const [error, setError] = useState('');
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-  const { signUp, signInWithGoogle, loading, error: authError } = useAuthStore();
+  const { signUp, loading, error: authError } = useAuthStore();
 
   const handleRegister = async () => {
     if (!fullName || !email || !password || !confirmPassword) {
@@ -151,23 +150,24 @@ export function RegisterScreen() {
               {error ? <Text className="text-center text-sm text-red-500">{error}</Text> : null}
 
               {/* Terms & Conditions */}
-              <View className="flex-row items-center">
-                <Pressable
-                  onPress={() => setAgreeToTerms(!agreeToTerms)}
+              <Pressable
+                className="flex-row items-center py-1"
+                onPress={() => setAgreeToTerms(!agreeToTerms)}>
+                <View
                   className={`mr-2 mt-1 h-5 w-5 items-center justify-center rounded border ${
                     agreeToTerms ? 'border-primary-500 bg-primary-500' : 'border-gray-300'
                   }`}>
                   {agreeToTerms && <Fa6 name="check" size={12} color="#fff" />}
-                </Pressable>
-                <Text className="flex-1 text-sm text-gray-600">
-                  {t('auth.agreeToTerms')}
-                  <Text className="font-semibold text-primary-600">
+                </View>
+                <Text className="flex-1 text-sm text-gray-600 gap-0.5">
+                  {t('auth.agreeToTerms')}{' '}
+                  <Text className="font-semibold text-slate-900">
                     {t('auth.termsAndConditions')}
                   </Text>
-                  {t('auth.and')}
-                  <Text className="font-semibold text-primary-600">{t('auth.privacyPolicy')}</Text>
+                  {' & '}
+                  <Text className="font-semibold text-slate-900">{t('auth.privacyPolicy')}</Text>
                 </Text>
-              </View>
+              </Pressable>
 
               {/* Register Button */}
               <TouchableOpacity

@@ -195,6 +195,7 @@ export class DeviceViewModel {
 
     let devicesUnsubscribe: (() => void) | undefined;
     let connectionsUnsubscribe: (() => void) | undefined;
+    let deviceListeners: Record<string, () => void> = {}; // Track individual device listeners
 
     const setupListeners = async () => {
       try {
@@ -219,7 +220,8 @@ export class DeviceViewModel {
             }
           });
 
-          // Setup device listeners after initial load
+          // Setup device listeners after initial load - only use a single listener for all devices
+          // instead of individual listeners for each device
           devicesUnsubscribe = DeviceService.listenToDevices(userDeviceIds, (device) => {
             // Update device in store (cache is handled by DeviceService)
             const existingDevice = this.deviceStore.getDeviceById(device.id);
@@ -251,10 +253,31 @@ export class DeviceViewModel {
             );
             if (!existingConnection) {
               this.connectionStore.addConnection(connection);
+
+              // When a new connection is added, we might need to set up a device listener
+              // but we already have a single listener for all devices, so no need for additional setup
             }
           },
           (connection) => this.connectionStore.updateConnection(connection.id, connection),
-          (connectionId) => this.connectionStore.removeConnection(connectionId)
+          (connectionId) => {
+            // Remove connection
+            this.connectionStore.removeConnection(connectionId);
+
+            // Check if we need to remove a device
+            const connectionFromStore = this.connectionStore.connections.find(
+              (c) => c.id === connectionId
+            );
+            if (connectionFromStore) {
+              // If no other connections use this device, we can remove it
+              const otherConnectionsWithSameDevice = this.connectionStore.connections.filter(
+                (c) => c.deviceId === connectionFromStore.deviceId && c.id !== connectionId
+              );
+
+              if (otherConnectionsWithSameDevice.length === 0) {
+                this.deviceStore.removeDevice(connectionFromStore.deviceId);
+              }
+            }
+          }
         );
 
         // Select the first connection if none is selected
@@ -274,6 +297,10 @@ export class DeviceViewModel {
     return () => {
       if (devicesUnsubscribe) devicesUnsubscribe();
       if (connectionsUnsubscribe) connectionsUnsubscribe();
+
+      // Clean up any individual device listeners
+      Object.values(deviceListeners).forEach((unsubscribe) => unsubscribe());
+      deviceListeners = {};
     };
   }
 }

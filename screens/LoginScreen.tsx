@@ -1,6 +1,7 @@
 import { PasswordInput } from '../components/inputs/PasswordInput';
 import { useAuthStore } from '../stores/authStore';
 import type { RootStackParamList } from '../types/navigation';
+import { useTranslation } from '@/lib/hooks/useTranslation';
 import Fa6 from '@expo/vector-icons/FontAwesome6';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -20,34 +21,39 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export function LoginScreen() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { signIn, signInWithGoogle, loading, error: authError } = useAuthStore();
+  const { signIn, signInWithGoogle, error: authError } = useAuthStore();
+  const [emailLoginLoading, setEmailLoginLoading] = useState(false);
+  const [googleLoginLoading, setGoogleLoginLoading] = useState(false);
   const handleLogin = async () => {
     if (!email || !password) {
-      setError('Please enter email and password');
+      setError('auth.errors.invalidEmailOrPassword');
       return;
     }
+    setEmailLoginLoading(true);
     try {
       const success = await signIn(email, password);
       if (!success) {
-        setError(authError || 'Invalid email or password');
+        setError(authError || 'auth.errors.invalidEmailOrPassword');
       }
-    } catch (err) {
-      setError(authError || 'An error occurred while logging in');
+    } finally {
+      setEmailLoginLoading(false);
     }
   };
 
   const handleGoogleSignIn = async () => {
+    setGoogleLoginLoading(true);
     try {
       const success = await signInWithGoogle();
       if (!success) {
-        setError(authError || 'Failed to sign in with Google');
+        setError(authError || 'auth.errors.signInFailed');
       }
-    } catch (err) {
-      setError(authError || 'An error occurred while logging in with Google');
+    } finally {
+      setGoogleLoginLoading(false);
     }
   };
 
@@ -77,13 +83,20 @@ export function LoginScreen() {
               {/* Google Sign In */}
               <TouchableOpacity
                 onPress={handleGoogleSignIn}
-                className="flex-row items-center justify-center space-x-2 rounded-lg bg-white p-4">
-                <Image
-                  source={require('../assets/google-icon.png')}
-                  className="h-6 w-6"
-                  resizeMode="contain"
-                />
-                <Text className="text-base font-semibold text-gray-700">Login with Google</Text>
+                disabled={googleLoginLoading}
+                className="flex-row items-center justify-center space-x-2 rounded-lg bg-white p-4 gap-2">
+                {googleLoginLoading ? (
+                  <ActivityIndicator color="#999" />
+                ) : (
+                  <>
+                    <Image
+                      source={require('../assets/google-icon.png')}
+                      className="h-6 w-6"
+                      resizeMode="contain"
+                    />
+                    <Text className="text-base font-semibold text-gray-700">Login with Google</Text>
+                  </>
+                )}
               </TouchableOpacity>
               {/* Divider */}
               <View className="flex-row items-center">
@@ -104,6 +117,7 @@ export function LoginScreen() {
                   }}
                   keyboardType="email-address"
                   autoCapitalize="none"
+                  returnKeyType="next"
                 />
               </View>
               {/* Password Input */}
@@ -123,13 +137,13 @@ export function LoginScreen() {
                 />
               </View>
               {/* Error Message */}
-              {error ? <Text className="text-center text-sm text-red-500">{error}</Text> : null}
+              {error ? <Text className="text-center text-sm text-red-500">{t(error)}</Text> : null}
               {/* Login Button */}
               <TouchableOpacity
                 onPress={handleLogin}
-                disabled={loading}
-                className="rounded-lg bg-primary-500 px-4 py-3">
-                {loading ? (
+                disabled={emailLoginLoading || googleLoginLoading}
+                className="rounded-lg bg-primary-500 px-4 h-14 flex items-center justify-center">
+                {emailLoginLoading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
                   <Text className="text-center text-lg font-semibold text-white">Login</Text>
