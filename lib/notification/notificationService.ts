@@ -7,16 +7,12 @@ import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { Platform, Vibration } from 'react-native';
 
-// Định nghĩa mẫu rung mạnh hơn cho thông báo
 export const STRONG_VIBRATION_PATTERN = [0, 300, 200, 300, 200, 300];
 
-// Sound constants - Sử dụng tên file để tham chiếu trong Android notification channel
 export const NOTIFICATION_SOUND = 'notification.mp3';
 
-// Tên kênh thông báo mặc định
 export const DEFAULT_CHANNEL_ID = 'babycare-alerts';
 
-// Các loại cảnh báo theo notification guide
 export enum AlertType {
   SIDE = 'side',
   PRONE = 'prone',
@@ -26,7 +22,6 @@ export enum AlertType {
   DEFAULT = 'info',
 }
 
-// Map AlertType to toast types
 export function getToastTypeFromAlert(alertType?: string): string {
   if (!alertType) return 'info';
 
@@ -44,7 +39,6 @@ export function getToastTypeFromAlert(alertType?: string): string {
   }
 }
 
-// Shared function to generate notification content based on alertType, language, and connectionName
 export function generateNotificationContent(
   alertType: string = AlertType.DEFAULT,
   language: string = 'en',
@@ -87,7 +81,6 @@ export function generateNotificationContent(
       body += `, đã liên tục trong ${duration} giây`;
     }
   } else {
-    // Default to English
     title = `[${connectionName}] `;
     body = `Baby is `;
 
@@ -125,7 +118,6 @@ export function generateNotificationContent(
   return { title, body };
 }
 
-// Helper function to get connection name from deviceId
 export function getConnectionNameFromDeviceId(deviceId?: string): string {
   if (!deviceId) return 'Baby';
 
@@ -134,11 +126,9 @@ export function getConnectionNameFromDeviceId(deviceId?: string): string {
   return connection?.name || 'Baby';
 }
 
-// Tạo kênh thông báo chung cho Android
 export async function createNotificationChannel() {
   if (Platform.OS === 'android') {
     try {
-      // Cấu hình kênh thông báo chính với âm thanh và rung mạnh
       await Notifications.setNotificationChannelAsync(DEFAULT_CHANNEL_ID, {
         name: 'BabyCare Alerts',
         importance: Notifications.AndroidImportance.MAX,
@@ -151,7 +141,6 @@ export async function createNotificationChannel() {
         showBadge: true,
       });
 
-      // Configure Firebase messaging for Android
       messaging().onMessage(async (remoteMessage) => {
         // Handling is done in notificationHandlers.ts
       });
@@ -161,12 +150,9 @@ export async function createNotificationChannel() {
   }
 }
 
-// Cấu hình cho background message handler
 export function setupBackgroundHandler() {
-  // Đảm bảo kênh thông báo được tạo
   createNotificationChannel();
 
-  // Đăng ký handler cho background messages
   messaging().setBackgroundMessageHandler(async (remoteMessage) => {
     const { data, notification } = remoteMessage;
     const alertType = (data?.type as string) || AlertType.DEFAULT;
@@ -181,7 +167,6 @@ export function setupBackgroundHandler() {
     const language = userStore.preferences?.language || 'en';
     const connectionName = getConnectionNameFromDeviceId(deviceId);
 
-    // Use shared notification content generator
     const { title, body } = generateNotificationContent(
       alertType,
       language,
@@ -189,7 +174,8 @@ export function setupBackgroundHandler() {
       duration
     );
 
-    // Đảm bảo thông báo này có âm thanh và rung thông qua kênh thông báo
+    console.log('remoteMessage', remoteMessage);
+
     await Notifications.scheduleNotificationAsync({
       content: {
         title: notification?.title || title,
@@ -208,7 +194,6 @@ export function setupBackgroundHandler() {
   });
 }
 
-// Store FCM token if user not logged in
 let cachedFcmToken: string | null = null;
 
 export async function registerDeviceForPushNotifications(): Promise<string | undefined> {
@@ -230,26 +215,19 @@ export async function registerDeviceForPushNotifications(): Promise<string | und
     return;
   }
 
-  // Đảm bảo kênh thông báo được tạo
   await createNotificationChannel();
 
   try {
-    // Đăng ký FCM token
     const token = await messaging().getToken();
-
-    // Cache the token
     cachedFcmToken = token;
 
-    // Yêu cầu quyền thông báo từ iOS
     if (Platform.OS === 'ios') {
       await messaging().requestPermission();
-      // Đặt badge icon về 0 khi đăng ký
       await Notifications.setBadgeCountAsync(0);
     }
 
     const currentUser = useAuthStore.getState().user;
     if (currentUser && token) {
-      // Cập nhật trong userStore
       const userStore = useUserStore.getState();
       await userStore.addFcmToken(token);
     }
@@ -260,7 +238,6 @@ export async function registerDeviceForPushNotifications(): Promise<string | und
   }
 }
 
-// Expose function to save cached token if it exists
 export async function saveCachedFcmTokenIfExists(): Promise<void> {
   const currentUser = useAuthStore.getState().user;
   if (currentUser && cachedFcmToken) {
@@ -269,7 +246,6 @@ export async function saveCachedFcmTokenIfExists(): Promise<void> {
   }
 }
 
-// Helper function to play a notification sound
 export async function playNotificationSound(): Promise<void> {
   try {
     const soundObject = new Audio.Sound();
@@ -278,10 +254,8 @@ export async function playNotificationSound(): Promise<void> {
 
     await soundObject.playAsync();
 
-    // Kích hoạt rung mạnh cho thiết bị
     Vibration.vibrate(STRONG_VIBRATION_PATTERN);
 
-    // Tự động giải phóng sound object sau khi phát
     setTimeout(() => {
       soundObject.unloadAsync().catch(console.error);
     }, 2000);
@@ -290,7 +264,6 @@ export async function playNotificationSound(): Promise<void> {
   }
 }
 
-// Helper function để tạo và hiển thị thông báo cục bộ với loại cảnh báo
 export async function showLocalNotification(title: string, body: string): Promise<void> {
   try {
     await Notifications.scheduleNotificationAsync({

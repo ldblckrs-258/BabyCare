@@ -1,5 +1,6 @@
 import { NotificationDetailModal } from '@/components/modals/NotificationDetailModal';
 import { NotificationModal } from '@/components/modals/NotificationModal';
+import DeviceSelector from '@/components/statistics/DeviceSelector';
 import { useDeviceHook } from '@/lib/hooks';
 import { useTranslation } from '@/lib/hooks/useTranslation';
 import {
@@ -16,11 +17,10 @@ import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { format, isToday, isYesterday } from 'date-fns';
 import { StatusBar } from 'expo-status-bar';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-// Get icon for notification type
 const getNotificationIcon = (type: NotificationType) => {
   switch (type) {
     case 'crying':
@@ -44,6 +44,9 @@ export default function HistoryScreen() {
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const [showNotificationDetail, setShowNotificationDetail] = useState(false);
 
+  // Filter states
+  const [selectedDevice, setSelectedDevice] = useState<string>('all');
+
   const { user } = useAuthStore();
   const {
     notifications,
@@ -53,10 +56,34 @@ export default function HistoryScreen() {
     error,
     subscribeToNotifications,
     deleteAll,
+    loadMore,
+    hasMore,
   } = useNotificationStore();
   const { connections } = useDeviceHook();
 
-  // Subscribe to notifications when component mounts
+  const filteredNotifications = useMemo(() => {
+    return notifications.filter((notification) => {
+      if (selectedDevice !== 'all' && notification.deviceId !== selectedDevice) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [notifications, selectedDevice]);
+
+  const groupedNotifications = useMemo(
+    () => groupNotificationsByDate(filteredNotifications),
+    [filteredNotifications]
+  );
+
+  const dateKeys = useMemo(
+    () =>
+      Object.keys(groupedNotifications).sort(
+        (a, b) => new Date(b).getTime() - new Date(a).getTime()
+      ),
+    [groupedNotifications]
+  );
+
   useEffect(() => {
     if (user?.uid) {
       const unsubscribe = subscribeToNotifications(user.uid);
@@ -64,25 +91,23 @@ export default function HistoryScreen() {
     }
   }, [user, subscribeToNotifications]);
 
-  // Handle notification read and show detail modal
   const handleNotificationPress = useCallback(
     (notification: Notification) => {
-      // Mark as read if needed
       if (!notification.read) {
         markAsRead(notification.id);
       }
-      // Show notification detail
       setSelectedNotification(notification);
       setShowNotificationDetail(true);
     },
     [markAsRead]
   );
 
-  // Group notifications by date
-  const groupedNotifications = groupNotificationsByDate(notifications);
-  const dateKeys = Object.keys(groupedNotifications).sort(
-    (a, b) => new Date(b).getTime() - new Date(a).getTime()
-  );
+  // Handle load more when reaching end of list
+  const handleLoadMore = () => {
+    if (hasMore && !isLoading) {
+      loadMore();
+    }
+  };
 
   // Determine if we have any unread notifications
   const hasUnreadNotifications = notifications.some((notification) => !notification.read);
@@ -185,26 +210,45 @@ export default function HistoryScreen() {
     </View>
   );
 
+  // Render footer loading indicator
+  const renderFooter = () => {
+    if (!hasMore) return null;
+
+    return (
+      <View className="py-4">
+        <ActivityIndicator size="small" color="#3d8d7a" />
+      </View>
+    );
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-neutral-100">
       <StatusBar style="dark" />
       {/* Header */}
       <View className="flex-row items-center justify-between px-5 py-4">
-        <Text className="text-2xl font-bold text-primary-600">{t('history.allEvents')}</Text>
+        <Text className="text-2xl font-bold text-primary-600">{t('history.title')}</Text>
         <View className="flex-row">
-          {notifications.length > 0 && (
-            <TouchableOpacity
-              onPress={() => deleteAll()}
-              className="mr-3 h-10 w-10 items-center justify-center">
-              <MaterialIcons name="delete" size={24} color="#888" />
-            </TouchableOpacity>
-          )}
-          {hasUnreadNotifications && (
+          <DeviceSelector
+            selectedDeviceId={selectedDevice}
+            onSelectDevice={(device) => {
+              setSelectedDevice(device.id);
+            }}
+            allOption={true}
+          />
+          {hasUnreadNotifications ? (
             <TouchableOpacity
               onPress={() => markAllAsRead()}
-              className="mr-3 h-10 w-10 items-center justify-center">
+              className="ml-3 mr-2 h-10 w-10 items-center justify-center">
               <MaterialIcons name="done-all" size={24} color="#888" />
             </TouchableOpacity>
+          ) : (
+            notifications.length > 0 && (
+              <TouchableOpacity
+                onPress={() => deleteAll()}
+                className="ml-3 mr-2 h-10 w-10 items-center justify-center">
+                <MaterialIcons name="delete" size={24} color="#888" />
+              </TouchableOpacity>
+            )
           )}
           <TouchableOpacity
             onPress={() => setShowNotificationSettings(true)}
@@ -215,8 +259,8 @@ export default function HistoryScreen() {
       </View>
 
       {/* Notification list */}
-      <View className="flex-1 px-5">
-        {isLoading ? (
+      <View className="flex-1 px-5 -mt-4">
+        {isLoading && notifications.length === 0 ? (
           <View className="flex-1 items-center justify-center">
             <ActivityIndicator size="large" color="#3d8d7a" />
             <Text className="mt-4 text-gray-600">{t('history.loading')}</Text>
@@ -226,14 +270,16 @@ export default function HistoryScreen() {
             <MaterialIcons name="error-outline" size={64} color="#ef4444" />
             <Text className="mt-4 text-lg font-medium text-gray-600">{error}</Text>
           </View>
-        ) : notifications.length === 0 ? (
+        ) : filteredNotifications.length === 0 ? (
           <View className="flex-1 items-center justify-center">
             <MaterialIcons name="notifications-none" size={64} color="#ccc" />
             <Text className="mt-4 text-lg font-medium text-gray-600">
               {t('history.noNotifications')}
             </Text>
             <Text className="mt-2 text-center text-gray-500">
-              {t('history.notificationsWillAppearHere')}
+              {notifications.length === 0
+                ? t('history.notificationsWillAppearHere')
+                : t('history.thisDeviceHasNoNotifications')}
             </Text>
           </View>
         ) : (
@@ -252,6 +298,9 @@ export default function HistoryScreen() {
             )}
             contentContainerStyle={{ paddingBottom: 20 }}
             showsVerticalScrollIndicator={false}
+            onEndReached={handleLoadMore}
+            onEndReachedThreshold={0.5}
+            ListFooterComponent={renderFooter}
           />
         )}
       </View>

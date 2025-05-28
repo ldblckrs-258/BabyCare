@@ -318,7 +318,7 @@ export const vi = {
     settings: 'Cài đặt',
   },
   history: {
-    allEvents: 'Tất cả thông báo',
+    title: 'Lịch sử',
     today: 'Hôm nay',
     yesterday: 'Hôm qua',
     loading: 'Đang tải thông báo...',
@@ -327,6 +327,9 @@ export const vi = {
     notificationsWillAppearHere: 'Khi bạn nhận được thông báo, chúng sẽ xuất hiện ở đây',
     markAllAsRead: 'Đánh dấu tất cả là đã đọc',
     deleteAll: 'Xóa tất cả',
+    selectDevice: 'Chọn thiết bị',
+    allDevices: 'Tất cả thiết bị',
+    thisDeviceHasNoNotifications: 'Thiết bị này không có thông báo nào',
     notificationTypes: {
       cryAlert: 'Cảnh báo khóc',
       positionAlert: 'Cảnh báo tư thế',

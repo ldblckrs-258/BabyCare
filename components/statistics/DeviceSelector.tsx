@@ -22,9 +22,14 @@ type DeviceDisplay = {
 type DeviceSelectorProps = {
   selectedDeviceId?: string;
   onSelectDevice: (device: DeviceDisplay) => void;
+  allOption?: boolean;
 };
 
-export default function DeviceSelector({ selectedDeviceId, onSelectDevice }: DeviceSelectorProps) {
+export default function DeviceSelector({
+  selectedDeviceId,
+  onSelectDevice,
+  allOption = false,
+}: DeviceSelectorProps) {
   const { t } = useTranslation();
   const { connections, loading } = useDeviceHook();
   const [modalVisible, setModalVisible] = useState(false);
@@ -80,9 +85,13 @@ export default function DeviceSelector({ selectedDeviceId, onSelectDevice }: Dev
     <View>
       <Pressable
         onPress={toggleModal}
-        className="flex-row items-center justify-between bg-white rounded-lg pl-4 pr-2 py-2 shadow-sm gap-2 border border-primary-300 max-w-[200px] overflow-x-hidden">
+        className="flex-row items-center justify-between bg-white rounded-lg pl-4 pr-2 py-2 shadow-sm gap-2 border border-primary-300 w-[140px] overflow-x-hidden">
         <Text className="text-base text-gray-800 font-medium line-clamp-1">
-          {selectedDevice ? selectedDevice.name : t('statistics.selectDevice')}
+          {selectedDeviceId === 'all'
+            ? t('history.allDevices')
+            : selectedDevice
+              ? selectedDevice.name
+              : t('statistics.selectDevice')}
         </Text>
         <Entypo name="chevron-down" size={16} color="#3D8D7A" />
       </Pressable>
@@ -99,18 +108,26 @@ export default function DeviceSelector({ selectedDeviceId, onSelectDevice }: Dev
                 {t('statistics.selectDevice')}
               </Text>
             </View>
-
+            {allOption && (
+              <TouchableOpacity
+                className={`px-4 py-3 flex-row items-center justify-between ${
+                  selectedDeviceId === 'all' ? 'bg-primary-50' : ''
+                }`}
+                onPress={() => handleSelectDevice({ id: 'all', name: '', connectionId: '' })}>
+                <Text className="text-base text-gray-800">{t('history.allDevices')}</Text>
+              </TouchableOpacity>
+            )}
             <FlatList
               data={devicesToDisplay}
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
                 <TouchableOpacity
                   className={`px-4 py-3 flex-row items-center justify-between ${
-                    selectedDevice && selectedDevice.id === item.id ? 'bg-primary-50' : ''
+                    selectedDeviceId === item.id ? 'bg-primary-50' : ''
                   }`}
                   onPress={() => handleSelectDevice(item)}>
                   <Text className="text-base text-gray-800">{item.name}</Text>
-                  {selectedDevice && selectedDevice.id === item.id && (
+                  {selectedDeviceId === item.id && (
                     <MaterialIcons name="check" size={18} color="#3D8D7A" />
                   )}
                 </TouchableOpacity>

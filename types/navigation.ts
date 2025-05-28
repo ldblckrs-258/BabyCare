@@ -17,4 +17,5 @@ export type RootStackParamList = {
         modal?: 'profile' | 'devices' | 'notifications' | 'privacy';
       }
     | undefined;
+  History: undefined;
 };

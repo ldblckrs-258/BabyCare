@@ -5,6 +5,7 @@ import { LoginScreen } from './screens/LoginScreen';
 import MainTabs from './screens/MainTabs';
 import { RegisterScreen } from './screens/RegisterScreen';
 import { WelcomeScreen } from './screens/WelcomeScreen';
+import { navigationRef } from '@/lib/navigation/NavigationService';
 import { setupNotificationListeners } from '@/lib/notification/notificationHandlers';
 import {
   DEFAULT_CHANNEL_ID,
@@ -86,7 +87,7 @@ export default function App() {
 
   return (
     <PaperProvider>
-      <NavigationContainer>
+      <NavigationContainer ref={navigationRef}>
         <Stack.Navigator
           screenOptions={{
             headerShown: false,

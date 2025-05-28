@@ -322,7 +322,7 @@ export const en = {
     settings: 'Settings',
   },
   history: {
-    allEvents: 'All Events',
+    title: 'History',
     today: 'Today',
     yesterday: 'Yesterday',
     loading: 'Loading notifications...',
@@ -331,6 +331,12 @@ export const en = {
     notificationsWillAppearHere: 'When you receive notifications, they will appear here',
     markAllAsRead: 'Mark all as read',
     deleteAll: 'Delete all',
+    filters: 'Filters',
+    clearFilters: 'Clear filters',
+    selectDevice: 'Select device',
+    allDevices: 'All devices',
+    selectDate: 'Select date',
+    thisDeviceHasNoNotifications: 'This device has no notifications',
     notificationTypes: {
       cryAlert: 'Cry Alert',
       positionAlert: 'Sleep Position Alert',
