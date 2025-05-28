@@ -93,10 +93,14 @@ export const groupNotificationsByDate = (notifications: Notification[]) => {
 };
 
 // Helper to format time as HH:MM AM/PM
-export const formatTime = (timeValue: any) => {
+export const formatTime = (timeValue: any, language: string) => {
   try {
     const date = safeTimestampToDate(timeValue);
-    return format(date, 'h:mm a');
+    return date.toLocaleTimeString(language === 'vi' ? 'vi-VN' : 'en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    });
   } catch (error) {
     console.error('Error formatting time:', error);
     return 'Invalid time';

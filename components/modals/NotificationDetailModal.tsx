@@ -1,5 +1,6 @@
 import { useDeviceHook } from '@/lib/hooks';
 import { Notification, NotificationType } from '@/lib/notifications';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { Ionicons } from '@expo/vector-icons';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -55,6 +56,7 @@ export function NotificationDetailModal({
   onClose,
   notification,
 }: NotificationDetailModalProps) {
+  const { language } = useSettingsStore();
   const insets = useSafeAreaInsets();
 
   const { connections } = useDeviceHook();
@@ -91,7 +93,7 @@ export function NotificationDetailModal({
           style={{ paddingBottom: Math.max(insets.bottom, 16) }}>
           {/* Header with close button */}
           <View className="mb-2 flex-row items-center justify-between border-b border-gray-100 p-6 pb-4">
-            <Text className="text-xl font-bold text-gray-800">Notification Detail</Text>
+            <Text className="text-xl font-bold text-gray-800">{t('history.details.title')}</Text>
             <TouchableOpacity
               onPress={onClose}
               className="h-10 w-10 items-center justify-center rounded-full bg-gray-100">
@@ -106,14 +108,14 @@ export function NotificationDetailModal({
               <Text className="text-xl font-bold text-gray-800">{notification.title}</Text>
               {notification.deviceId && (
                 <Text className="mt-1 text-primary-600 font-medium">
-                  Device: {getDeviceName(notification.deviceId)}
+                  {t('history.details.device')}: {getDeviceName(notification.deviceId)}
                 </Text>
               )}
-              <Text className="mt-1 text-sm text-gray-500">
+              <Text className="mt-1 text-sm text-gray-500 capitalize">
                 {(typeof notification.time === 'object' && 'toDate' in notification.time
                   ? notification.time.toDate()
                   : new Date(notification.time)
-                ).toLocaleDateString('en-US', {
+                ).toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', {
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric',
@@ -133,7 +135,8 @@ export function NotificationDetailModal({
 
                   {notification.duration !== undefined && (
                     <Text className="mt-1 text-sm text-gray-600">
-                      Duration: {Number(notification.duration).toFixed(0)} {t('home.seconds')}
+                      {t('history.details.duration')}: {Number(notification.duration).toFixed(0)}{' '}
+                      {t('home.seconds')}
                     </Text>
                   )}
                 </View>
@@ -142,7 +145,9 @@ export function NotificationDetailModal({
             {/* Image Preview */}
             {notification.imageUrl ? (
               <View className="mb-6">
-                <Text className="mb-2 text-base font-semibold text-gray-700">Captured Image</Text>
+                <Text className="mb-2 text-base font-semibold text-gray-700">
+                  {t('history.details.capturedImage')}
+                </Text>
                 <View className="overflow-hidden rounded-xl">
                   <Image source={{ uri: notification.imageUrl }} className="h-56 w-full" />
                 </View>
@@ -150,7 +155,7 @@ export function NotificationDetailModal({
             ) : notification.type === 'prone' || notification.type === 'side' ? (
               <View className="mt-2  bg-slate-100 w-full aspect-video flex items-center justify-center rounded">
                 <Text className="text-center text-sm text-gray-500">
-                  Image captured at the time of the event
+                  {t('history.details.capturedImagePlaceholder')}
                 </Text>
               </View>
             ) : null}
@@ -159,7 +164,9 @@ export function NotificationDetailModal({
           {/* Action Button */}
           <View className="border-t border-gray-100 p-6 pt-4">
             <TouchableOpacity onPress={onClose} className="w-full rounded-lg bg-primary-500 p-4">
-              <Text className="text-center text-base font-semibold text-white">Close</Text>
+              <Text className="text-center text-base font-semibold text-white">
+                {t('common.close')}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

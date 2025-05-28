@@ -12,6 +12,7 @@ import {
 } from '@/lib/notifications';
 import { useAuthStore } from '@/stores/authStore';
 import { useNotificationStore } from '@/stores/notificationStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { Ionicons } from '@expo/vector-icons';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -40,6 +41,7 @@ const getNotificationIcon = (type: NotificationType) => {
 
 export default function HistoryScreen() {
   const { t } = useTranslation();
+  const { language } = useSettingsStore();
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const [showNotificationDetail, setShowNotificationDetail] = useState(false);
@@ -121,7 +123,11 @@ export default function HistoryScreen() {
     } else if (isYesterday(date)) {
       return t('history.yesterday');
     } else {
-      return format(date, 'MMMM d, yyyy');
+      return date.toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
     }
   };
 
@@ -192,7 +198,9 @@ export default function HistoryScreen() {
         <View className="flex-1">
           <Text className="text-base font-semibold text-gray-800">{renderTitle(item)}</Text>
           <Text className="text-sm text-gray-600">{renderDescription(item)}</Text>
-          <Text className="inline-block text-xs text-gray-400">{formatTime(item.time)}</Text>
+          <Text className="inline-block text-xs text-gray-400">
+            {formatTime(item.time, language)}
+          </Text>
         </View>
         {!item.read && (
           <View className="absolute right-3 top-3 h-3 w-3 rounded-full bg-primary-500" />

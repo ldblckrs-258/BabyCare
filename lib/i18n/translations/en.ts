@@ -367,6 +367,13 @@ export const en = {
       title: 'BabyCare notification',
       description: 'Your baby was changed position or started crying',
     },
+    details: {
+      title: 'Notification Detail',
+      device: 'Device',
+      duration: 'Duration',
+      capturedImage: 'Captured Image',
+      capturedImagePlaceholder: 'Image captured at the time of the event',
+    },
   },
   streaming: {
     title: 'Streaming Camera',

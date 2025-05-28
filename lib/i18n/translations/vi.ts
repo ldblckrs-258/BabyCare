@@ -360,6 +360,13 @@ export const vi = {
       title: 'Thông báo BabyCare',
       description: 'Bé đã thay đổi tư thế hoặc bắt đầu khóc',
     },
+    details: {
+      title: 'Chi tiết thông báo',
+      device: 'Thiết bị',
+      duration: 'Thời gian',
+      capturedImage: 'Ảnh chụp',
+      capturedImagePlaceholder: 'Ảnh chụp tại thời điểm sự kiện',
+    },
   },
   streaming: {
     title: 'Theo dõi trực tiếp',
